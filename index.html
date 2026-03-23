@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tarot Ritual</title>
+<style>
+  :root {
+    --bg0: #040309;
+    --bg1: #0b0714;
+    --bg2: #171022;
+    --card: rgba(18, 13, 28, 0.66);
+    --line: rgba(255,255,255,0.10);
+    --line2: rgba(255,255,255,0.16);
+    --text: #f6f0ff;
+    --muted: rgba(246,240,255,0.68);
+    --accent: #c7a6ff;
+    --accent2: #8b6dff;
+    --shadow: 0 28px 90px rgba(0,0,0,0.58);
+    --shadow2: 0 16px 50px rgba(0,0,0,0.34);
+    --radius-xl: 34px;
+    --radius-lg: 24px;
+    --radius-md: 18px;
+    --max: 1120px;
+    --cardRatio: 300 / 527;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+      radial-gradient(circle at top, rgba(199,166,255,0.18), transparent 28%),
+      radial-gradient(circle at 20% 20%, rgba(86,241,194,0.08), transparent 18%),
+      radial-gradient(circle at 85% 0%, rgba(139,109,255,0.12), transparent 24%),
+      linear-gradient(180deg, var(--bg0), var(--bg1) 45%, var(--bg2));
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::before {
+    background:
+      radial-gradient(circle at 32% 18%, rgba(199,166,255,0.14), transparent 18%),
+      radial-gradient(circle at 72% 30%, rgba(139,109,255,0.10), transparent 20%),
+      radial-gradient(circle at 50% 80%, rgba(86,241,194,0.06), transparent 22%);
+    filter: blur(54px);
+    animation: drift 18s ease-in-out infinite alternate;
+  }
+
+  body::after {
+    opacity: 0.22;
+    background-image:
+      radial-gradient(rgba(255,255,255,0.78) 0.8px, transparent 0.8px),
+      radial-gradient(rgba(255,255,255,0.42) 0.6px, transparent 0.6px);
+    background-position: 0 0, 10px 10px;
+    background-size: 20px 20px;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent 92%);
+    animation: twinkle 10s linear infinite;
+  }
+
+  @keyframes drift {
+    0% { transform: translate3d(-1%, -1%, 0) scale(1); }
+    50% { transform: translate3d(1.5%, 1%, 0) scale(1.04); }
+    100% { transform: translate3d(-0.5%, 1.5%, 0) scale(1.08); }
+  }
+
+  @keyframes twinkle {
+    0%,100% { opacity: 0.15; }
+    50% { opacity: 0.26; }
+  }
+
+  .noise {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: linear-gradient(rgba(255,255,255,.16) 1px, transparent 1px);
+    background-size: 100% 3px;
+    mix-blend-mode: soft-light;
+    animation: scan 7s linear infinite;
+  }
+
+  @keyframes scan {
+    from { transform: translateY(-4%); }
+    to { transform: translateY(4%); }
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    width: min(calc(100% - 20px), var(--max));
+    margin: 0 auto;
+    padding: 16px 0 34px;
+  }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    backdrop-filter: blur(18px);
+    border-radius: 34px;
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at top left, rgba(199,166,255,0.20), transparent 32%),
+      radial-gradient(circle at bottom right, rgba(86,241,194,0.08), transparent 28%);
+    pointer-events: none;
+  }
+
+  .hero-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1.2fr auto;
+    gap: 18px;
+    align-items: center;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.05);
+    color: rgba(246,240,255,0.84);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset;
+  }
+
+  .hero h1 {
+    margin: 14px 0 10px;
+    font-size: clamp(30px, 5vw, 60px);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+  }
+
+  .hero p {
+    margin: 0;
+    max-width: 72ch;
+    color: var(--muted);
+    line-height: 1.75;
+    font-size: 15px;
+  }
+
+  .hero-badge {
+    justify-self: end;
+    padding: 14px 16px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(199,166,255,0.16), rgba(139,109,255,0.10));
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: var(--shadow2);
+    min-width: 174px;
+    text-align: right;
+  }
+
+  .hero-badge strong {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  .hero-badge span {
+    color: rgba(246,240,255,0.70);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .panel {
+    position: relative;
+    border: 1px solid var(--line);
+    background: rgba(18, 13, 28, 0.66);
+    backdrop-filter: blur(20px);
+    border-radius: 30px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .panel-inner { padding: 22px; }
+
+  .section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .section-title h2 {
+    margin: 0;
+    font-size: 18px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(246,240,255,0.86);
+  }
+
+  .section-title .hint {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .top-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    align-items: start;
+    margin-bottom: 18px;
+  }
+
+  .select-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.12);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04)),
+      rgba(255,255,255,0.04);
+    color: var(--text);
+    border-radius: 20px;
+    padding: 16px 18px;
+    cursor: pointer;
+    font-weight: 800;
+    transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .select-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.16), transparent 55%);
+    transform: translateX(-120%);
+    transition: transform .8s ease;
+  }
+
+  .select-btn:hover::before { transform: translateX(120%); }
+  .select-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(199,166,255,0.45);
+    box-shadow: 0 16px 34px rgba(139,109,255,0.14);
+  }
+
+  .select-left {
+    display: grid;
+    gap: 4px;
+    text-align: left;
+  }
+
+  .select-btn .label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .select-btn .value {
+    font-size: 18px;
+    letter-spacing: 0.02em;
+  }
+
+  .chevron {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    opacity: .72;
+    transition: transform .35s cubic-bezier(.2,.8,.2,1), opacity .2s ease;
+  }
+
+  .select-btn.open .chevron {
+    transform: rotate(180deg);
+    opacity: 1;
+  }
+
+  .select-btn.open {
+    border-color: rgba(199,166,255,0.58);
+    box-shadow: 0 20px 44px rgba(139,109,255,0.18), 0 0 0 1px rgba(199,166,255,0.06) inset;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 14px;
+    align-items: start;
+  }
+
+  .field label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: rgba(246,240,255,0.86);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .field input {
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(7, 6, 11, 0.55);
+    color: var(--text);
+    border-radius: 20px;
+    padding: 18px 18px 17px;
+    outline: none;
+    font-size: 16px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  }
+
+  .field input:focus {
+    border-color: rgba(199,166,255,0.66);
+    box-shadow: 0 0 0 4px rgba(199,166,255,0.10);
+    transform: translateY(-1px);
+  }
+
+  .field .warn {
+    margin-top: 10px;
+    color: rgba(246,240,255,0.68);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .controls {
+    display: grid;
+    gap: 10px;
+  }
+
+  .btn {
+    position: relative;
+    overflow: hidden;
+    border: none;
+    border-radius: 18px;
+    padding: 16px 18px;
+    color: white;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform .2s ease, filter .2s ease, box-shadow .2s ease, opacity .2s ease;
+    letter-spacing: 0.02em;
+  }
+
+  .btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.22), transparent 55%);
+    transform: translateX(-120%);
+    transition: transform .8s ease;
+  }
+
+  .btn:hover::after { transform: translateX(120%); }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:disabled { opacity: .42; cursor: not-allowed; transform: none; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #a77fff, #6d55ff);
+    box-shadow: 0 16px 32px rgba(109,85,255,0.30);
+  }
+
+  .btn-ghost {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(246,240,255,0.92);
+  }
+
+  .micro-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .micro-row .status {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .results {
+    margin-top: 18px;
+    display: none;
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .results.show {
+    display: block;
+    animation: sectionIn .55s cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  @keyframes sectionIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .results-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .results-head h3 {
+    margin: 0;
+    font-size: 24px;
+    letter-spacing: 0.02em;
+  }
+
+  .results-head p {
+    margin: 8px 0 0;
+    max-width: 74ch;
+    color: var(--muted);
+    line-height: 1.65;
+    font-size: 14px;
+  }
+
+  .cards-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .tarot-card {
+    perspective: 1600px;
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+    animation: cardRise .62s cubic-bezier(.2,.8,.2,1) forwards;
+    animation-delay: var(--delay, 0ms);
+    position: relative;
+  }
+
+  @keyframes cardRise {
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .card-stack {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--cardRatio);
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+    transition: transform .85s cubic-bezier(.22,.84,.16,1), filter .25s ease;
+    will-change: transform;
+    transform: translateZ(0);
+    cursor: pointer;
+  }
+
+  .tarot-card.flipped .card-stack {
+    transform: rotateY(180deg) translateZ(0);
+  }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    overflow: hidden;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: var(--shadow2);
+    background: rgba(255,255,255,0.03);
+    display: flex;
+    flex-direction: column;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+  }
+
+  .card-face.back {
+    transform: rotateY(0deg) translateZ(1px);
+    z-index: 2;
+  }
+
+  .tarot-card.flipped .card-face.back {
+    z-index: 1;
+  }
+
+  .card-face.front {
+    transform: rotateY(180deg) translateZ(1px);
+    z-index: 1;
+  }
+
+  .tarot-card.flipped .card-face.front {
+    z-index: 2;
+  }
+
+  .card-visual {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #06050a;
+  }
+
+  .card-face.back .card-visual {
+    background:
+      radial-gradient(circle at center, rgba(199,166,255,0.14), transparent 58%),
+      linear-gradient(180deg, rgba(31,23,46,0.98), rgba(10,8,15,0.98));
+  }
+
+  .back-art,
+  .card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    filter: saturate(1.06) contrast(1.03);
+    transition: transform .4s ease, filter .4s ease;
+    transform-origin: center;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .tarot-card:hover .card-img {
+    transform: scale(1.02);
+    filter: brightness(1.03) saturate(1.08);
+  }
+
+  .card-img.reversed {
+    transform: rotate(180deg);
+  }
+
+  .tarot-card:hover .card-img.reversed {
+    transform: rotate(180deg) scale(1.02);
+  }
+
+  .back-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(6,5,10,0.08), rgba(6,5,10,0.42));
+    pointer-events: none;
+  }
+
+  .back-label {
+    position: absolute;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+    padding: 9px 13px;
+    border-radius: 999px;
+    backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.28);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: rgba(255,255,255,0.84);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .card-meta {
+    padding: 10px 2px 0;
+    display: grid;
+    gap: 4px;
+    align-content: start;
+    min-height: 64px;
+  }
+
+  .card-meta .num {
+    color: rgba(246,240,255,0.46);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .card-meta .name {
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.35;
+  }
+
+  .card-meta .state {
+    color: rgba(246,240,255,0.68);
+    font-size: 13px;
+  }
+
+  .copy-box {
+    margin-top: 16px;
+    display: none;
+    padding: 18px;
+    border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(7,6,11,0.50);
+  }
+
+  .copy-box.show {
+    display: block;
+    animation: sectionIn .45s cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  .copy-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .copy-head h4 {
+    margin: 0;
+    font-size: 18px;
+  }
+
+  .copy-head p {
+    margin: 7px 0 0;
+    color: var(--muted);
+    line-height: 1.6;
+    font-size: 14px;
+    max-width: 80ch;
+  }
+
+  .output {
+    width: 100%;
+    min-height: 220px;
+    resize: vertical;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.03);
+    color: #f8f1ff;
+    border-radius: 18px;
+    padding: 16px;
+    line-height: 1.7;
+    font-size: 14px;
+    outline: none;
+  }
+
+  .copy-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .ai-actions {
+    justify-content: flex-end;
+  }
+
+  .ai-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
+
+  .ai-icon {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+
+  .ai-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .ai-label {
+    line-height: 1;
+    font-size: 14px;
+  }
+
+  .mini-note {
+    margin-top: 10px;
+    color: rgba(246,240,255,0.58);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(3, 2, 6, 0.76);
+    backdrop-filter: blur(18px);
+    padding: 16px;
+  }
+
+  .overlay.show { display: flex; }
+
+  .ritual-box {
+    position: relative;
+    width: min(620px, 100%);
+    border-radius: 34px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.10);
+    background:
+      radial-gradient(circle at top, rgba(199,166,255,0.18), transparent 34%),
+      linear-gradient(180deg, rgba(18,13,31,0.98), rgba(6,5,10,0.98));
+    box-shadow: var(--shadow);
+    padding: 24px;
+  }
+
+  .ritual-box::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255,255,255,0.08), transparent 26%),
+      linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.05), transparent 50%, rgba(255,255,255,0.05), transparent 80%);
+    transform: translateX(-110%);
+    animation: ritualScan 4.2s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes ritualScan { to { transform: translateX(110%); } }
+
+  .ritual-head {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .ritual-head h3 {
+    margin: 0 0 10px;
+    font-size: clamp(26px, 4vw, 44px);
+    letter-spacing: 0.02em;
+  }
+
+  .ritual-head p {
+    margin: 0 auto;
+    max-width: 60ch;
+    color: rgba(246,240,255,0.80);
+    line-height: 1.8;
+    font-size: 15px;
+  }
+
+  .hold-shell {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+  }
+
+  .hold-area {
+    position: relative;
+    width: min(420px, 100%);
+    aspect-ratio: 1 / 1;
+    display: grid;
+    place-items: center;
+    user-select: none;
+    touch-action: none;
+  }
+
+  .hold-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+      conic-gradient(from -90deg, rgba(201,166,255,0.95) var(--progress, 0%), rgba(255,255,255,0.08) 0);
+    filter: drop-shadow(0 0 24px rgba(201,166,255,0.18));
+    opacity: .95;
+  }
+
+  .hold-ring::before {
+    content: "";
+    position: absolute;
+    inset: 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(201,166,255,0.13), transparent 66%);
+    border: 1px solid rgba(255,255,255,0.10);
+  }
+
+  .hold-core {
+    position: relative;
+    z-index: 2;
+    width: 62%;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    text-align: center;
+    color: #fff;
+    background: radial-gradient(circle at top, rgba(199,166,255,0.42), rgba(23,14,36,0.94));
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 0 60px rgba(139,109,255,0.18), inset 0 0 30px rgba(255,255,255,0.04);
+    transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+  }
+
+  .hold-core::before {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .hold-core::after {
+    content: "";
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.14), transparent 65%);
+    opacity: .12;
+    filter: blur(16px);
+    transition: opacity .16s ease;
+  }
+
+  .hold-core.active {
+    transform: scale(1.04);
+    box-shadow: 0 0 92px rgba(201,166,255,0.26), inset 0 0 30px rgba(255,255,255,0.06);
+    filter: brightness(1.05);
+  }
+
+  .hold-core.active::after { opacity: .18; }
+
+  .hold-core strong {
+    display: block;
+    font-size: 24px;
+    letter-spacing: 0.02em;
+    margin-bottom: 6px;
+  }
+
+  .hold-core span {
+    display: block;
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.82);
+  }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    transform: translateX(-50%) translateY(24px);
+    opacity: 0;
+    z-index: 40;
+    padding: 12px 16px;
+    border-radius: 999px;
+    background: rgba(16,12,24,0.96);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #fff;
+    box-shadow: var(--shadow2);
+    transition: opacity .24s ease, transform .24s ease;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Liquid glass spread modal */
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(3, 2, 6, 0.48);
+    backdrop-filter: blur(18px) saturate(1.2);
+  }
+
+  .modal.show { display: flex; }
+
+  .modal-card {
+    width: min(720px, 100%);
+    border-radius: 30px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04));
+    box-shadow: 0 26px 80px rgba(0,0,0,0.48);
+    overflow: hidden;
+    position: relative;
+    transform: translateY(14px) scale(.965);
+    opacity: 0;
+    animation: liquidIn .42s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+
+  .modal-card::before {
+    content: "";
+    position: absolute;
+    inset: -40% -20%;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.28), transparent 20%),
+      radial-gradient(circle at 80% 0%, rgba(201,166,255,0.20), transparent 22%),
+      radial-gradient(circle at 70% 80%, rgba(86,241,194,0.10), transparent 20%);
+    filter: blur(30px);
+    opacity: .70;
+    animation: liquidGlow 7s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+
+  .modal-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.22) 18%, transparent 32%),
+      linear-gradient(300deg, transparent 0%, rgba(255,255,255,0.10) 16%, transparent 28%);
+    opacity: .35;
+    mix-blend-mode: screen;
+    animation: liquidSheen 3.4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes liquidIn {
+    0% { opacity: 0; transform: translateY(22px) scale(.92); filter: blur(6px); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+
+  @keyframes liquidGlow {
+    0% { transform: translate3d(-1%, -1%, 0) scale(1); }
+    100% { transform: translate3d(1%, 1%, 0) scale(1.08); }
+  }
+
+  @keyframes liquidSheen {
+    0% { transform: translateX(-20%) translateY(0); }
+    50% { transform: translateX(15%) translateY(-2%); }
+    100% { transform: translateX(40%) translateY(0); }
+  }
+
+  .modal-head {
+    position: relative;
+    z-index: 1;
+    padding: 20px 20px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.10);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .modal-head h3 {
+    margin: 0;
+    font-size: 22px;
+  }
+
+  .modal-head p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.08);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(10px);
+  }
+
+  .modal-body {
+    position: relative;
+    z-index: 1;
+    padding: 18px 20px 20px;
+  }
+
+  .spread-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .spread-option {
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.08);
+    color: var(--text);
+    border-radius: 18px;
+    min-height: 92px;
+    cursor: pointer;
+    transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
+    padding: 14px;
+    text-align: left;
+    backdrop-filter: blur(10px);
+  }
+
+  .spread-option:hover {
+    transform: translateY(-2px);
+    border-color: rgba(201,166,255,0.42);
+    box-shadow: 0 14px 30px rgba(139,109,255,0.16);
+  }
+
+  .spread-option.active {
+    background: linear-gradient(135deg, rgba(199,166,255,0.26), rgba(139,109,255,0.16));
+    border-color: rgba(201,166,255,0.60);
+  }
+
+  .spread-option .big {
+    display: block;
+    font-size: 26px;
+    line-height: 1;
+    font-weight: 900;
+  }
+
+  .spread-option .small {
+    display: block;
+    margin-top: 8px;
+    color: rgba(246,240,255,0.72);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .modal-foot {
+    position: relative;
+    z-index: 1;
+    padding: 0 20px 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .modal-foot .btn { flex: 1 1 180px; }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 1024px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-badge { justify-self: start; text-align: left; }
+    .form-grid { grid-template-columns: 1fr 180px; }
+  }
+
+  @media (max-width: 780px) {
+    .wrap { width: min(calc(100% - 14px), var(--max)); padding-top: 10px; }
+    .hero, .panel-inner { padding: 16px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .results-head h3 { font-size: 20px; }
+    .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .spread-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .modal-card { border-radius: 24px; }
+    .modal-head, .modal-body, .modal-foot { padding-left: 16px; padding-right: 16px; }
+    .modal .spread-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 520px) {
+    .cards-grid { grid-template-columns: 1fr 1fr; }
+    .hero h1 { font-size: 34px; }
+    .hero p { font-size: 14px; }
+    .spread-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .controls { grid-template-columns: 1fr 1fr; }
+    .hold-area { width: min(360px, 100%); }
+    .modal .spread-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow">Tarot Ritual • Motion UI</div>
+          <h1>Rút Bài Tarot</h1>
+          <p>
+            “Tarot là một bộ bài dùng để khám phá cảm xúc, suy nghĩ và những gì đang diễn ra trong cuộc sống.”
+          </p>
+        </div>
+        <div class="hero-badge">
+          <strong>ChatGPT x duvansi</strong>
+          <span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-inner">
+        <div class="section-title">
+          <h2>Chọn trải bài</h2>
+          <div class="hint"></div>
+        </div>
+
+        <div class="top-row">
+          <button class="select-btn" id="openSpreadModal" type="button" aria-haspopup="dialog" aria-expanded="false">
+            <div class="select-left">
+              <div class="label">Số lá hiện tại</div>
+              <div class="value" id="selectedSpreadText">3 lá</div>
+            </div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button class="btn btn-ghost" id="quickResetBtn" type="button" style="min-width:160px;">Đặt lại</button>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="questionInput">Câu hỏi</label>
+            <input id="questionInput" type="text" placeholder="Ví dụ: ngày mai của tôi như thế nào ?" autocomplete="off" />
+            <div class="warn">Hãy nhập câu hỏi rõ ràng, đầy đủ và đúng chính tả để prompt AI mượt và chuẩn hơn.</div>
+          </div>
+          <div class="controls">
+            <button class="btn btn-ghost" id="clearBtn" type="button">Xoá</button>
+            <button class="btn btn-primary" id="readyBtn" type="button">Sẵn sàng</button>
+          </div>
+        </div>
+
+        <div class="micro-row">
+          <div class="status" id="statusText">Chọn số lá và nhập câu hỏi để bắt đầu.</div>
+          <div class="status"></div>
+        </div>
+
+        <section class="results" id="resultsSection">
+          <div class="results-head">
+            <div>
+              <h3>Kết quả trải bài</h3>
+              <p id="resultSub">Chạm vào từng lá để lật mặt trước. Mỗi lá được giữ kín ở mặt sau cho đến khi m chạm.</p>
+            </div>
+            <div class="copy-actions">
+              <button class="btn btn-ghost" id="rerollBtn" type="button">Rút lại</button>
+            </div>
+          </div>
+
+          <div class="cards-grid" id="cardsGrid"></div>
+
+          <div class="copy-box" id="copyBox">
+            <div class="copy-head">
+              <div>
+                <h4>Giải mã tín hiệu này</h4>
+                <p>
+                  Dán mã hóa này vào ứng dụng AI để giải thích ý nghĩa những lá bài này cho bạn.
+                </p>
+              </div>
+              <div class="copy-actions ai-actions">
+                <button class="btn btn-primary ai-btn" id="copyBtn" type="button">Sao Chép</button>
+                <button class="btn btn-ghost ai-btn ai-chatgpt" id="openChatGPTBtn" type="button" aria-label="Mở ChatGPT">
+                  <span class="ai-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="20" height="20" aria-hidden="true">
+                      <path d="M 14.070312 2 C 11.330615 2 8.9844456 3.7162572 8.0390625 6.1269531 C 6.061324 6.3911222 4.2941948 7.5446684 3.2773438 9.3066406 C 1.9078196 11.678948 2.2198602 14.567816 3.8339844 16.591797 C 3.0745422 18.436097 3.1891418 20.543674 4.2050781 22.304688 C 5.5751778 24.677992 8.2359331 25.852135 10.796875 25.464844 C 12.014412 27.045167 13.895916 28 15.929688 28 C 18.669385 28 21.015554 26.283743 21.960938 23.873047 C 23.938676 23.608878 25.705805 22.455332 26.722656 20.693359 C 28.09218 18.321052 27.78014 15.432184 26.166016 13.408203 C 26.925458 11.563903 26.810858 9.4563257 25.794922 7.6953125 C 24.424822 5.3220082 21.764067 4.1478652 19.203125 4.5351562 C 17.985588 2.9548328 16.104084 2 14.070312 2 z" fill="currentColor"></path>
+                    </svg>
+                  </span>
+                  <span class="ai-label">ChatGPT</span>
+                </button>
+                <button class="btn btn-ghost ai-btn ai-gemini" id="openGeminiBtn" type="button" aria-label="Mở Gemini">
+                  <span class="ai-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20" aria-hidden="true">
+                      <path fill="#3098de" d="M45.963,23.959C34.056,23.489,24.51,13.944,24.041,2.037L24,1l-0.041,1.037 C23.49,13.944,13.944,23.489,2.037,23.959L1,24l1.037,0.041c11.907,0.47,21.452,10.015,21.922,21.922L24,47l0.041-1.037 c0.47-11.907,10.015-21.452,21.922-21.922L47,24L45.963,23.959z"></path>
+                    </svg>
+                  </span>
+                  <span class="ai-label">Gemini</span>
+                </button>
+              </div>
+            </div>
+            <textarea class="output" id="outputText" readonly></textarea>
+            <div class="mini-note">dừng bao giờ tin tưởng bất kỳ thứ gì khác hơn chính mình siuu.</div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="ritual-box">
+      <div class="ritual-head">
+        <h3>Hãy nhắm mắt lại</h3>
+        <p>
+          Tập trung vào câu hỏi. Nhấn giữ vùng tròn để kích hoạt trạng thái tarot.
+          Trong lúc giữ, thanh năng lượng sẽ đầy dần. Khi thả tay, kết quả cuối sẽ được chốt ngay.
+        </p>
+      </div>
+
+      <div class="hold-shell">
+        <div class="hold-area" id="holdArea">
+          <div class="hold-ring" id="holdRing"></div>
+          <div class="hold-core" id="holdCore">
+            <div>
+              <strong id="holdTitle">Nhấn giữ</strong>
+              <span id="holdSubtitle">Để bắt đầu hiệu ứng tarot</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Đã sao chép tín hiệu 🔮</div>
+
+  <div class="modal" id="spreadModal" role="dialog" aria-modal="true" aria-labelledby="spreadModalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h3 id="spreadModalTitle">Chọn số lá</h3>
+          <p>Chọn nhanh số lượng lá để tạo trải bài. Cửa sổ này có thể mở ra và đóng lại.</p>
+        </div>
+        <button class="icon-btn" id="closeSpreadModal" type="button" aria-label="Đóng">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="spread-grid" id="spreadGrid"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" id="modalCancelBtn" type="button">Hủy</button>
+        <button class="btn btn-primary" id="modalDoneBtn" type="button">Xong</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const BASE_PATH = "images/";
+  const CARD_BACK = "CardBacks.png";
+
+  const majorCards = [
+    ["00-TheFool.png", "The Fool"],
+    ["01-TheMagician.png", "The Magician"],
+    ["02-TheHighPriestess.png", "The High Priestess"],
+    ["03-TheEmpress.png", "The Empress"],
+    ["04-TheEmperor.png", "The Emperor"],
+    ["05-TheHierophant.png", "The Hierophant"],
+    ["06-TheLovers.png", "The Lovers"],
+    ["07-TheChariot.png", "The Chariot"],
+    ["08-Strength.png", "Strength"],
+    ["09-TheHermit.png", "The Hermit"],
+    ["10-WheelOfFortune.png", "Wheel of Fortune"],
+    ["11-Justice.png", "Justice"],
+    ["12-TheHangedMan.png", "The Hanged Man"],
+    ["13-Death.png", "Death"],
+    ["14-Temperance.png", "Temperance"],
+    ["15-TheDevil.png", "The Devil"],
+    ["16-TheTower.png", "The Tower"],
+    ["17-TheStar.png", "The Star"],
+    ["18-TheMoon.png", "The Moon"],
+    ["19-TheSun.png", "The Sun"],
+    ["20-Judgement.png", "Judgement"],
+    ["21-TheWorld.png", "The World"]
+  ].map(([file, name]) => ({ file, name, arcana: "major" }));
+
+  const suits = ["Cups", "Pentacles", "Swords", "Wands"];
+  const ranks = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Page", "Knight", "Queen", "King"];
+  const minorCards = suits.flatMap(suit =>
+    Array.from({ length: 14 }, (_, i) => ({
+      file: `${suit}${String(i + 1).padStart(2, "0")}.png`,
+      name: `${ranks[i]} of ${suit}`,
+      suit,
+      arcana: "minor"
+    }))
+  );
+
+  const deck = [...majorCards, ...minorCards];
+  const spreadOptions = [1, 2, 3, 4, 5, 7, 10, 12];
+
+  let selectedSpread = 3;
+  let selectedSpreadBeforeModal = 3;
+  let currentQuestion = "";
+  let currentCards = [];
+  let shuffleTimer = null;
+  let holdRAF = 0;
+  let isHolding = false;
+  let holdStart = 0;
+
+  const spreadModal = document.getElementById("spreadModal");
+  const spreadGrid = document.getElementById("spreadGrid");
+  const openSpreadModal = document.getElementById("openSpreadModal");
+  const closeSpreadModal = document.getElementById("closeSpreadModal");
+  const modalCancelBtn = document.getElementById("modalCancelBtn");
+  const modalDoneBtn = document.getElementById("modalDoneBtn");
+  const selectedSpreadText = document.getElementById("selectedSpreadText");
+  const questionInput = document.getElementById("questionInput");
+  const readyBtn = document.getElementById("readyBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const quickResetBtn = document.getElementById("quickResetBtn");
+  const statusText = document.getElementById("statusText");
+  const resultsSection = document.getElementById("resultsSection");
+  const resultSub = document.getElementById("resultSub");
+  const cardsGrid = document.getElementById("cardsGrid");
+  const copyBox = document.getElementById("copyBox");
+  const outputText = document.getElementById("outputText");
+  const copyBtn = document.getElementById("copyBtn");
+  const rerollBtn = document.getElementById("rerollBtn");
+  const overlay = document.getElementById("overlay");
+  const holdArea = document.getElementById("holdArea");
+  const holdCore = document.getElementById("holdCore");
+  const holdRing = document.getElementById("holdRing");
+  const holdTitle = document.getElementById("holdTitle");
+  const holdSubtitle = document.getElementById("holdSubtitle");
+  const toast = document.getElementById("toast");
+
+  const randInt = (max) => {
+    const a = new Uint32Array(1);
+    crypto.getRandomValues(a);
+    return a[0] % max;
+  };
+
+  function shuffleDeck(list) {
+    const arr = [...list];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = randInt(i + 1);
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function drawCards(count) {
+    const shuffled = shuffleDeck(deck);
+    return shuffled.slice(0, count).map(card => ({
+      ...card,
+      reversed: randInt(2) === 1,
+      token: `${card.file}-${Date.now()}-${randInt(999999)}`
+    }));
+  }
+
+  function validateQuestion(q) {
+    return Boolean(q && q.trim().length >= 10);
+  }
+
+  function normalizeQuestion(q) {
+    return q.trim().replace(/\s+/g, " ");
+  }
+
+  function toastMsg(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => toast.classList.remove("show"), 1600);
+  }
+
+  function buildPrompt(question, cards) {
+    let text = `Bạn là một tarot reader chuyên nghiệp, tinh tế và trực diện.\n\n`;
+    text += `Hãy giải nghĩa trải bài tarot dưới đây một cách sâu sắc, rõ ràng, dễ hiểu và đúng trọng tâm câu hỏi.\n\n`;
+    text += `Câu hỏi của người xem:\n"${question}"\n\n`;
+    text += `Các lá bài được rút:\n`;
+    cards.forEach((card, index) => {
+      text += `Lá ${index + 1}: ${card.name} ${card.reversed ? "(   Reversed)" : "(  Upright)"}\n`;
+    });
+    text += `\nYêu cầu:\n`;
+    text += `- Giải thích từng lá theo đúng ngữ cảnh câu hỏi.\n`;
+    text += `- Phân tích cảm xúc, động cơ và bối cảnh của các bên liên quan.\n`;
+    text += `- Tổng hợp thành một kết luận ngắn gọn nhưng đủ ý.\n`;
+    text += `- Giọng văn tự nhiên, mạch lạc, không lan man và không chung chung.\n`;
+    text += `- Trả lời như một người đọc tarot có kinh nghiệm.\n`;
+    return text;
+  }
+
+  function encodeBase64Utf8(text) {
+    const bytes = new TextEncoder().encode(text);
+    let bin = "";
+    bytes.forEach(b => bin += String.fromCharCode(b));
+    return btoa(bin);
+  }
+
+  function buildEncodedCopy(question, cards) {
+    const raw = buildPrompt(question, cards);
+    const encoded = encodeBase64Utf8(raw);
+    return `Giải mã tín hiệu được tiết lộ từ trải bài tarot sau:\n\n${encoded}`;
+  }
+
+  function updateSelectedSpreadText() {
+    selectedSpreadText.textContent = `${selectedSpread} lá`;
+  }
+
+  function renderSpreadOptions() {
+    spreadGrid.innerHTML = "";
+    spreadOptions.forEach(num => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "spread-option" + (num === selectedSpread ? " active" : "");
+      btn.innerHTML = `<span class="big">${num}</span><span class="small">Lá</span>`;
+      btn.addEventListener("click", () => {
+        selectedSpread = num;
+        [...spreadGrid.children].forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+      spreadGrid.appendChild(btn);
+    });
+  }
+
+  function openModal() {
+    selectedSpreadBeforeModal = selectedSpread;
+    renderSpreadOptions();
+    spreadModal.classList.add("show");
+    openSpreadModal.classList.add("open");
+    openSpreadModal.setAttribute("aria-expanded", "true");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal(commit = false) {
+    if (!commit) selectedSpread = selectedSpreadBeforeModal;
+    updateSelectedSpreadText();
+    renderSpreadOptions();
+    spreadModal.classList.remove("show");
+    openSpreadModal.classList.remove("open");
+    openSpreadModal.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = "";
+  }
+
+  function clearResults() {
+    resultsSection.classList.remove("show");
+    cardsGrid.innerHTML = "";
+    copyBox.classList.remove("show");
+    outputText.value = "";
+    currentCards = [];
+  }
+
+  function openRitual() {
+    currentQuestion = normalizeQuestion(questionInput.value);
+    if (!validateQuestion(currentQuestion)) {
+      toastMsg("Nhập câu hỏi rõ và đủ dài hơn chút.");
+      questionInput.focus();
+      return;
+    }
+
+    clearResults();
+    overlay.classList.add("show");
+    document.body.style.overflow = "hidden";
+    holdTitle.textContent = "Nhấn giữ";
+    holdSubtitle.textContent = "Để khởi động trạng thái tarot";
+    holdRing.style.setProperty("--progress", "0%");
+    statusText.textContent = `Đang mở nghi thức cho ${selectedSpread} lá...`;
+  }
+
+  function animateHold() {
+    if (!isHolding) return;
+    const elapsed = Date.now() - holdStart;
+    const progress = Math.min(100, (elapsed / 1400) * 100);
+    holdRing.style.setProperty("--progress", `${progress}%`);
+
+    const t = performance.now() * 0.001;
+    const scale = 1 + Math.sin(t * 3.1) * 0.014;
+    const glow = 0.98 + Math.sin(t * 4.0) * 0.03;
+    holdCore.style.transform = `scale(${scale})`;
+    holdCore.style.filter = `brightness(${glow})`;
+
+    holdRAF = requestAnimationFrame(animateHold);
+  }
+
+  function startShuffle() {
+    if (shuffleTimer) clearInterval(shuffleTimer);
+    isHolding = true;
+    holdCore.classList.add("active");
+    holdTitle.textContent = "Đang giữ";
+    holdSubtitle.textContent = "Năng lượng đang đầy dần...";
+
+    shuffleTimer = setInterval(() => {
+      const temp = drawCards(selectedSpread);
+      const sample = temp[0];
+      if (sample) holdSubtitle.textContent = `${sample.reversed ? "   Reversed" : "   Upright"} • ${sample.name}`;
+    }, 120);
+
+    cancelAnimationFrame(holdRAF);
+    animateHold();
+
+    if (navigator.vibrate) navigator.vibrate(20);
+  }
+
+  function stopShuffle() {
+    if (!isHolding) return;
+    isHolding = false;
+    clearInterval(shuffleTimer);
+    shuffleTimer = null;
+    cancelAnimationFrame(holdRAF);
+    holdCore.classList.remove("active");
+    holdCore.style.transform = "";
+    holdCore.style.filter = "";
+    holdRing.style.setProperty("--progress", "0%");
+
+    const holdMs = Math.max(0, Date.now() - holdStart);
+    currentCards = drawCards(selectedSpread);
+    renderFinalResults(currentCards, holdMs);
+
+    overlay.classList.remove("show");
+    document.body.style.overflow = "";
+
+    if (navigator.vibrate) navigator.vibrate([20, 30, 20]);
+  }
+
+  function renderFinalResults(cards, holdMs) {
+    resultsSection.classList.add("show");
+    copyBox.classList.add("show");
+    resultSub.textContent = `Câu hỏi: “${currentQuestion}” · Đã giữ ${Math.max(1, Math.round(holdMs / 1000))} giây · Chạm vào từng lá để lật mặt trước.`;
+    cardsGrid.innerHTML = "";
+
+    cards.forEach((card, index) => {
+      const item = document.createElement("div");
+      item.className = "tarot-card";
+      item.style.setProperty("--delay", `${index * 110}ms`);
+      item.innerHTML = `
+        <div class="card-stack">
+          <div class="card-face back">
+            <div class="card-visual">
+              <img class="back-art" src="${BASE_PATH}${CARD_BACK}" alt="Mặt sau" onerror="this.style.display='none'" />
+              <div class="back-overlay"></div>
+              <div class="back-label">Chạm để lật</div>
+            </div>
+          </div>
+          <div class="card-face front">
+            <div class="card-visual">
+              <img class="card-img ${card.reversed ? 'reversed' : ''}" src="${BASE_PATH}${card.file}" alt="${card.name}" onerror="this.alt='Không tải được ảnh'; this.style.background='rgba(255,255,255,0.08)'" />
+            </div>
+            <div class="card-meta">
+              <div class="num">Lá ${index + 1}</div>
+              <div class="name">${card.name}</div>
+              <div class="state">${card.reversed ? '   Reversed' : '   Upright'}</div>
+            </div>
+          </div>
+        </div>
+      `;
+      item.addEventListener("click", () => item.classList.toggle("flipped"));
+      cardsGrid.appendChild(item);
+    });
+
+    outputText.value = buildEncodedCopy(currentQuestion, cards);
+    toastMsg("Kết quả đã sẵn sàng 🔮");
+  }
+
+  function copyPrompt() {
+    const txt = outputText.value.trim();
+    if (!txt) return;
+    navigator.clipboard.writeText(txt)
+      .then(() => toastMsg("Đã sao chép tín hiệu 🔮"))
+      .catch(() => toastMsg("Không copy được, thử lại nhé."));
+  }
+
+  function openTarget(url) {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const copyText = outputText.value.trim();
+    if (!copyText) {
+      toastMsg("Chưa có tín hiệu để gửi.");
+      return;
+    }
+
+    navigator.clipboard.writeText(copyText).then(() => {
+      toastMsg("Đã copy, đang mở AI 🔮");
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+      document.body.appendChild(anchor);
+      setTimeout(() => {
+        anchor.click();
+        anchor.remove();
+      }, isMobile ? 180 : 80);
+    }).catch(() => {
+      toastMsg("Copy thất bại, thử lại nhé.");
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
+  }
+
+  function openChatGPT() {
+    openTarget("https://chatgpt.com/");
+  }
+
+  function openGemini() {
+    openTarget("https://gemini.google.com/");
+  }
+
+  function resetAll() {
+    questionInput.value = "";
+    selectedSpread = 3;
+    selectedSpreadBeforeModal = 3;
+    updateSelectedSpreadText();
+    renderSpreadOptions();
+    clearResults();
+    statusText.textContent = "Chọn số lá và nhập câu hỏi để bắt đầu.";
+    questionInput.focus();
+  }
+
+  openSpreadModal.addEventListener("click", openModal);
+  closeSpreadModal.addEventListener("click", () => closeModal(false));
+  modalCancelBtn.addEventListener("click", () => closeModal(false));
+  modalDoneBtn.addEventListener("click", () => closeModal(true));
+
+  spreadModal.addEventListener("click", (e) => {
+    if (e.target === spreadModal) closeModal(false);
+  });
+
+  readyBtn.addEventListener("click", openRitual);
+  clearBtn.addEventListener("click", resetAll);
+  quickResetBtn.addEventListener("click", resetAll);
+  copyBtn.addEventListener("click", copyPrompt);
+  document.getElementById("openChatGPTBtn").addEventListener("click", openChatGPT);
+  document.getElementById("openGeminiBtn").addEventListener("click", openGemini);
+  rerollBtn.addEventListener("click", openRitual);
+
+  questionInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") openRitual();
+  });
+
+  let pointerActive = false;
+  holdArea.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (!overlay.classList.contains("show")) return;
+    pointerActive = true;
+    if (!isHolding) holdStart = Date.now();
+    holdArea.setPointerCapture?.(e.pointerId);
+    startShuffle();
+  }, { passive: false });
+
+  const stopByPointer = (e) => {
+    if (!pointerActive) return;
+    pointerActive = false;
+    e.preventDefault?.();
+    stopShuffle();
+  };
+
+  holdArea.addEventListener("pointerup", stopByPointer, { passive: false });
+  holdArea.addEventListener("pointercancel", stopByPointer, { passive: false });
+  holdArea.addEventListener("lostpointercapture", stopByPointer, { passive: false });
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) stopShuffle();
+  });
+
+  updateSelectedSpreadText();
+  renderSpreadOptions();
+  clearResults();
+</script>
+</body>
+</html>
