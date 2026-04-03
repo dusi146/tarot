@@ -3,16 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tarot Ritual - Ultimate UI</title>
+<title>Tarot Ritual - Ultimate AI Edition</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg-base: #030108;
-    --glass-bg: rgba(12, 7, 24, 0.4);
+    --glass-bg: rgba(12, 7, 24, 0.35);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-border-glow: rgba(180, 140, 255, 0.4);
     
     --text-main: #fcfafc;
     --text-muted: rgba(210, 200, 240, 0.6);
@@ -24,12 +23,9 @@
     --cyan: #66e0ff;
     
     --shadow-heavy: 0 40px 80px rgba(0, 0, 0, 0.9);
-    
     --radius-xl: 32px;
     --radius-lg: 20px;
-    --radius-md: 14px;
     --max-w: 1100px;
-    --cardRatio: 300 / 527;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -47,438 +43,236 @@
     font-family: 'Cormorant Garamond', serif;
   }
 
-  /* --- STUNNING NEBULA & MYSTIC BACKGROUND --- */
-  .bg-nebula {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background: radial-gradient(circle at 50% 50%, #060112 0%, #000 100%);
-    overflow: hidden;
-  }
-  .bg-nebula::before, .bg-nebula::after, .bg-nebula-core {
-    content: ""; position: absolute; border-radius: 50%;
-    filter: blur(90px); opacity: 0.5;
-    animation: floatOrb 25s infinite alternate ease-in-out;
-  }
-  .bg-nebula::before {
-    width: 70vw; height: 70vw; top: -20vh; left: -10vw;
-    background: rgba(120, 40, 220, 0.35);
-  }
-  .bg-nebula::after {
-    width: 60vw; height: 60vw; bottom: -20vh; right: -10vw;
-    background: rgba(40, 120, 220, 0.25);
-    animation-delay: -12s;
-  }
-  .bg-nebula-core {
-    width: 40vw; height: 40vw; top: 30vh; left: 30vw;
-    background: rgba(242, 208, 128, 0.15);
-    animation-duration: 30s;
-  }
+  /* --- STUNNING BACKGROUNDS --- */
+  .bg-nebula { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at 50% 50%, #060112 0%, #000 100%); overflow: hidden; }
+  .bg-nebula::before, .bg-nebula::after, .bg-nebula-core { content: ""; position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.5; animation: floatOrb 25s infinite alternate ease-in-out; }
+  .bg-nebula::before { width: 70vw; height: 70vw; top: -20vh; left: -10vw; background: rgba(120, 40, 220, 0.35); }
+  .bg-nebula::after { width: 60vw; height: 60vw; bottom: -20vh; right: -10vw; background: rgba(40, 120, 220, 0.25); animation-delay: -12s; }
+  .bg-nebula-core { width: 40vw; height: 40vw; top: 30vh; left: 30vw; background: rgba(242, 208, 128, 0.15); animation-duration: 30s; }
+  
+  .bg-mystic-dust { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" opacity="0.03"><circle cx="60" cy="60" r="40" stroke="%23aa80ff" stroke-width="1" fill="none"/></svg>'); background-size: 150px 150px; animation: mysticFloat 60s linear infinite; }
+  
+  .stardust { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8) 1px, transparent 1px), radial-gradient(2px 2px at 30% 50%, rgba(242,208,128,0.7) 1px, transparent 1px); background-size: 200px 200px; animation: twinkle 6s infinite alternate ease-in-out; opacity: 0.6; }
 
-  .bg-mystic-dust {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image: 
-      url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" opacity="0.04"><circle cx="60" cy="60" r="40" stroke="%23aa80ff" stroke-width="1" fill="none"/><path d="M60 10 L60 110 M10 60 L110 60" stroke="%23aa80ff" stroke-width="0.5"/></svg>');
-    background-size: 150px 150px;
-    animation: mysticFloat 50s linear infinite;
-  }
+  @keyframes floatOrb { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(10vw, 15vh) scale(1.15); } }
+  @keyframes twinkle { 0% { opacity: 0.3; transform: translateY(0); } 100% { opacity: 0.8; transform: translateY(-15px); } }
+  @keyframes mysticFloat { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-150px) rotate(5deg); } }
 
-  .stardust {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image: 
-      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8) 1px, transparent 1px),
-      radial-gradient(2px 2px at 30% 50%, rgba(242,208,128,0.7) 1px, transparent 1px),
-      radial-gradient(1.5px 1.5px at 70% 30%, rgba(170,128,255,0.8) 1px, transparent 1px),
-      radial-gradient(2px 2px at 80% 80%, rgba(102,224,255,0.6) 1px, transparent 1px),
-      radial-gradient(1px 1px at 40% 90%, rgba(255,255,255,0.5) 1px, transparent 1px);
-    background-size: 200px 200px;
-    animation: twinkle 6s infinite alternate ease-in-out;
-    opacity: 0.6;
-  }
+  .wrap { position: relative; z-index: 10; width: min(100% - 32px, var(--max-w)); margin: 0 auto; padding: 60px 0 80px; animation: slideUpFade 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-  @keyframes floatOrb {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(10vw, 15vh) scale(1.15); }
-  }
-  @keyframes twinkle {
-    0% { opacity: 0.3; transform: translateY(0); }
-    100% { opacity: 0.8; transform: translateY(-15px); }
-  }
-  @keyframes mysticFloat {
-    0% { transform: translateY(0) rotate(0deg); }
-    100% { transform: translateY(-150px) rotate(5deg); }
-  }
+  .glass-panel { background: var(--glass-bg); backdrop-filter: blur(28px) saturate(1.2); -webkit-backdrop-filter: blur(28px) saturate(1.2); border: 1px solid var(--glass-border); border-top: 1px solid rgba(255, 255, 255, 0.15); border-left: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-xl); box-shadow: var(--shadow-heavy); overflow: hidden; }
 
-  .wrap {
-    position: relative; z-index: 10;
-    width: min(100% - 32px, var(--max-w));
-    margin: 0 auto; padding: 60px 0 80px;
-    animation: slideUpFade 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-  }
+  .hero { padding: 48px; margin-bottom: 32px; text-align: center; }
+  .hero h1 { font-size: clamp(40px, 6vw, 76px); line-height: 1.1; margin-bottom: 10px; background: linear-gradient(to bottom right, #fff 20%, var(--gold) 80%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
+  .hero p { color: var(--text-muted); font-size: 16px; max-width: 600px; margin: 0 auto; }
 
-  @keyframes slideUpFade {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* --- PREMIUM GLASS UI --- */
-  .glass-panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(28px) saturate(1.2);
-    -webkit-backdrop-filter: blur(28px) saturate(1.2);
-    border: 1px solid var(--glass-border);
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-heavy);
-    position: relative; overflow: hidden;
-  }
-
-  .hero { padding: 48px; margin-bottom: 32px; }
-  .hero-grid { display: flex; justify-content: space-between; align-items: center; gap: 32px; flex-wrap: wrap; }
-
-  .eyebrow {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 8px 20px; border-radius: 100px;
-    background: linear-gradient(90deg, rgba(170,128,255,0.1), transparent);
-    border: 1px solid rgba(170, 128, 255, 0.3);
-    color: var(--purple); font-size: 12px; font-weight: 600;
-    letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px;
-  }
-
-  .hero h1 {
-    font-size: clamp(40px, 6vw, 76px); line-height: 1.1; margin-bottom: 20px;
-    background: linear-gradient(to bottom right, #fff 20%, var(--gold) 80%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    text-shadow: 0 10px 30px rgba(242, 208, 128, 0.2);
-    font-weight: 700; letter-spacing: -1px;
-  }
-
-  .hero p {
-    color: var(--text-muted); font-size: 16px; line-height: 1.8;
-    max-width: 580px; font-weight: 300;
-  }
-
-  .hero-badge {
-    padding: 24px 32px; border-radius: var(--radius-lg);
-    background: linear-gradient(145deg, rgba(170,128,255,0.15), rgba(0,0,0,0.6));
-    border: 1px solid rgba(170, 128, 255, 0.3);
-    text-align: right; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .hero-badge:hover { transform: translateY(-5px); border-color: var(--purple); }
-  .hero-badge strong { font-size: 22px; font-weight: 600; color: #fff; display: block;}
-  .hero-badge span { display: block; color: var(--gold); font-size: 12px; margin-top: 6px; letter-spacing: 2px; text-transform: uppercase;}
-
-  /* --- CONTROL PANEL (STACKED & CENTERED) --- */
   .panel-inner { padding: 48px 40px; }
-
   .section-title { text-align: center; margin-bottom: 40px; }
-  .section-title h2 {
-    font-size: 32px; letter-spacing: 2px; color: var(--gold);
-    text-shadow: 0 0 20px rgba(242, 208, 128, 0.3); font-weight: 600;
-    display: inline-flex; align-items: center; gap: 16px; margin: 0;
-  }
+  .section-title h2 { font-size: 32px; color: var(--gold); text-shadow: 0 0 20px rgba(242, 208, 128, 0.3); font-weight: 600; display: inline-flex; align-items: center; gap: 16px; margin: 0; }
   .section-title h2::before, .section-title h2::after { content: "✧"; font-size: 20px; opacity: 0.7;}
 
-  .setup-stack {
-    display: flex; flex-direction: column; gap: 16px;
-    width: 100%; max-width: 360px; margin: 0 auto;
-  }
+  /* --- FORM NHẬP LIỆU NÂNG CẤP THÔNG MINH --- */
+  .setup-stack { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 380px; margin: 0 auto; }
 
-  .select-btn {
-    display: flex; justify-content: space-between; align-items: center;
-    width: 100%; height: 60px; padding: 0 28px;
-    background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border);
-    border-radius: 100px; color: #fff; cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .select-btn:hover {
-    border-color: var(--purple); background: rgba(170, 128, 255, 0.1);
-    transform: translateY(-2px); box-shadow: 0 10px 30px rgba(170, 128, 255, 0.15);
-  }
+  .select-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 60px; padding: 0 28px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border); border-radius: 100px; color: #fff; cursor: pointer; transition: 0.3s; }
+  .select-btn:hover { border-color: var(--purple); background: rgba(170, 128, 255, 0.1); transform: translateY(-2px); }
   .select-btn .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;}
   .select-btn .value { font-size: 24px; font-weight: 600; color: var(--cyan); text-shadow: 0 0 15px rgba(102,224,255,0.3);}
 
-  .field { width: 100%; }
-  .field input {
-    width: 100%; height: 60px; background: rgba(0, 0, 0, 0.5); 
-    border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0 28px; 
-    border-radius: 100px; font-size: 15px; font-family: 'Montserrat', sans-serif; 
-    transition: all 0.3s ease; outline: none; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
-    text-align: center;
-  }
+  .field-row { display: grid; grid-template-columns: 140px 1fr; gap: 12px; }
+  
+  .field input { width: 100%; height: 60px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); padding: 0 20px; border-radius: 100px; font-size: 14px; font-family: 'Montserrat', sans-serif; transition: 0.3s; outline: none; text-align: center; }
   .field input::placeholder { color: rgba(255,255,255,0.3); font-style: italic; }
-  .field input:focus {
-    border-color: var(--purple); background: rgba(170, 128, 255, 0.05);
-    box-shadow: 0 0 0 4px rgba(170, 128, 255, 0.15), inset 0 2px 10px rgba(0,0,0,0.5);
-  }
+  .field input:focus { border-color: var(--purple); box-shadow: 0 0 0 4px rgba(170, 128, 255, 0.15); }
   
-  .btn {
-    border: none; height: 60px; padding: 0 28px; border-radius: 100px;
-    font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px;
-    letter-spacing: 2px; cursor: pointer; transition: all 0.3s;
-    text-transform: uppercase; display: inline-flex; align-items: center; justify-content: center;
-    width: 100%;
+  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.6); cursor: pointer; transition: 0.3s; }
+  input[type="date"]::-webkit-calendar-picker-indicator:hover { filter: invert(1) opacity(1) drop-shadow(0 0 5px var(--cyan)); }
+  
+  /* Cụm Segmented Control Giới Tính */
+  .gender-group { display: flex; gap: 6px; height: 60px; background: rgba(0,0,0,0.5); border-radius: 100px; padding: 4px; border: 1px solid rgba(255,255,255,0.1); }
+  .gender-btn { flex: 1; position: relative; cursor: pointer; }
+  .gender-btn input { display: none; }
+  .gender-btn span { display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; border-radius: 100px; color: var(--text-muted); font-size: 13px; font-weight: 600; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;}
+  .gender-btn input:checked + span { background: linear-gradient(135deg, rgba(170, 128, 255, 0.3), rgba(102, 224, 255, 0.2)); color: #fff; box-shadow: inset 0 0 10px rgba(170,128,255,0.4); text-shadow: 0 0 10px rgba(255,255,255,0.5); border: 1px solid rgba(170,128,255,0.4); }
+
+  /* Zodiac Badge */
+  .zodiac-badge {
+    background: rgba(170, 128, 255, 0.15); border: 1px solid rgba(170, 128, 255, 0.4); color: var(--gold);
+    padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600;
+    display: none; align-items: center; justify-content: center; width: 100%;
+    margin-top: -4px; animation: slideUpFade 0.4s forwards;
   }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--purple), #4c1d95); color: #fff;
-    box-shadow: 0 10px 25px rgba(170, 128, 255, 0.3); border: 1px solid rgba(255,255,255,0.2);
-  }
+  .zodiac-badge.show { display: flex; }
+
+  .btn { border: none; height: 60px; padding: 0 28px; border-radius: 100px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px; letter-spacing: 2px; cursor: pointer; transition: all 0.3s; text-transform: uppercase; display: inline-flex; align-items: center; justify-content: center; width: 100%; }
+  .btn-primary { background: linear-gradient(135deg, var(--purple), #4c1d95); color: #fff; box-shadow: 0 10px 25px rgba(170, 128, 255, 0.3); border: 1px solid rgba(255,255,255,0.2); }
   .btn-primary:hover { box-shadow: 0 15px 35px rgba(170, 128, 255, 0.5); transform: translateY(-2px); }
-  
   .btn-ghost { background: rgba(255, 255, 255, 0.03); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); }
   .btn-ghost:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.4); transform: translateY(-2px); }
 
-  .warn { font-size: 12px; color: rgba(255,255,255,0.5); text-align: center; margin-top: 8px; font-style: italic; }
+  /* EPIC BUTTON */
+  .btn-epic {
+    background: linear-gradient(45deg, #4c1d95, #aa80ff, #0891b2, #4c1d95); background-size: 300% 300%;
+    color: white; border: 1px solid var(--gold);
+    box-shadow: 0 0 25px rgba(170, 128, 255, 0.6), inset 0 0 10px rgba(242, 208, 128, 0.4);
+    animation: shineGradient 4s infinite linear;
+    height: 64px; font-size: 16px; margin: 40px auto 0; max-width: 400px;
+  }
+  .btn-epic:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 0 40px rgba(170, 128, 255, 0.8), inset 0 0 15px rgba(242, 208, 128, 0.6); }
+  @keyframes shineGradient { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+
+  .warn { font-size: 12px; color: rgba(255,255,255,0.5); text-align: center; margin-top: 8px; font-style: italic; line-height: 1.5; }
 
   /* --- RITUAL OVERLAY --- */
-  .overlay {
-    position: fixed; inset: 0; z-index: 100;
-    background: rgba(2, 0, 8, 0.9); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: opacity 0.5s ease;
-  }
+  .overlay { position: fixed; inset: 0; z-index: 100; background: rgba(2, 0, 8, 0.9); backdrop-filter: blur(30px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.5s ease; }
   .overlay.show { opacity: 1; pointer-events: auto; }
-
   .ritual-box { text-align: center; max-width: 600px; width: 90%; }
   .ritual-head h3 { font-size: clamp(34px, 6vw, 48px); color: var(--gold); margin-bottom: 16px; font-weight: 600; }
-  .ritual-head p { color: var(--text-muted); font-size: 15px; line-height: 1.6; margin-bottom: 50px; }
+  .ritual-head p { color: var(--text-muted); font-size: 15px; margin-bottom: 50px; }
 
-  .hold-area {
-    position: relative; width: 300px; height: 300px; margin: 0 auto;
-    border-radius: 50%; display: grid; place-items: center;
-    cursor: pointer; user-select: none; touch-action: none;
-  }
-  .hold-ring-1 {
-    position: absolute; inset: -25px; border-radius: 50%;
-    border: 2px dashed rgba(170, 128, 255, 0.3);
-    animation: spinLayer 20s linear infinite; pointer-events: none;
-  }
-  .hold-ring-progress {
-    position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
-    background: conic-gradient(from 0deg, var(--cyan), var(--purple) var(--progress, 0%), transparent 0);
-    mask: radial-gradient(transparent 68%, black 69%); -webkit-mask: radial-gradient(transparent 68%, black 69%);
-    transition: --progress 0.1s linear;
-  }
-  .hold-core {
-    position: relative; z-index: 2; width: 200px; height: 200px;
-    border-radius: 50%; background: radial-gradient(circle at 30% 30%, #3b1475, #080312);
-    border: 3px solid rgba(170, 128, 255, 0.4);
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
-    box-shadow: inset 0 0 50px rgba(0,0,0,0.9), 0 0 40px rgba(170, 128, 255, 0.2);
-    transition: all 0.3s;
-  }
+  .hold-area { position: relative; width: 300px; height: 300px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; cursor: pointer; user-select: none; touch-action: none; }
+  .hold-ring-1 { position: absolute; inset: -25px; border-radius: 50%; border: 2px dashed rgba(170, 128, 255, 0.3); animation: spinLayer 20s linear infinite; pointer-events: none; }
+  .hold-ring-progress { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, var(--cyan), var(--purple) var(--progress, 0%), transparent 0); mask: radial-gradient(transparent 68%, black 69%); -webkit-mask: radial-gradient(transparent 68%, black 69%); transition: --progress 0.1s linear; pointer-events: none;}
+  .hold-core { position: relative; z-index: 2; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #3b1475, #080312); border: 3px solid rgba(170, 128, 255, 0.4); display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: inset 0 0 50px rgba(0,0,0,0.9); transition: 0.3s; }
   .hold-core strong { font-size: 28px; color: #fff; margin-bottom: 8px; font-weight: 600;}
   .hold-core span { font-size: 11px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase;}
-  .hold-core.active {
-    transform: scale(1.1); border-color: var(--cyan);
-    box-shadow: inset 0 0 80px rgba(102, 224, 255, 0.3), 0 0 100px rgba(170, 128, 255, 0.5);
-  }
+  .hold-core.active { transform: scale(1.1); border-color: var(--cyan); box-shadow: inset 0 0 80px rgba(102, 224, 255, 0.3); }
   @keyframes spinLayer { 100% { transform: rotate(360deg); } }
 
-  /* --- STRICT 3D CARD RENDERING --- */
+  /* --- CARDS RENDERING & BUG-FREE CARD BACK --- */
   .results { margin-top: 50px; display: none; opacity: 0; transform: translateY(40px); transition: 0.8s; }
   .results.show { display: block; opacity: 1; transform: translateY(0); }
-
   .results-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; flex-wrap: wrap; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 24px;}
   .results-head h3 { font-size: 32px; color: var(--gold); margin-bottom: 8px; font-weight: 600;}
   .results-head p { color: var(--text-muted); font-size: 15px; }
 
-  .cards-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; perspective: 2500px;
-  }
-
-  .tarot-card {
-    position: relative; width: 100%; cursor: pointer;
-    opacity: 0; transform: translateY(50px) rotateX(-10deg);
-    animation: epicCardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    animation-delay: var(--delay, 0ms);
-  }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; perspective: 2500px; }
+  .tarot-card { position: relative; width: 100%; cursor: pointer; opacity: 0; transform: translateY(50px) rotateX(-10deg); animation: epicCardEntrance 0.8s forwards; animation-delay: var(--delay, 0ms); }
   @keyframes epicCardEntrance { to { opacity: 1; transform: translateY(0) rotateX(0); } }
+  
+  .card-stack { width: 100%; aspect-ratio: 300 / 527; position: relative; transform-style: preserve-3d; transition: transform 0.8s; box-shadow: 0 20px 40px rgba(0,0,0,0.7); border-radius: 18px; }
+  
+  .tarot-card.flipped .card-stack { transform: rotateY(180deg); }
+  .tarot-card:hover .card-stack { transform: translateY(-10px) scale(1.02); box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 40px rgba(170, 128, 255, 0.2); }
+  .tarot-card.flipped:hover .card-stack { transform: rotateY(180deg) translateY(-10px) scale(1.02); box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 40px rgba(102, 224, 255, 0.2); }
 
-  .card-stack {
-    width: 100%; aspect-ratio: var(--cardRatio); position: relative;
-    transform-style: preserve-3d; -webkit-transform-style: preserve-3d;
-    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-    box-shadow: 0 20px 40px rgba(0,0,0,0.7); border-radius: 18px;
-  }
-  .tarot-card.flipped .card-stack {
-    transform: rotateY(180deg); -webkit-transform: rotateY(180deg);
-  }
-  .tarot-card:hover .card-stack {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 40px rgba(170, 128, 255, 0.2);
-  }
-  .tarot-card.flipped:hover .card-stack {
-    transform: rotateY(180deg) translateY(-10px) scale(1.02); 
-    box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 40px rgba(102, 224, 255, 0.2);
-  }
-
-  .card-face {
-    position: absolute; inset: 0;
-    backface-visibility: hidden; -webkit-backface-visibility: hidden;
-    border-radius: 18px; overflow: hidden; border: 2px solid rgba(255,255,255,0.15);
-    transform: translate3d(0,0,0); -webkit-transform: translate3d(0,0,0);
-  }
-
+  .card-face { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 18px; overflow: hidden; border: 2px solid rgba(255,255,255,0.15); transform: translate3d(0,0,0); }
+  
+  /* PERFECT ASTRAL PORTAL CARD BACK */
   .card-face.back {
-    transform: rotateY(0deg); -webkit-transform: rotateY(0deg);
-    background: #0d0614;
-    background-image: 
-      radial-gradient(circle at 50% 50%, rgba(170, 128, 255, 0.15) 0%, transparent 60%),
-      linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.02) 75%),
-      linear-gradient(-45deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.02) 75%);
-    background-size: 100% 100%, 20px 20px, 20px 20px;
-    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at center, #1a0b2e 0%, #05020a 100%);
+    display: flex; align-items: center; justify-content: center; position: relative;
+    border: 2px solid rgba(242, 208, 128, 0.25);
   }
-  .magic-emblem {
-    width: 80px; height: 120px;
-    border: 2px solid rgba(242, 208, 128, 0.6); border-radius: 50%;
-    box-shadow: 0 0 30px rgba(242, 208, 128, 0.2), inset 0 0 20px rgba(242, 208, 128, 0.2);
-    display: flex; align-items: center; justify-content: center;
-    position: relative; animation: pulseGlow 3s infinite alternate;
+  .card-face.back::before {
+    content: ""; position: absolute; inset: 10px; border: 1px solid rgba(170, 128, 255, 0.3); border-radius: 12px; pointer-events: none;
   }
-  .magic-emblem::before { content: "✧"; font-size: 40px; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
-  .magic-emblem::after {
-    content: ""; position: absolute; inset: -10px; border: 1px dashed rgba(102, 224, 255, 0.4);
-    border-radius: 50%; animation: spinLayer 15s linear infinite;
+  .card-face.back::after {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px);
+    background-size: 15px 15px; opacity: 0.3; pointer-events: none;
   }
-  @keyframes pulseGlow { from { opacity: 0.7; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
+  .astral-portal {
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, rgba(242, 208, 128, 0.15), transparent 70%);
+    border: 1px solid rgba(242, 208, 128, 0.5); border-radius: 50%;
+    position: relative; box-shadow: 0 0 25px rgba(170,128,255,0.5), inset 0 0 15px rgba(242,208,128,0.2);
+    display: flex; align-items: center; justify-content: center; z-index: 2;
+  }
+  .astral-portal::before {
+    content: "✧"; font-size: 36px; color: var(--gold); animation: pulseGlow 2s infinite alternate; text-shadow: 0 0 15px var(--gold);
+  }
+  .astral-ring {
+    position: absolute; inset: -14px; border: 1px dashed rgba(102, 224, 255, 0.6); border-radius: 50%;
+    animation: spinLayer 12s linear infinite; opacity: 0.8;
+  }
+  .astral-ring-2 {
+    position: absolute; inset: -24px; border: 1px solid rgba(170, 128, 255, 0.4); border-radius: 50%;
+    border-top-color: transparent; border-bottom-color: transparent;
+    animation: spinLayer 8s linear infinite reverse; opacity: 0.6;
+  }
+  @keyframes pulseGlow { from { transform: scale(0.9); opacity: 0.8;} to { transform: scale(1.1); opacity: 1;} }
 
-  .card-face.front {
-    transform: rotateY(180deg); -webkit-transform: rotateY(180deg);
-    background: #050505; border-color: var(--cyan);
+  .card-face.front { transform: rotateY(180deg); background: #050505; border-color: var(--cyan); display: flex; align-items: center; justify-content: center;}
+  
+  .fallback-bg {
+    position: absolute; inset: 0; background: #0b0714;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: 16px; border: 1px solid rgba(242,208,128,0.3); border-radius: 16px; margin: 8px; z-index: 0;
   }
-
-  .card-img { width: 100%; height: 100%; object-fit: cover; }
+  .fallback-bg span { color: var(--gold); font-size: 22px; font-weight: 600; line-height: 1.3;}
+  .card-img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; }
   .card-img.reversed { transform: rotate(180deg); }
 
-  /* MANG THÔNG TIN RA NGOÀI (CHỐNG LỖI HIỂN THỊ NGƯỢC 3D) */
-  .card-info {
-    margin-top: 20px; text-align: center;
-    opacity: 0; transform: translateY(10px);
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .tarot-card.flipped .card-info {
-    opacity: 1; transform: translateY(0);
-  }
+  .card-info { margin-top: 20px; text-align: center; opacity: 0; transform: translateY(10px); transition: 0.5s; }
+  .tarot-card.flipped .card-info { opacity: 1; transform: translateY(0); }
   .card-info .num { font-size: 11px; color: var(--gold); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px; font-weight: 500;}
-  .card-info .name { font-size: 24px; color: #fff; font-weight: 600; margin-bottom: 4px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);}
+  .card-info .name { font-size: 24px; color: #fff; font-weight: 600; margin-bottom: 4px; }
   .card-info .state { font-size: 12px; color: var(--cyan); font-style: italic; letter-spacing: 1px;}
 
-  /* --- COPY BOX NÂNG CẤP --- */
-  .copy-box {
-    margin-top: 60px; padding: 40px; border-radius: var(--radius-xl);
-    background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border);
-    display: none; opacity: 0; transform: translateY(20px); transition: 0.6s;
+  /* --- EPIC AI READING MODAL --- */
+  .reading-modal {
+    position: fixed; inset: 0; z-index: 300; background: rgba(2, 0, 8, 0.85);
+    backdrop-filter: blur(25px); display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 20px;
   }
-  .copy-box.show { display: block; opacity: 1; transform: translateY(0); }
-  .copy-head h4 { font-size: 26px; color: var(--cyan); margin-bottom: 8px; font-weight: 600;}
-  .copy-head p { color: var(--text-muted); font-size: 14px; margin-bottom: 24px;}
+  .reading-modal.show { opacity: 1; pointer-events: auto; }
+  .reading-card {
+    width: 100%; max-width: 800px; max-height: 85vh; overflow-y: auto;
+    background: rgba(12, 7, 24, 0.7); border: 1px solid var(--purple);
+    border-radius: var(--radius-xl); padding: 40px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.9), inset 0 0 50px rgba(170,128,255,0.1);
+    transform: scale(0.9) translateY(30px); transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    scrollbar-width: thin; scrollbar-color: var(--purple) transparent;
+  }
+  .reading-modal.show .reading-card { transform: scale(1) translateY(0); }
+  .reading-card::-webkit-scrollbar { width: 6px; }
+  .reading-card::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 10px; }
+
+  .reading-head { text-align: center; margin-bottom: 30px; position: relative; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);}
+  .reading-head h4 { font-size: 36px; color: var(--cyan); font-weight: 700; margin-bottom: 8px; text-shadow: 0 0 20px rgba(102,224,255,0.4);}
+  .reading-head p { color: var(--gold); font-size: 14px; letter-spacing: 2px; text-transform: uppercase;}
+  .close-reading-btn { position: absolute; top: 0; right: 0; background: transparent; border: none; color: #fff; font-size: 32px; cursor: pointer; opacity: 0.5; transition: 0.3s; }
+  .close-reading-btn:hover { opacity: 1; color: var(--cyan); transform: rotate(90deg); }
+
+  .reading-content { font-size: 16px; line-height: 1.9; color: rgba(255,255,255,0.9); text-align: justify; white-space: pre-line; }
   
-  .output-container {
-    position: relative; margin-bottom: 24px; border-radius: var(--radius-lg); padding: 1px;
-    background: linear-gradient(90deg, rgba(102, 224, 255, 0.3), rgba(170, 128, 255, 0.3), rgba(102, 224, 255, 0.3));
-    background-size: 200% 100%; animation: borderGlow 4s linear infinite;
-  }
-  @keyframes borderGlow { 0% { background-position: 0% 0%; } 100% { background-position: 200% 0%; } }
-  
-  .output-container::after {
-    content: ""; position: absolute; inset: 1px; border-radius: calc(var(--radius-lg) - 1px);
-    background: linear-gradient(to bottom, transparent, rgba(102, 224, 255, 0.05) 50%, transparent);
-    background-size: 100% 200%; animation: scanline 3s linear infinite; pointer-events: none;
-  }
-  @keyframes scanline { 0% { background-position: 0% -100%; } 100% { background-position: 0% 200%; } }
+  .loading-shimmer { width: 100%; height: 20px; background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(170,128,255,0.2) 50%, rgba(255,255,255,0.05) 75%); background-size: 400% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; margin-bottom: 12px; }
+  @keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-  .output {
-    width: 100%; height: 160px; padding: 24px; border-radius: calc(var(--radius-lg) - 1px);
-    background: rgba(10, 5, 20, 0.95); border: none;
-    color: #fff; font-family: monospace; font-size: 14px; resize: none; outline: none;
-    -ms-overflow-style: none; scrollbar-width: none; line-height: 1.6;
-  }
-  .output::-webkit-scrollbar { display: none; } /* Ẩn thanh cuộn */
-
-  .ai-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;}
-  .ai-btn { flex: 1; min-width: 180px; max-width: 220px; }
-
-  /* --- SLEEK MOBILE-FRIENDLY MODAL --- */
-  .modal {
-    position: fixed; inset: 0; z-index: 200;
-    background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: 0.3s; padding: 20px;
-  }
+  /* Spread Modal & Toast */
+  .modal { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; padding: 20px; }
   .modal.show { opacity: 1; pointer-events: auto; }
-
-  .modal-card {
-    background: var(--bg-base); border: 1px solid rgba(170, 128, 255, 0.4);
-    border-radius: var(--radius-xl); width: 100%; max-width: 580px; padding: 32px;
-    transform: scale(0.95) translateY(20px); transition: 0.4s;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8), inset 0 0 30px rgba(170, 128, 255, 0.1);
-  }
-  .modal.show .modal-card { transform: scale(1) translateY(0); }
-
-  .modal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-  .modal-head h3 { font-size: 32px; color: var(--gold); font-weight: 600; margin-bottom: 6px;}
-  .modal-head p { color: var(--text-muted); font-size: 14px; }
-  .icon-btn { background: transparent; border: none; color: #fff; font-size: 32px; cursor: pointer; opacity: 0.5;}
-
+  .modal-card { background: var(--bg-base); border: 1px solid rgba(170, 128, 255, 0.4); border-radius: var(--radius-xl); width: 100%; max-width: 620px; padding: 32px; transform: scale(0.95); transition: 0.4s; }
+  .modal.show .modal-card { transform: scale(1); }
+  .modal-head { display: flex; justify-content: space-between; margin-bottom: 24px; }
+  .modal-head h3 { font-size: 32px; color: var(--gold); }
+  .icon-btn { background: transparent; border: none; color: #fff; font-size: 32px; cursor: pointer; opacity: 0.5; transition: 0.3s;}
+  .icon-btn:hover { opacity: 1; color: var(--cyan); }
   .spread-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
-  .spread-option {
-    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 16px; padding: 18px 8px; text-align: center;
-    cursor: pointer; transition: 0.3s; color: #fff;
-  }
-  .spread-option.active { background: rgba(170,128,255,0.15); border-color: var(--purple); box-shadow: 0 10px 20px rgba(170,128,255,0.2);}
-  .spread-option .big { font-size: 32px; display: block; margin-bottom: 4px; color: var(--gold); transition: 0.3s;}
-  .spread-option.active .big { color: #fff; transform: scale(1.1);}
-  .spread-option .small { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;}
-
-  .modal-foot { display: flex; gap: 12px; justify-content: flex-end;}
-
-  .toast {
-    position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(60px);
-    background: linear-gradient(135deg, var(--gold), #d4af37); color: #000; font-weight: 600;
-    padding: 16px 32px; border-radius: 100px; opacity: 0; transition: 0.4s; z-index: 999;
-  }
+  .spread-option { border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 18px 8px; text-align: center; cursor: pointer; color: #fff; transition: 0.3s;}
+  .spread-option.active { background: rgba(170,128,255,0.15); border-color: var(--purple); box-shadow: 0 0 15px rgba(170,128,255,0.3);}
+  .spread-option .big { font-size: 32px; color: var(--gold); }
+  .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(60px); background: linear-gradient(135deg, var(--gold), #d4af37); color: #000; font-weight: 600; padding: 16px 32px; border-radius: 100px; opacity: 0; transition: 0.4s; z-index: 999; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-  /* --- OPTIMIZED MOBILE VIEW --- */
-  @media (max-width: 800px) {
-    .hero { padding: 32px; }
-    .hero-grid { flex-direction: column; align-items: flex-start; }
-    .hero-badge { align-self: stretch; text-align: left; }
-  }
 
   @media (max-width: 600px) {
     .wrap { padding: 20px 0 40px; width: min(100% - 20px, var(--max-w)); }
     .hero h1 { font-size: 36px; }
     .panel-inner { padding: 32px 20px; }
     
-    .setup-stack { max-width: 100%; }
-    .select-btn { padding: 0 20px; }
+    .field-row { grid-template-columns: 1fr; }
     
     .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 16px 12px; }
-    
-    .card-info { margin-top: 12px; }
-    .card-info .name { font-size: 16px; }
-    .card-info .num { font-size: 9px; margin-bottom: 2px; }
-    .card-info .state { font-size: 11px; }
-    
-    .copy-box { padding: 24px 20px; }
-    .ai-btn { min-width: 100%; max-width: 100%; }
-    
-    .modal-card { padding: 24px 16px; }
-    .spread-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .spread-option { padding: 12px 4px; border-radius: 12px; }
-    .spread-option .big { font-size: 22px; }
-    .spread-option .small { font-size: 8px; }
-    
+    .btn-epic { max-width: 100%; font-size: 14px; padding: 0 20px; }
+    .reading-card { padding: 30px 20px; }
+    .reading-head h4 { font-size: 28px; }
     .hold-area { width: 250px; height: 250px; }
     .hold-core { width: 160px; height: 160px; }
-    .hold-core strong { font-size: 22px; }
-    .hold-core span { font-size: 10px; }
+    .spread-grid { grid-template-columns: repeat(3, 1fr); }
   }
-
   @property --progress { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
 </style>
 </head>
@@ -489,20 +283,8 @@
 
   <div class="wrap">
     <section class="glass-panel hero">
-      <div class="hero-grid">
-        <div>
-          <div class="eyebrow">Tarot Ritual • Ultimate Edition</div>
-          <h1 class="serif-font">Nghi Thức Tarot</h1>
-          <p>
-            "Hãy để vũ trụ kết nối với tâm thức của bạn. 
-            Mọi lá bài đều mang một thông điệp, chỉ cần bạn sẵn sàng lắng nghe."
-          </p>
-        </div>
-        <div class="hero-badge">
-          <strong>VŨ TRỤ TAROT</strong>
-          <span>duvansi & AI</span>
-        </div>
-      </div>
+      <h1 class="serif-font">Nghi Thức Tarot</h1>
+      <p>"Vũ trụ thấu hiểu bạn qua từng lá bài."</p>
     </section>
 
     <section class="glass-panel">
@@ -512,67 +294,70 @@
         </div>
 
         <div class="setup-stack">
-          <!-- Nút chọn quy mô -->
           <button class="select-btn" id="openSpreadModal" type="button">
-            <div>
-              <div class="label">Quy mô trải bài</div>
-            </div>
+            <div class="label">Quy mô trải bài</div>
             <div class="value serif-font" id="selectedSpreadText" style="display:flex; align-items:center; gap:8px;">
-              3 lá
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              3 lá <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
             </div>
           </button>
 
-          <!-- Ô nhập thông điệp -->
+          <div class="field-row">
+            <div class="field">
+              <input id="dobInput" type="date" placeholder="Ngày sinh" />
+            </div>
+            <div class="field gender-group">
+              <label class="gender-btn">
+                <input type="radio" name="gender" value="Nam">
+                <span>Nam</span>
+              </label>
+              <label class="gender-btn">
+                <input type="radio" name="gender" value="Nữ">
+                <span>Nữ</span>
+              </label>
+              <label class="gender-btn">
+                <input type="radio" name="gender" value="Khác">
+                <span>Khác</span>
+              </label>
+            </div>
+          </div>
+          
+          <div id="zodiacBadge" class="zodiac-badge">
+             ✦ Hãy chọn ngày sinh
+          </div>
+
           <div class="field">
             <input id="questionInput" type="text" placeholder="Thông điệp bạn muốn hỏi..." autocomplete="off" />
           </div>
 
-          <!-- Nút hành động -->
-          <button class="btn btn-primary" id="readyBtn" type="button">Tiến Hành</button>
-          <button class="btn btn-ghost" id="quickResetBtn" type="button">Thanh Tẩy</button>
+          <button class="btn btn-primary" id="readyBtn" type="button">Tiến Hành Rút Bài</button>
+          <button class="btn btn-ghost" id="quickResetBtn" type="button">Thanh Tẩy Làm Lại</button>
 
-          <div class="warn">Hãy tĩnh tâm và đặt câu hỏi thật cụ thể để vũ trụ phản hồi chính xác.</div>
+          <div class="warn">Thông tin cá nhân giúp vũ trụ hội tụ năng lượng chuẩn xác hơn.</div>
         </div>
 
         <section class="results" id="resultsSection">
           <div class="results-head">
             <div>
-              <h3 class="serif-font">Thông Điệp Từ Vũ Trụ</h3>
-              <p id="resultSub">Chạm vào lá bài để mở khóa thông điệp.</p>
+              <h3 class="serif-font">Thông Điệp Vũ Trụ</h3>
+              <p id="resultSub">Chạm vào lá bài để lật mở.</p>
             </div>
             <button class="btn btn-ghost" id="rerollBtn" type="button" style="width: auto;">Rút Lại Tụ Mới</button>
           </div>
 
           <div class="cards-grid" id="cardsGrid"></div>
 
-          <div class="copy-box" id="copyBox">
-            <div class="copy-head">
-              <h4 class="serif-font">Giải Mã Cổ Ngữ</h4>
-              <p>Dán đoạn mã này vào cổng AI (ChatGPT / Gemini) để luận giải chi tiết.</p>
-            </div>
-            
-            <div class="output-container">
-              <textarea class="output" id="outputText" readonly></textarea>
-            </div>
-            
-            <div class="ai-actions">
-              <button class="btn btn-ghost ai-btn" id="copyBtn" type="button">Sao Chép Mã</button>
-              <button class="btn btn-primary ai-btn" id="openChatGPTBtn" type="button">Mở ChatGPT</button>
-              <button class="btn btn-primary ai-btn" id="openGeminiBtn" type="button" style="background: linear-gradient(135deg, #0891b2, #2563eb);">Mở Gemini</button>
-            </div>
-          </div>
+          <button class="btn btn-epic" id="revealAiBtn" style="display: none;">✧ Mở Khóa Thông Điệp Từ AI ✧</button>
+          
         </section>
       </div>
     </section>
   </div>
 
-  <!-- RITUAL OVERLAY -->
   <div class="overlay" id="overlay">
     <div class="ritual-box">
       <div class="ritual-head">
         <h3 class="serif-font">Nhắm Mắt Lại</h3>
-        <p>Tập trung năng lượng vào câu hỏi của bạn. Nhấn giữ tụ sáng để kết nối. Thả tay khi bạn cảm thấy sẵn sàng.</p>
+        <p>Tập trung năng lượng vào câu hỏi của bạn. Nhấn giữ tụ sáng để kết nối.</p>
       </div>
       <div class="hold-area" id="holdArea">
         <div class="hold-ring-1"></div>
@@ -585,397 +370,316 @@
     </div>
   </div>
 
-  <!-- SPREAD MODAL -->
   <div class="modal" id="spreadModal">
     <div class="modal-card">
       <div class="modal-head">
         <div>
           <h3 class="serif-font">Số Lượng Lá Bài</h3>
-          <p>Chọn quy mô phù hợp cho câu hỏi của bạn.</p>
         </div>
         <button class="icon-btn" id="closeSpreadModal" type="button">&times;</button>
       </div>
       <div class="spread-grid" id="spreadGrid"></div>
       <div class="modal-foot">
-        <button class="btn btn-ghost" id="modalCancelBtn" type="button" style="flex:1">Hủy Bỏ</button>
-        <button class="btn btn-primary" id="modalDoneBtn" type="button" style="flex:1">Xác Nhận</button>
+        <button class="btn btn-primary" id="modalDoneBtn" type="button" style="width:100%">Xác Nhận</button>
       </div>
+    </div>
+  </div>
+
+  <div class="reading-modal" id="aiReadingModal">
+    <div class="reading-card">
+      <button class="close-reading-btn" id="closeReadingBtn">&times;</button>
+      <div class="reading-head">
+        <h4 class="serif-font">Lời Sấm Truyền</h4>
+        <p>Trí tuệ vũ trụ đang luận giải</p>
+      </div>
+      <div class="reading-content" id="readingContent">
+        </div>
     </div>
   </div>
 
   <div class="toast" id="toast">Thông báo</div>
 
 <script>
+  // ==========================================
+  // ĐIỀN API KEY CỦA MÀY VÀO ĐÂY ĐỂ AI HOẠT ĐỘNG
+  // ==========================================
+  const GEMINI_API_KEY = "AIzaSyCsuG9Gh-SpuTXx459kxBYH3SDHh6p6cXc"; 
+  
   const BASE_PATH = "images/";
-  const CARD_BACK = "CardBacks.png";
-
-  const majorCards = [
-    ["00-TheFool.png", "The Fool"], ["01-TheMagician.png", "The Magician"],
-    ["02-TheHighPriestess.png", "The High Priestess"], ["03-TheEmpress.png", "The Empress"],
-    ["04-TheEmperor.png", "The Emperor"], ["05-TheHierophant.png", "The Hierophant"],
-    ["06-TheLovers.png", "The Lovers"], ["07-TheChariot.png", "The Chariot"],
-    ["08-Strength.png", "Strength"], ["09-TheHermit.png", "The Hermit"],
-    ["10-WheelOfFortune.png", "Wheel of Fortune"], ["11-Justice.png", "Justice"],
-    ["12-TheHangedMan.png", "The Hanged Man"], ["13-Death.png", "Death"],
-    ["14-Temperance.png", "Temperance"], ["15-TheDevil.png", "The Devil"],
-    ["16-TheTower.png", "The Tower"], ["17-TheStar.png", "The Star"],
-    ["18-TheMoon.png", "The Moon"], ["19-TheSun.png", "The Sun"],
-    ["20-Judgement.png", "Judgement"], ["21-TheWorld.png", "The World"]
-  ].map(([file, name]) => ({ file, name, arcana: "major" }));
+  const deck = [
+    { file: "00-TheFool.png", name: "The Fool" }, { file: "01-TheMagician.png", name: "The Magician" },
+    { file: "02-TheHighPriestess.png", name: "The High Priestess" }, { file: "03-TheEmpress.png", name: "The Empress" },
+    { file: "04-TheEmperor.png", name: "The Emperor" }, { file: "05-TheHierophant.png", name: "The Hierophant" },
+    { file: "06-TheLovers.png", name: "The Lovers" }, { file: "07-TheChariot.png", name: "The Chariot" },
+    { file: "08-Strength.png", name: "Strength" }, { file: "09-TheHermit.png", name: "The Hermit" },
+    { file: "10-WheelOfFortune.png", name: "Wheel of Fortune" }, { file: "11-Justice.png", name: "Justice" },
+    { file: "12-TheHangedMan.png", name: "The Hanged Man" }, { file: "13-Death.png", name: "Death" },
+    { file: "14-Temperance.png", name: "Temperance" }, { file: "15-TheDevil.png", name: "The Devil" },
+    { file: "16-TheTower.png", name: "The Tower" }, { file: "17-TheStar.png", name: "The Star" },
+    { file: "18-TheMoon.png", name: "The Moon" }, { file: "19-TheSun.png", name: "The Sun" },
+    { file: "20-Judgement.png", name: "Judgement" }, { file: "21-TheWorld.png", name: "The World" },
+    { file: "Cups01.png", name: "Ace of Cups" }, { file: "Cups02.png", name: "Two of Cups" }, { file: "Cups03.png", name: "Three of Cups" },
+  ];
 
   const suits = ["Cups", "Pentacles", "Swords", "Wands"];
   const ranks = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Page", "Knight", "Queen", "King"];
-  const minorCards = suits.flatMap(suit =>
-    Array.from({ length: 14 }, (_, i) => ({
-      file: `${suit}${String(i + 1).padStart(2, "0")}.png`,
-      name: `${ranks[i]} of ${suit}`,
-      suit,
-      arcana: "minor"
-    }))
-  );
+  const minorCards = suits.flatMap(suit => Array.from({ length: 14 }, (_, i) => ({ file: `${suit}${String(i + 1).padStart(2, "0")}.png`, name: `${ranks[i]} of ${suit}` })));
+  const fullDeck = [...deck.slice(0,22), ...minorCards];
 
-  const deck = [...majorCards, ...minorCards];
   const spreadOptions = [1, 2, 3, 4, 5, 7, 10, 12];
-
   let selectedSpread = 3;
-  let selectedSpreadBeforeModal = 3;
   let currentQuestion = "";
   let currentCards = [];
-  let shuffleTimer = null;
-  let holdRAF = 0;
-  let isHolding = false;
-  let holdStart = 0;
+  let isHolding = false, holdStart = 0, shuffleTimer, holdRAF;
+  let aiReadingFetched = false;
+  let aiReadingText = "";
+  let userZodiac = "";
 
-  const spreadModal = document.getElementById("spreadModal");
-  const spreadGrid = document.getElementById("spreadGrid");
-  const openSpreadModal = document.getElementById("openSpreadModal");
-  const closeSpreadModal = document.getElementById("closeSpreadModal");
-  const modalCancelBtn = document.getElementById("modalCancelBtn");
-  const modalDoneBtn = document.getElementById("modalDoneBtn");
-  const selectedSpreadText = document.getElementById("selectedSpreadText");
-  const questionInput = document.getElementById("questionInput");
-  const readyBtn = document.getElementById("readyBtn");
-  const quickResetBtn = document.getElementById("quickResetBtn");
-  const resultsSection = document.getElementById("resultsSection");
-  const resultSub = document.getElementById("resultSub");
-  const cardsGrid = document.getElementById("cardsGrid");
-  const copyBox = document.getElementById("copyBox");
-  const outputText = document.getElementById("outputText");
-  const copyBtn = document.getElementById("copyBtn");
-  const rerollBtn = document.getElementById("rerollBtn");
-  const overlay = document.getElementById("overlay");
-  const holdArea = document.getElementById("holdArea");
-  const holdCore = document.getElementById("holdCore");
-  const holdRing = document.getElementById("holdRing");
-  const holdTitle = document.getElementById("holdTitle");
-  const holdSubtitle = document.getElementById("holdSubtitle");
-  const toast = document.getElementById("toast");
-
-  const randInt = (max) => {
-    const a = new Uint32Array(1);
-    crypto.getRandomValues(a);
-    return a[0] % max;
+  const elements = {
+    spreadModal: document.getElementById("spreadModal"),
+    spreadGrid: document.getElementById("spreadGrid"),
+    openSpreadModal: document.getElementById("openSpreadModal"),
+    closeSpreadModal: document.getElementById("closeSpreadModal"),
+    modalDoneBtn: document.getElementById("modalDoneBtn"),
+    selectedSpreadText: document.getElementById("selectedSpreadText"),
+    questionInput: document.getElementById("questionInput"),
+    dobInput: document.getElementById("dobInput"),
+    zodiacBadge: document.getElementById("zodiacBadge"),
+    readyBtn: document.getElementById("readyBtn"),
+    quickResetBtn: document.getElementById("quickResetBtn"),
+    resultsSection: document.getElementById("resultsSection"),
+    cardsGrid: document.getElementById("cardsGrid"),
+    revealAiBtn: document.getElementById("revealAiBtn"),
+    aiReadingModal: document.getElementById("aiReadingModal"),
+    readingContent: document.getElementById("readingContent"),
+    closeReadingBtn: document.getElementById("closeReadingBtn"),
+    rerollBtn: document.getElementById("rerollBtn"),
+    overlay: document.getElementById("overlay"),
+    holdArea: document.getElementById("holdArea"),
+    holdCore: document.getElementById("holdCore"),
+    holdRing: document.getElementById("holdRing"),
+    toast: document.getElementById("toast")
   };
 
-  function shuffleDeck(list) {
-    const arr = [...list];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = randInt(i + 1);
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
+  const randInt = (max) => crypto.getRandomValues(new Uint32Array(1))[0] % max;
+  const toastMsg = (msg) => { elements.toast.textContent = msg; elements.toast.classList.add("show"); setTimeout(() => elements.toast.classList.remove("show"), 2500); };
+
+  // --- Tính Cung Hoàng Đạo ---
+  function getZodiac(day, month) {
+      if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return "Bạch Dương ♈";
+      if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return "Kim Ngưu ♉";
+      if ((month == 5 && day >= 21) || (month == 6 && day <= 21)) return "Song Tử ♊";
+      if ((month == 6 && day >= 22) || (month == 7 && day <= 22)) return "Cự Giải ♋";
+      if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return "Sư Tử ♌";
+      if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return "Xử Nữ ♍";
+      if ((month == 9 && day >= 23) || (month == 10 && day <= 23)) return "Thiên Bình ♎";
+      if ((month == 10 && day >= 24) || (month == 11 && day <= 21)) return "Bọ Cạp ♏";
+      if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return "Nhân Mã ♐";
+      if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return "Ma Kết ♑";
+      if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return "Bảo Bình ♒";
+      if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return "Song Ngư ♓";
+      return "";
   }
+
+  elements.dobInput.addEventListener('change', (e) => {
+      const date = new Date(e.target.value);
+      if(isNaN(date)) {
+          elements.zodiacBadge.classList.remove("show");
+          userZodiac = "";
+          return;
+      }
+      userZodiac = getZodiac(date.getDate(), date.getMonth() + 1);
+      if(userZodiac) {
+          elements.zodiacBadge.textContent = "Năng lượng chòm sao: " + userZodiac;
+          elements.zodiacBadge.classList.add("show");
+      }
+  });
 
   function drawCards(count) {
-    const shuffled = shuffleDeck(deck);
-    return shuffled.slice(0, count).map(card => ({
-      ...card,
-      reversed: randInt(2) === 1,
-      token: `${card.file}-${Date.now()}-${randInt(999999)}`
-    }));
+    const arr = [...fullDeck];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = randInt(i + 1); [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr.slice(0, count).map(card => ({ ...card, reversed: randInt(2) === 1 }));
   }
 
-  function validateQuestion(q) {
-    return Boolean(q && q.trim().length >= 10);
-  }
-
-  function normalizeQuestion(q) {
-    return q.trim().replace(/\s+/g, " ");
-  }
-
-  function toastMsg(msg) {
-    toast.textContent = msg;
-    toast.classList.add("show");
-    clearTimeout(toast._timer);
-    toast._timer = setTimeout(() => toast.classList.remove("show"), 2500);
-  }
-
-  function buildPrompt(question, cards) {
-    let text = `Bạn là một tarot reader chuyên nghiệp, tinh tế và trực diện.\n\n`;
-    text += `Hãy giải nghĩa trải bài tarot dưới đây một cách sâu sắc, rõ ràng, dễ hiểu và đúng trọng tâm câu hỏi.\n\n`;
-    text += `Câu hỏi của người xem:\n"${question}"\n\n`;
-    text += `Các lá bài được rút:\n`;
-    cards.forEach((card, index) => {
-      text += `Lá ${index + 1}: ${card.name} ${card.reversed ? "(Reversed)" : "(Upright)"}\n`;
-    });
-    text += `\nYêu cầu:\n`;
-    text += `- Giải thích từng lá theo đúng ngữ cảnh câu hỏi.\n`;
-    text += `- Phân tích cảm xúc, động cơ và bối cảnh của các bên liên quan.\n`;
-    text += `- Tổng hợp thành một kết luận ngắn gọn nhưng đủ ý.\n`;
-    text += `- Giọng văn tự nhiên, mạch lạc, không lan man.\n`;
-    return text;
-  }
-
-  function encodeBase64Utf8(text) {
-    const bytes = new TextEncoder().encode(text);
-    let bin = "";
-    bytes.forEach(b => bin += String.fromCharCode(b));
-    return btoa(bin);
-  }
-
-  function buildEncodedCopy(question, cards) {
-    const raw = buildPrompt(question, cards);
-    const encoded = encodeBase64Utf8(raw);
-    return `[Tarot Ritual Request]\nGiải mã thông điệp tâm linh sau:\n\n${encoded}`;
-  }
-
-  function updateSelectedSpreadText() {
-    selectedSpreadText.innerHTML = `${selectedSpread} lá`;
-  }
-
-  function renderSpreadOptions() {
-    spreadGrid.innerHTML = "";
+  elements.openSpreadModal.onclick = () => {
+    elements.spreadGrid.innerHTML = "";
     spreadOptions.forEach(num => {
       const btn = document.createElement("div");
       btn.className = "spread-option" + (num === selectedSpread ? " active" : "");
-      btn.innerHTML = `<span class="big serif-font">${num}</span><span class="small">Lá Bài</span>`;
-      btn.addEventListener("click", () => {
-        selectedSpread = num;
-        [...spreadGrid.children].forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-      });
-      spreadGrid.appendChild(btn);
+      btn.innerHTML = `<span class="big serif-font">${num}</span><span class="small">Lá</span>`;
+      btn.onclick = () => { selectedSpread = num; [...elements.spreadGrid.children].forEach(b => b.classList.remove("active")); btn.classList.add("active"); };
+      elements.spreadGrid.appendChild(btn);
     });
-  }
+    elements.spreadModal.classList.add("show");
+  };
+  
+  elements.closeSpreadModal.onclick = elements.modalDoneBtn.onclick = () => {
+    elements.selectedSpreadText.innerHTML = `${selectedSpread} lá <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>`;
+    elements.spreadModal.classList.remove("show");
+  };
 
-  function openModal() {
-    selectedSpreadBeforeModal = selectedSpread;
-    renderSpreadOptions();
-    spreadModal.classList.add("show");
-    document.body.style.overflow = "hidden";
-  }
+  elements.readyBtn.onclick = () => {
+    currentQuestion = elements.questionInput.value.trim();
+    if (currentQuestion.length < 5) return toastMsg("Hãy nhập câu hỏi rõ ràng hơn chút nhé.");
+    
+    elements.resultsSection.classList.remove("show");
+    elements.revealAiBtn.style.display = "none";
+    aiReadingFetched = false;
+    aiReadingText = "";
+    
+    elements.overlay.classList.add("show");
+    elements.holdRing.style.setProperty("--progress", "0%");
+  };
 
-  function closeModal(commit = false) {
-    if (!commit) selectedSpread = selectedSpreadBeforeModal;
-    updateSelectedSpreadText();
-    spreadModal.classList.remove("show");
-    document.body.style.overflow = "";
-  }
+  elements.quickResetBtn.onclick = elements.rerollBtn.onclick = () => {
+    elements.questionInput.value = "";
+    elements.resultsSection.classList.remove("show");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-  function clearResults() {
-    resultsSection.classList.remove("show");
-    cardsGrid.innerHTML = "";
-    copyBox.classList.remove("show");
-    outputText.value = "";
-    currentCards = [];
-  }
-
-  function openRitual() {
-    currentQuestion = normalizeQuestion(questionInput.value);
-    if (!validateQuestion(currentQuestion)) {
-      toastMsg("Hãy tĩnh tâm và nhập câu hỏi dài hơn một chút.");
-      questionInput.focus();
-      return;
-    }
-
-    clearResults();
-    overlay.classList.add("show");
-    document.body.style.overflow = "hidden";
-    holdTitle.textContent = "Chạm & Giữ";
-    holdSubtitle.textContent = "Tụ năng lượng";
-    holdRing.style.setProperty("--progress", "0%");
+  function startShuffle() {
+    isHolding = true; elements.holdCore.classList.add("active");
+    shuffleTimer = setInterval(() => {}, 100); holdStart = Date.now();
+    animateHold();
   }
 
   function animateHold() {
     if (!isHolding) return;
-    const elapsed = Date.now() - holdStart;
-    const progress = Math.min(100, (elapsed / 2500) * 100); 
-    holdRing.style.setProperty("--progress", `${progress}%`);
-
-    holdRAF = requestAnimationFrame(animateHold);
-  }
-
-  function startShuffle() {
-    if (shuffleTimer) clearInterval(shuffleTimer);
-    isHolding = true;
-    holdCore.classList.add("active");
-    holdTitle.textContent = "Đang Tụ Khí";
-    holdSubtitle.textContent = "Cảm nhận năng lượng...";
-
-    shuffleTimer = setInterval(() => {
-      const temp = drawCards(selectedSpread);
-      const sample = temp[0];
-      if (sample) holdSubtitle.textContent = `✧ ${sample.name} ✧`;
-    }, 120);
-
-    cancelAnimationFrame(holdRAF);
-    animateHold();
-
-    if (navigator.vibrate) navigator.vibrate(40);
+    const progress = Math.min(100, ((Date.now() - holdStart) / 2000) * 100);
+    elements.holdRing.style.setProperty("--progress", `${progress}%`);
+    requestAnimationFrame(animateHold);
   }
 
   function stopShuffle() {
     if (!isHolding) return;
-    isHolding = false;
-    clearInterval(shuffleTimer);
-    shuffleTimer = null;
-    cancelAnimationFrame(holdRAF);
+    isHolding = false; clearInterval(shuffleTimer); elements.holdCore.classList.remove("active");
+    elements.overlay.classList.remove("show");
     
-    holdCore.classList.remove("active");
-    holdRing.style.setProperty("--progress", "0%");
-
-    const holdMs = Math.max(0, Date.now() - holdStart);
     currentCards = drawCards(selectedSpread);
-    renderFinalResults(currentCards, holdMs);
-
-    overlay.classList.remove("show");
-    document.body.style.overflow = "";
-
-    if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+    renderCards(currentCards);
   }
 
-  function renderFinalResults(cards, holdMs) {
-    resultsSection.classList.add("show");
-    copyBox.classList.add("show");
+  function renderCards(cards) {
+    elements.resultsSection.classList.add("show");
+    elements.cardsGrid.innerHTML = "";
+    let flippedCount = 0;
     
-    const timeSec = Math.max(1, Math.round(holdMs / 1000));
-    resultSub.textContent = `Vấn đề: "${currentQuestion}" · Tụ khí trong ${timeSec}s · Chạm để lật bài.`;
-    cardsGrid.innerHTML = "";
-
-    cards.forEach((card, index) => {
-      const item = document.createElement("div");
-      item.className = "tarot-card";
-      item.style.setProperty("--delay", `${index * 200}ms`);
+    cards.forEach((card, i) => {
+      const item = document.createElement("div"); item.className = "tarot-card"; item.style.setProperty("--delay", `${i * 150}ms`);
       
-      const fallbackHTML = `
-        <div class="fallback-img">
-          <div style="text-align:center; padding: 15px;">
-            <div style="font-family:'Cormorant Garamond',serif; font-size: 20px; font-weight:600; color: var(--gold);">${card.name}</div>
-          </div>
-        </div>
-      `;
-
+      const fallbackHTML = `<div class="fallback-bg"><span class="serif-font">${card.name}</span></div>`;
+      
       item.innerHTML = `
         <div class="card-stack">
           <div class="card-face back">
-             <div class="magic-emblem"></div>
+            <div class="astral-portal"><div class="astral-ring"></div><div class="astral-ring-2"></div></div>
           </div>
           <div class="card-face front">
-            <img class="card-img ${card.reversed ? 'reversed' : ''}" 
-                 src="${BASE_PATH}${card.file}" 
-                 alt="${card.name}" 
-                 onerror="this.outerHTML=\`${fallbackHTML}\`" />
+            ${fallbackHTML}
+            <img class="card-img ${card.reversed ? 'reversed' : ''}" src="${BASE_PATH}${card.file}" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'">
           </div>
         </div>
         <div class="card-info">
-          <div class="num">Lá ${index + 1}</div>
+          <div class="num">Lá ${i + 1}</div>
           <div class="name serif-font">${card.name}</div>
           <div class="state">${card.reversed ? 'Reversed' : 'Upright'}</div>
-        </div>
-      `;
-      item.addEventListener("click", () => item.classList.toggle("flipped"));
-      cardsGrid.appendChild(item);
+        </div>`;
+        
+      item.onclick = () => {
+        if (!item.classList.contains("flipped")) {
+          item.classList.add("flipped");
+          flippedCount++;
+          if (flippedCount === cards.length) {
+            elements.revealAiBtn.style.display = "flex";
+            elements.revealAiBtn.style.animation = "slideUpFade 0.8s forwards";
+          }
+        }
+      };
+      elements.cardsGrid.appendChild(item);
     });
-
-    outputText.value = buildEncodedCopy(currentQuestion, cards);
-    toastMsg("Vũ trụ đã hồi đáp ✧");
-    
-    setTimeout(() => {
-      resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 600);
+    setTimeout(() => elements.resultsSection.scrollIntoView({ behavior: 'smooth' }), 500);
   }
 
-  function copyPrompt() {
-    const txt = outputText.value.trim();
-    if (!txt) return;
-    navigator.clipboard.writeText(txt)
-      .then(() => toastMsg("Đã sao chép mã cổ ngữ ✧"))
-      .catch(() => toastMsg("Lỗi sao chép, thử lại nhé."));
-  }
-
-  function openTarget(url) {
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const copyText = outputText.value.trim();
-    if (!copyText) {
-      toastMsg("Chưa có thông điệp để gửi.");
-      return;
-    }
-
-    navigator.clipboard.writeText(copyText).then(() => {
-      toastMsg("Đã copy, mở cổng AI ✧");
-      setTimeout(() => {
-        window.open(url, "_blank", "noopener,noreferrer");
-      }, isMobile ? 250 : 150);
-    }).catch(() => {
-      toastMsg("Copy thủ công đoạn text trên rồi mở AI nhé.");
-      window.open(url, "_blank", "noopener,noreferrer");
-    });
-  }
-
-  function resetAll() {
-    questionInput.value = "";
-    selectedSpread = 3;
-    selectedSpreadBeforeModal = 3;
-    updateSelectedSpreadText();
-    clearResults();
-    questionInput.focus();
-    toastMsg("Đã thanh tẩy không gian.");
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // Event Listeners
-  openSpreadModal.addEventListener("click", openModal);
-  closeSpreadModal.addEventListener("click", () => closeModal(false));
-  modalCancelBtn.addEventListener("click", () => closeModal(false));
-  modalDoneBtn.addEventListener("click", () => closeModal(true));
-  spreadModal.addEventListener("click", (e) => { if (e.target === spreadModal) closeModal(false); });
-
-  readyBtn.addEventListener("click", openRitual);
-  quickResetBtn.addEventListener("click", resetAll);
-  copyBtn.addEventListener("click", copyPrompt);
-  document.getElementById("openChatGPTBtn").addEventListener("click", () => openTarget("https://chatgpt.com/"));
-  document.getElementById("openGeminiBtn").addEventListener("click", () => openTarget("https://gemini.google.com/"));
-  rerollBtn.addEventListener("click", openRitual);
-
-  questionInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") openRitual();
-  });
-
-  // Pointer events for Ritual hold
-  let pointerActive = false;
-  holdArea.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    if (!overlay.classList.contains("show")) return;
-    pointerActive = true;
-    if (!isHolding) holdStart = Date.now();
-    holdArea.setPointerCapture?.(e.pointerId);
-    startShuffle();
-  }, { passive: false });
-
-  const stopByPointer = (e) => {
-    if (!pointerActive) return;
-    pointerActive = false;
-    e.preventDefault?.();
-    stopShuffle();
+  // AI Logic
+  elements.revealAiBtn.onclick = () => {
+    elements.aiReadingModal.classList.add("show");
+    if (!aiReadingFetched) fetchGeminiReading();
   };
 
-  holdArea.addEventListener("pointerup", stopByPointer, { passive: false });
-  holdArea.addEventListener("pointercancel", stopByPointer, { passive: false });
-  holdArea.addEventListener("lostpointercapture", stopByPointer, { passive: false });
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) stopShuffle(); });
+  elements.closeReadingBtn.onclick = () => {
+    elements.aiReadingModal.classList.remove("show");
+  };
 
-  // Init
-  updateSelectedSpreadText();
+  async function fetchGeminiReading() {
+    aiReadingFetched = true;
+    elements.readingContent.innerHTML = '<div class="loading-shimmer" style="width: 80%;"></div><div class="loading-shimmer" style="width: 100%;"></div><div class="loading-shimmer" style="width: 90%;"></div><div class="loading-shimmer" style="width: 60%;"></div>';
+    
+    const dob = elements.dobInput.value ? `Ngày sinh: ${elements.dobInput.value}` : "Không rõ ngày sinh";
+    const selectedGenderBtn = document.querySelector('input[name="gender"]:checked');
+    const rawGender = selectedGenderBtn ? selectedGenderBtn.value : "";
+    const genderStr = rawGender ? `Giới tính: ${rawGender}` : "Không rõ giới tính";
+    const zodiacStr = userZodiac ? `(${userZodiac})` : "";
+    
+    // Logic xưng hô
+    let tone = "bạn";
+    if (rawGender === "Nam") tone = "ông";
+    else if (rawGender === "Nữ") tone = "bà";
+
+    const cardText = currentCards.map((c, i) => `Lá ${i+1}: ${c.name} (${c.reversed ? "Ngược" : "Xuôi"})`).join(", ");
+    
+    const prompt = `Đóng vai một Tarot Reader Gen Z thế hệ mới, tâm lý, hiểu chuyện nhưng thỉnh thoảng hơi "mỏ hỗn" và thích trêu chọc khách hàng một cách duyên dáng.
+Khách hàng: ${genderStr} (xưng hô: tôi và ${tone}), ${dob} ${zodiacStr}. 
+Hỏi: "${currentQuestion}". 
+Rút được: ${cardText}.
+
+Yêu cầu cấu trúc bài giải (Trả lời bằng text thuần, chia đoạn rõ ràng):
+1. Mở bài: Dựa vào tổng quan các lá bài và cung hoàng đạo (nếu có), hãy buông 1 câu trêu đùa/nhận xét cực kỳ trendy, hài hước (không vô duyên) về tình trạng hiện tại của ${tone}.
+2. Thân bài: Giải mã sâu sắc, nghiêm túc, đúng trọng tâm vấn đề. Kết nối ý nghĩa các lá bài lại thành một câu chuyện hợp lý.
+3. Kết bài: Đưa ra lời khuyên thiết thực. Chốt lại bằng một câu trêu đùa hoặc cà khịa nhẹ nhàng cuối cùng để tạo tiếng cười.`;
+
+    if(GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+        elements.readingContent.innerHTML = `<span style="color: #ff8888;">Năng lượng vũ trụ đang bị nghẽn (Thiếu API Key). Mày cần thay mã GEMINI_API_KEY trong file HTML để AI có thể kết nối.</span>`;
+        return;
+    }
+
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+      const data = await res.json();
+      aiReadingText = data.candidates[0].content.parts[0].text;
+      
+      // Hiệu ứng gõ chữ (Typewriter) ĐÃ BỎ AUTO-SCROLL
+      elements.readingContent.innerHTML = "";
+      let i = 0;
+      const typeWriter = setInterval(() => {
+        let char = aiReadingText.charAt(i);
+        if (char === '\n') {
+            elements.readingContent.innerHTML += '<br/>';
+        } else if (char === '*' && aiReadingText.charAt(i+1) === '*') {
+            i++; 
+        } else {
+            elements.readingContent.innerHTML += char;
+        }
+        
+        i++;
+
+        if (i >= aiReadingText.length) {
+            clearInterval(typeWriter);
+        }
+      }, 20); // Tốc độ gõ chữ
+    } catch(e) {
+      elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Có nhiễu loạn sóng vũ trụ. Hãy tải lại và thử lại sau.</span>";
+    }
+  }
+
+  // Pointer Events
+  elements.holdArea.addEventListener("pointerdown", (e) => { e.preventDefault(); if(elements.overlay.classList.contains("show")) startShuffle(); }, {passive: false});
+  const stopEvt = (e) => { if(isHolding) stopShuffle(); };
+  elements.holdArea.addEventListener("pointerup", stopEvt); elements.holdArea.addEventListener("pointercancel", stopEvt);
 </script>
 </body>
 </html>
