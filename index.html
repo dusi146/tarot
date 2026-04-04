@@ -622,7 +622,6 @@
     const genderStr = rawGender ? `Giới tính: ${rawGender}` : "Không rõ giới tính";
     const zodiacStr = userZodiac ? `(${userZodiac})` : "";
     
-    // Logic xưng hô
     let tone = "bạn";
     if (rawGender === "Nam") tone = "ông";
     else if (rawGender === "Nữ") tone = "bà";
@@ -639,20 +638,31 @@ Yêu cầu cấu trúc bài giải (Trả lời bằng text thuần, chia đoạ
 2. Thân bài: Giải mã sâu sắc, nghiêm túc, đúng trọng tâm vấn đề. Kết nối ý nghĩa các lá bài lại thành một câu chuyện hợp lý.
 3. Kết bài: Đưa ra lời khuyên thiết thực. Chốt lại bằng một câu trêu đùa hoặc cà khịa nhẹ nhàng cuối cùng để tạo tiếng cười.`;
 
-    if(GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
-        elements.readingContent.innerHTML = `<span style="color: #ff8888;">Năng lượng vũ trụ đang bị nghẽn (Thiếu API Key). Mày cần thay mã GEMINI_API_KEY trong file HTML để AI có thể kết nối.</span>`;
-        return;
-    }
-
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      // GỌI ĐẾN SERVER NGẦM CỦA MÌNH THAY VÌ GỌI TRỰC TIẾP GOOGLE
+      const res = await fetch(`/api/tarot`, {
+        method: "POST", 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: prompt })
       });
       const data = await res.json();
+      
+      if (data.error) {
+          if (data.error.code === 429) {
+              elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Hỏi từ từ thôi! Vũ trụ đang nghẽn mạng (quá giới hạn). Đợi 1 tí rồi thử lại nhé.</span>";
+          } else {
+              elements.readingContent.innerHTML = `<span style='color: #ff8888;'>Lỗi: ${data.error.message || "Không xác định"}</span>`;
+          }
+          return;
+      }
+
+      if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content) {
+          elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Vũ trụ từ chối trả lời (Nội dung nhạy cảm).</span>";
+          return;
+      }
+
       aiReadingText = data.candidates[0].content.parts[0].text;
       
-      // Hiệu ứng gõ chữ (Typewriter) ĐÃ BỎ AUTO-SCROLL
       elements.readingContent.innerHTML = "";
       let i = 0;
       const typeWriter = setInterval(() => {
@@ -666,13 +676,12 @@ Yêu cầu cấu trúc bài giải (Trả lời bằng text thuần, chia đoạ
         }
         
         i++;
-
         if (i >= aiReadingText.length) {
             clearInterval(typeWriter);
         }
-      }, 20); // Tốc độ gõ chữ
+      }, 20);
     } catch(e) {
-      elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Có nhiễu loạn sóng vũ trụ. Hãy tải lại và thử lại sau.</span>";
+      elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Mất kết nối mạng hoặc lỗi hệ thống. Hãy tải lại trang.</span>";
     }
   }
 
