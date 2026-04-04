@@ -9,38 +9,31 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg-base: #260a6d;
+    --bg-base: #4621a4;
     --glass-bg: rgba(12, 7, 24, 0.35);
     --glass-border: rgba(255, 255, 255, 0.08);
-    
     --text-main: #fcfafc;
     --text-muted: rgba(210, 200, 240, 0.6);
-    
     --gold: #f2d080;
     --gold-glow: rgba(242, 208, 128, 0.5);
     --purple: #aa80ff;
     --purple-glow: rgba(170, 128, 255, 0.6);
     --cyan: #66e0ff;
-    
     --shadow-heavy: 0 40px 80px rgba(0, 0, 0, 0.9);
     --radius-xl: 32px;
     --radius-lg: 20px;
     --max-w: 1100px;
   }
 
-  /* --- LIGHT MODE VARIABLES --- */
   body.light-mode {
     --bg-base: #eef2f5;
     --glass-bg: rgba(255, 255, 255, 0.5);
     --glass-border: rgba(0, 0, 0, 0.1);
-    
     --text-main: #1a1a2e;
     --text-muted: rgba(50, 50, 80, 0.7);
-    
-    --gold: #433400;
+    --gold: #49009e;
     --purple: #6b21a8;
     --cyan: #0891b2;
-    
     --shadow-heavy: 0 40px 80px rgba(0, 0, 0, 0.15);
   }
   
@@ -55,41 +48,27 @@
   body.light-mode .gender-group { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(0,0,0,0.1); }
   body.light-mode .reading-card { background: rgba(255, 255, 255, 0.85); box-shadow: 0 30px 80px rgba(0,0,0,0.2); border-color: var(--gold); }
   body.light-mode .reading-content { color: #222; }
-  body.light-mode .close-reading-btn { color: #000; }
   body.light-mode .fallback-bg { background: rgba(255,255,255,0.8); }
   body.light-mode .spread-option { color: #333; }
   body.light-mode .icon-btn { color: #333; }
-
-  /* Tinh chỉnh Modal sang suốt ở Light Mode */
-  body.light-mode .modal-card { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
-  body.light-mode .cal-panel { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-color: rgba(212, 175, 55, 0.5); box-shadow: 0 20px 50px rgba(0,0,0,0.1);}
+  body.light-mode .modal-card, body.light-mode .cal-panel { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+  body.light-mode .cal-panel { border-color: rgba(212, 175, 55, 0.5); }
   body.light-mode .cal-nav { background: rgba(255, 255, 255, 0.5); border-color: rgba(0,0,0,0.1); color: #333;}
   body.light-mode .year-item { background: rgba(255, 255, 255, 0.4); border-color: transparent; color: #333;}
   body.light-mode .year-item:hover { background: rgba(255, 255, 255, 0.8); }
+  body.light-mode .guide-tooltip { background: rgba(255, 255, 255, 0.95); color: #222; border-color: var(--gold); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+  body.light-mode .guide-tooltip::before { border-bottom-color: var(--gold); }
+  body.light-mode .reading-footer { background: #ffffff; border-top: none; } /* Fix nền solid cho Light Mode */
 
-  /* Xóa highlight xanh mặc định trên điện thoại iOS/Android */
+  /* Xóa highlight xanh rác trên điện thoại iOS/Android */
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; outline: none; }
   
-  html, body {
-    min-height: 100vh;
-    font-family: 'Montserrat', sans-serif;
-    background-color: var(--bg-base);
-    color: var(--text-main);
-    overflow-x: hidden;
-    scroll-behavior: smooth;
-    transition: background-color 0.25s linear, color 0.25s linear; 
-  }
+  html, body { min-height: 100vh; font-family: 'Montserrat', sans-serif; background-color: var(--bg-base); color: var(--text-main); overflow-x: hidden; scroll-behavior: smooth; transition: background-color 0.25s linear, color 0.25s linear; }
+  h1, h2, h3, h4, .serif-font, .spread-option .big, .card-info .name, .hold-core strong, .value, .guide-title { font-family: 'Cormorant Garamond', serif; }
 
-  h1, h2, h3, h4, .serif-font, .spread-option .big, .card-info .name, .hold-core strong, .value {
-    font-family: 'Cormorant Garamond', serif;
-  }
-
-  /* --- BACKGROUNDS TỐI ƯU --- */
+  /* Backgrounds */
   .bg-nebula { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-  .bg-nebula::before, .bg-nebula::after, .bg-nebula-core { 
-    content: ""; position: absolute; border-radius: 50%; opacity: 0.5; 
-    animation: floatOrb 25s infinite alternate ease-in-out; will-change: transform; 
-  }
+  .bg-nebula::before, .bg-nebula::after, .bg-nebula-core { content: ""; position: absolute; border-radius: 50%; opacity: 0.5; animation: floatOrb 25s infinite alternate ease-in-out; will-change: transform; }
   .bg-nebula::before { width: 70vw; height: 70vw; top: -20vh; left: -10vw; background: radial-gradient(circle, rgba(120, 40, 220, 0.5) 0%, transparent 70%); }
   .bg-nebula::after { width: 60vw; height: 60vw; bottom: -20vh; right: -10vw; background: radial-gradient(circle, rgba(40, 120, 220, 0.4) 0%, transparent 70%); animation-delay: -12s; }
   .bg-nebula-core { width: 40vw; height: 40vw; top: 30vh; left: 30vw; background: radial-gradient(circle, rgba(242, 208, 128, 0.25) 0%, transparent 70%); animation-duration: 30s; }
@@ -114,46 +93,38 @@
   .section-title h2 { font-size: 32px; color: var(--gold); text-shadow: 0 0 20px rgba(242, 208, 128, 0.3); font-weight: 600; display: inline-flex; align-items: center; gap: 16px; margin: 0; }
   .section-title h2::before, .section-title h2::after { content: "✧"; font-size: 20px; opacity: 0.7;}
 
-  /* --- FORM NHẬP LIỆU --- */
+  /* --- Form --- */
   .setup-stack { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 440px; margin: 0 auto; }
-
-  .select-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 60px; padding: 0 28px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border); border-radius: 100px; color: var(--text-main); cursor: pointer; transition: 0.3s; }
+  
+  .select-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 60px; padding: 0 28px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border); border-radius: 100px; color: var(--text-main); cursor: pointer; transition: 0.3s; position: relative;}
   .select-btn:hover { border-color: var(--purple); background: rgba(170, 128, 255, 0.1); transform: translateY(-2px); }
-  .select-btn .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;}
+  .select-btn .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; gap: 16px;}
   .select-btn .value { font-size: 24px; font-weight: 600; color: var(--cyan); text-shadow: 0 0 15px rgba(102,224,255,0.3);}
 
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  
   .field input[type="text"] { width: 100%; height: 60px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); padding: 0 20px; border-radius: 100px; font-size: 14px; font-family: 'Montserrat', sans-serif; transition: 0.3s; text-align: center; }
   .field input[type="text"]::placeholder { color: var(--text-muted); font-style: italic; opacity: 0.7; }
   .field input[type="text"]:focus { border-color: var(--purple); box-shadow: 0 0 0 4px rgba(170, 128, 255, 0.15); }
   
-  /* Cụm Segmented Control Giới Tính Nâng Cấp (Slider Animation) */
   .gender-group { position: relative; display: flex; height: 60px; background: rgba(0,0,0,0.5); border-radius: 100px; padding: 4px; border: 1px solid rgba(255,255,255,0.1); isolation: isolate; }
   .gender-group input { display: none; }
   .gender-slider { position: absolute; top: 4px; bottom: 4px; width: calc(33.33% - 2.66px); background: linear-gradient(135deg, rgba(170, 128, 255, 0.4), rgba(102, 224, 255, 0.3)); border-radius: 100px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.3s; z-index: 1; opacity: 0; border: 1px solid rgba(170, 128, 255, 0.5); box-shadow: 0 0 15px rgba(170,128,255,0.2);}
   body.light-mode .gender-slider { background: var(--purple); border: none; box-shadow: 0 4px 10px rgba(107, 33, 168, 0.3);}
-  
   #g-nam:checked ~ .gender-slider { transform: translateX(0); opacity: 1; }
   #g-nu:checked ~ .gender-slider { transform: translateX(calc(100% + 4px)); opacity: 1; }
   #g-khac:checked ~ .gender-slider { transform: translateX(calc(200% + 8px)); opacity: 1; }
-  
   .gender-btn { flex: 1; z-index: 2; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
   .gender-btn span { color: var(--text-muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-  
   #g-nam:checked ~ label[for="g-nam"] span, #g-nu:checked ~ label[for="g-nu"] span, #g-khac:checked ~ label[for="g-khac"] span { color: var(--text-main); text-shadow: 0 0 10px rgba(255,255,255,0.5); }
   body.light-mode #g-nam:checked ~ label[for="g-nam"] span, body.light-mode #g-nu:checked ~ label[for="g-nu"] span, body.light-mode #g-khac:checked ~ label[for="g-khac"] span { color: #fff; text-shadow: none; }
 
-  /* Ngày tháng DOB UI mới */
   .dob-row { display: flex; gap: 8px; width: 100%; transition: gap 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.15); height: 60px;}
   .dob-row.compact { gap: 6px; }
   .dob-box, .year-box { position: relative; border-radius: 100px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.15); }
   body.light-mode .dob-box, body.light-mode .year-box { background: rgba(255, 255, 255, 0.6); border-color: rgba(0,0,0,0.1); }
-  
   .dob-box { flex: 1; min-width: 0; }
   .year-box { width: 0; opacity: 0; transform: translateX(20px) scale(0.9); pointer-events: none; }
   .year-box.show { width: 100px; opacity: 1; transform: translateX(0) scale(1); pointer-events: auto; }
-  
   .field-btn { width: 100%; height: 100%; border: 0; background: transparent; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.2s ease; }
   .field-btn:hover { background: rgba(170, 128, 255, 0.1); }
   .field-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -163,7 +134,6 @@
   body.light-mode .dob-val.active { color: var(--text-main); }
   .year-box .field-btn { justify-content: center; padding: 0; }
 
-  /* Zodiac Badge */
   .zodiac-badge { background: rgba(170, 128, 255, 0.15); border: 1px solid rgba(170, 128, 255, 0.4); color: var(--gold); padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600; display: none; align-items: center; justify-content: center; width: 100%; margin-top: -4px; animation: slideUpFade 0.4s forwards; }
   .zodiac-badge.show { display: flex; }
 
@@ -174,7 +144,6 @@
   body.light-mode .btn-ghost { background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.1); }
   .btn-ghost:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.4); transform: translateY(-2px); }
 
-  /* EPIC BUTTON */
   .btn-epic { background: linear-gradient(45deg, #4c1d95, #aa80ff, #0891b2, #4c1d95); background-size: 300% 300%; color: white; border: 1px solid var(--gold); box-shadow: 0 0 25px rgba(170, 128, 255, 0.6), inset 0 0 10px rgba(242, 208, 128, 0.4); animation: shineGradient 4s infinite linear; height: 64px; font-size: 16px; margin: 40px auto 0; max-width: 400px; }
   .btn-epic:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 0 40px rgba(170, 128, 255, 0.8), inset 0 0 15px rgba(242, 208, 128, 0.6); }
   @keyframes shineGradient { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
@@ -235,6 +204,49 @@
   .card-info .name { font-size: 24px; color: var(--text-main); font-weight: 600; margin-bottom: 4px; }
   .card-info .state { font-size: 12px; color: var(--cyan); font-style: italic; letter-spacing: 1px;}
 
+  /* --- SPREAD MODAL & NUTBAM GỢI Ý --- */
+  .modal { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; padding: 20px; }
+  .modal.show { opacity: 1; pointer-events: auto; }
+  .modal-card { background: var(--bg-base); border: 1px solid rgba(170, 128, 255, 0.4); border-radius: var(--radius-xl); width: 100%; max-width: 620px; padding: 32px; transform: scale(0.95); transition: 0.4s; }
+  .modal.show .modal-card { transform: scale(1); }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; position: relative;}
+  .icon-btn { background: transparent; border: none; color: #fff; font-size: 32px; cursor: pointer; opacity: 0.5; transition: 0.3s;}
+  .icon-btn:hover { opacity: 1; color: var(--cyan); }
+  .spread-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+  .spread-option { border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 18px 8px; text-align: center; cursor: pointer; color: #fff; transition: 0.3s;}
+  .spread-option.active { background: rgba(170,128,255,0.15); border-color: var(--purple); box-shadow: 0 0 15px rgba(170,128,255,0.3);}
+  .spread-option .big { font-size: 32px; color: var(--gold); }
+  
+  /* Cẩm Nang Toggle trong Modal */
+  .guide-toggle-wrap { display: inline-block; transform: scale(0.4); width: 20px; height: 20px; transform-origin: left center; }
+  .reject-checkbox .checkbox-wrapper * { -webkit-tap-highlight-color: transparent; outline: none; }
+  .reject-checkbox .checkbox-wrapper input[type="checkbox"] { display: none; }
+  .reject-checkbox .checkbox-wrapper label { --size: 50px; --shadow: calc(var(--size) * 0.07) calc(var(--size) * 0.1); position: relative; display: block; width: var(--size); height: var(--size); margin: 0 auto; background-color: #4158d0; background-image: linear-gradient(43deg, #4158d0 0%, #c850c0 46%, #ffcc70 100%); border-radius: 50%; box-shadow: 0 var(--shadow) #ffbeb8; cursor: pointer; transition: 0.2s ease transform, 0.2s ease background-color, 0.2s ease box-shadow; overflow: hidden; z-index: 1; }
+  .reject-checkbox .checkbox-wrapper label:before { content: ""; position: absolute; top: 50%; right: 0; left: 0; width: calc(var(--size) * 0.7); height: calc(var(--size) * 0.7); margin: 0 auto; background-color: #fff; transform: translateY(-50%); border-radius: 50%; box-shadow: inset 0 var(--shadow) #ffbeb8; transition: 0.2s ease width, 0.2s ease height; }
+  .reject-checkbox .checkbox-wrapper label:after { content: "i"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; font-weight: bold; color: #c850c0; font-family: 'Montserrat', sans-serif; transition: 0.2s opacity; pointer-events: none;}
+  .reject-checkbox .checkbox-wrapper label:hover:before { width: calc(var(--size) * 0.55); height: calc(var(--size) * 0.55); box-shadow: inset 0 var(--shadow) #ff9d96; }
+  .reject-checkbox .checkbox-wrapper label:active { transform: scale(0.9); }
+  .reject-checkbox .checkbox-wrapper .tick_mark { position: absolute; top: 9px; left: 2px; right: 0; width: calc(var(--size) * 0.6); height: calc(var(--size) * 0.6); margin: 0 auto; margin-left: calc(var(--size) * 0.14); transform: rotateZ(-92deg); }
+  .reject-checkbox .checkbox-wrapper .tick_mark:before, .reject-checkbox .checkbox-wrapper .tick_mark:after { content: ""; position: absolute; background-color: #fff; border-radius: 2px; opacity: 0; transition: 0.2s ease transform, 0.2s ease opacity; }
+  .reject-checkbox .checkbox-wrapper .tick_mark:before { left: 0; bottom: 0; width: calc(var(--size) * 0.1); height: calc(var(--size) * 0.3); box-shadow: -2px 0 5px rgba(0, 0, 0, 0.23); transform: translateY(calc(var(--size) * -0.68)); }
+  .reject-checkbox .checkbox-wrapper .tick_mark:after { left: 0; bottom: 0; width: 100%; height: calc(var(--size) * 0.1); box-shadow: 0 3px 5px rgba(0, 0, 0, 0.23); transform: translateX(calc(var(--size) * 0.78)); }
+  .reject-checkbox .checkbox-wrapper input[type="checkbox"]:checked + label { background-color: #4158d0; background-image: linear-gradient(43deg, #f7805c 0%, #fb4545 46%, #e1236a 100%); box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px; }
+  .reject-checkbox .checkbox-wrapper input[type="checkbox"]:checked + label:before { width: 0; height: 0; }
+  .reject-checkbox .checkbox-wrapper input[type="checkbox"]:checked + label:after { opacity: 0; }
+  .reject-checkbox .checkbox-wrapper input[type="checkbox"]:checked + label .tick_mark:before, .reject-checkbox .checkbox-wrapper input[type="checkbox"]:checked + label .tick_mark:after { background-color: #fff; width: calc(var(--size) * 0.4); height: calc(var(--size) * 0.1); left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 1; }
+  .reject-checkbox .checkbox-wrapper input[type="checkbox"]:checked + label .tick_mark:before { transform: translate(-50%, -50%) rotate(45deg); }
+  .reject-checkbox .checkbox-wrapper input[type="checkbox"]:checked + label .tick_mark:after { transform: translate(-50%, -50%) rotate(-45deg); }
+
+  /* Bảng Hướng Dẫn Cuộn (Trong Modal) */
+  .guide-tooltip { position: absolute; top: calc(100% + 15px); left: 0; width: 100%; max-height: 400px; overflow-y: auto; background: rgba(12, 7, 24, 0.98); backdrop-filter: blur(20px); border: 1px solid var(--purple); border-radius: 16px; padding: 20px; color: var(--text-main); font-size: 13px; line-height: 1.6; opacity: 0; pointer-events: none; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 50; box-shadow: 0 20px 50px rgba(0,0,0,0.8); scrollbar-width: thin; scrollbar-color: var(--cyan) transparent; transform: translateY(-10px); }
+  .guide-tooltip.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .guide-tooltip::before { content: ''; position: absolute; bottom: 100%; left: 60%; transform: translateX(-50%); border-width: 0 10px 10px 10px; border-style: solid; border-color: transparent transparent var(--purple) transparent; }
+  .guide-tooltip::-webkit-scrollbar { width: 4px; }
+  .guide-tooltip::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 4px; }
+  .guide-title { font-size: 20px; color: var(--gold); margin-bottom: 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;}
+  .guide-item { margin-bottom: 14px; }
+  .guide-item strong { color: var(--cyan); font-size: 14px; display: block; margin-bottom: 2px;}
+
   /* --- EPIC AI READING MODAL --- */
   .reading-modal { position: fixed; inset: 0; z-index: 300; background: rgba(2, 0, 8, 0.85); backdrop-filter: blur(25px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 20px; }
   .reading-modal.show { opacity: 1; pointer-events: auto; }
@@ -243,43 +255,45 @@
   .reading-card::-webkit-scrollbar { width: 6px; }
   .reading-card::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 10px; }
 
-  .reading-head { text-align: center; margin-bottom: 30px; position: relative; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);}
+  .reading-head { text-align: center; margin-bottom: 20px; position: relative; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);}
   .reading-head h4 { font-size: 36px; color: var(--cyan); font-weight: 700; margin-bottom: 8px; text-shadow: 0 0 20px rgba(102,224,255,0.4);}
   .reading-head p { color: var(--gold); font-size: 14px; letter-spacing: 2px; text-transform: uppercase;}
-  .close-reading-btn { position: absolute; top: 0; right: 0; background: transparent; border: none; color: #fff; font-size: 32px; cursor: pointer; opacity: 0.5; transition: 0.3s; }
-  .close-reading-btn:hover { opacity: 1; color: var(--cyan); transform: rotate(90deg); }
-  .reading-content { font-size: 16px; line-height: 1.9; color: rgba(255,255,255,0.9); text-align: justify; white-space: pre-line; transition: color 0.3s ease;}
   
-  /* Spread Modal & Toast */
-  .modal { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; padding: 20px; }
-  .modal.show { opacity: 1; pointer-events: auto; }
-  .modal-card { background: var(--bg-base); border: 1px solid rgba(170, 128, 255, 0.4); border-radius: var(--radius-xl); width: 100%; max-width: 620px; padding: 32px; transform: scale(0.95); transition: 0.4s; }
-  .modal.show .modal-card { transform: scale(1); }
-  .modal-head { display: flex; justify-content: space-between; margin-bottom: 24px; }
-  .modal-head h3 { font-size: 32px; color: var(--gold); }
-  .icon-btn { background: transparent; border: none; color: #fff; font-size: 32px; cursor: pointer; opacity: 0.5; transition: 0.3s;}
-  .icon-btn:hover { opacity: 1; color: var(--cyan); }
-  .spread-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
-  .spread-option { border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 18px 8px; text-align: center; cursor: pointer; color: #fff; transition: 0.3s;}
-  .spread-option.active { background: rgba(170,128,255,0.15); border-color: var(--purple); box-shadow: 0 0 15px rgba(170,128,255,0.3);}
-  .spread-option .big { font-size: 32px; color: var(--gold); }
-  .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(60px); background: linear-gradient(135deg, var(--gold), #d4af37); color: #000; font-weight: 600; padding: 16px 32px; border-radius: 100px; opacity: 0; transition: 0.4s; z-index: 999; }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .reading-content { font-size: 16px; line-height: 1.9; color: rgba(255,255,255,0.9); text-align: justify; white-space: pre-line; transition: color 0.3s ease;}
 
-  /* ==================================================
-     CALENDAR & YEAR MODALS
-     ================================================== */
+  /* --- NÚT ĐÓNG & PLAY DÍNH ĐÁY VỚI BACKGROUND MƯỢT --- */
+  .reading-footer { position: sticky; bottom: -40px; margin: 20px -40px -40px -40px; padding: 20px 40px 30px; background: #0c0718; display: flex; flex-direction: column; align-items: center; gap: 16px; z-index: 10; }
+  
+  .footer-buttons { display: flex; justify-content: center; align-items: center; gap: 24px; width: 100%; }
+
+  /* Nút Đóng (Nutbam Style Đỏ) */
+  .close-nutbam { --size: 56px; position: relative; display: block; width: var(--size); height: var(--size); background: linear-gradient(135deg, #f7805c 0%, #fb4545 46%, #e1236a 100%); border-radius: 50%; box-shadow: 0 5px 15px rgba(225, 35, 106, 0.3); cursor: pointer; transition: 0.2s ease transform, 0.2s ease box-shadow; border: none; outline: none; flex-shrink: 0;}
+  .close-nutbam:before { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(var(--size) * 0.7); height: calc(var(--size) * 0.7); background: var(--bg-base); border-radius: 50%; transition: 0.2s ease all; }
+  body.light-mode .close-nutbam:before { background: #fff; }
+  .close-nutbam:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(225, 35, 106, 0.5); }
+  .close-nutbam:hover:before { width: calc(var(--size) * 0.55); height: calc(var(--size) * 0.55); }
+  .close-nutbam:active { transform: scale(0.9); }
+  .close-nutbam .cross { position: absolute; top: 50%; left: 50%; width: calc(var(--size) * 0.4); height: calc(var(--size) * 0.1); transform: translate(-50%, -50%); pointer-events: none; }
+  .close-nutbam .cross:before, .close-nutbam .cross:after { content: ""; position: absolute; background-color: var(--text-main); border-radius: 2px; width: 100%; height: 100%; left: 0; top: 0; }
+  body.light-mode .close-nutbam .cross:before, body.light-mode .close-nutbam .cross:after { background-color: #333; }
+  .close-nutbam .cross:before { transform: rotate(45deg); }
+  .close-nutbam .cross:after { transform: rotate(-45deg); }
+
+  /* Thanh Tiến Trình TTS */
+  .tts-progress-bg { width: 100%; max-width: 250px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; display: none; margin: 0;}
+  .reading-modal.show .tts-progress-bg { display: block; }
+  .tts-progress-bar { width: 0%; height: 100%; background: var(--cyan); transition: width 0.15s linear; box-shadow: 0 0 8px var(--cyan); }
+
+  /* CALENDAR & YEAR MODALS */
   .cal-modal { position: fixed; left: 50%; top: 50%; width: min(92vw, 360px); transform: translate(-50%, -45%) scale(0.95); opacity: 0; pointer-events: none; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.4s; z-index: 250; }
   .cal-modal.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
   .cal-panel { border-radius: 24px; border: 1px solid var(--purple); background: var(--bg-base); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 40px 100px rgba(0,0,0,0.9); overflow: hidden; display: flex; flex-direction: column; padding: 24px; }
-  
   .cal-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
   .cal-month { font-size: 20px; font-weight: 700; color: var(--gold);}
   .cal-hint { font-size: 13px; color: var(--text-muted); font-weight: 500; }
   .cal-navs { display: flex; gap: 8px; }
   .cal-nav { width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.4); color: var(--text-main); cursor: pointer; display: grid; place-items: center; transition: 0.2s; }
   .cal-nav:hover { background: rgba(170,128,255,0.2); border-color: var(--purple); }
-  
   .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 12px; color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; text-align: center; }
   .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
   .cal-days button { width: 100%; aspect-ratio: 1; border: 0; border-radius: 8px; background: transparent; color: var(--text-main); font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.2s; position: relative; }
@@ -287,7 +301,6 @@
   .cal-days button.other { color: rgba(255, 255, 255, 0.2); }
   .cal-days button.today::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--cyan); }
   .cal-days button.selected { background: var(--purple); color: #fff; font-weight: 600; box-shadow: 0 4px 12px rgba(170,128,255,0.4); }
-
   .cal-actions { display: flex; gap: 12px; margin-top: 24px; }
   .cal-actions .btn { height: 48px; font-size: 13px; border-radius: 12px; }
 
@@ -306,7 +319,7 @@
   .theme-label:hover { transform: perspective(100px) rotateX(5deg) rotateY(-5deg); }
   #theme-checkbox:checked ~ .theme-label:hover { transform: perspective(100px) rotateX(-5deg) rotateY(5deg); }
   #theme-checkbox { display: none; }
-  #theme-checkbox:checked ~ .theme-label::before { left: 70px; background-color: #260a6d; background-image: linear-gradient(315deg, #000000 0%, #414141 70%); transition: 0.4s; }
+  #theme-checkbox:checked ~ .theme-label::before { left: 70px; background-color: #000000; background-image: linear-gradient(315deg, #000000 0%, #414141 70%); transition: 0.4s; }
   .theme-label::before { position: absolute; content: ""; height: 40px; width: 40px; border-radius: 50%; background-color: #000000; background-image: linear-gradient(130deg, #757272 10%, #ffffff 11%, #726f6f 62%); left: 10px; box-shadow: 0 2px 1px rgba(0, 0, 0, 0.3), 10px 10px 10px rgba(0, 0, 0, 0.3); transition: 0.4s; }
 
   /* LOADING ANIMATION - CON MẮT */
@@ -319,7 +332,7 @@
   .white-pupil { position: absolute; top: 70%; left: 10%; border-radius: 50%; background-color: #fffcf4; width: 20px; height: 20px; }
 
   /* PLAY BUTTON TTS */
-  .play-container { display: none; justify-content: center; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+  .play-container { display: flex; justify-content: center; }
   .play-wrapper { --width: 150px; --height: 60px; --padding: 8px; --border-radius: 24px; --dot-size: 8px; --btn-color: #000000; --hue: 14deg; --animation-duration: 1.2s; position: relative; display: flex; align-items: center; justify-content: center; width: var(--width); height: var(--height); border-radius: var(--border-radius); background-color: #00000008; box-shadow: 1px 1px 2px 0 #fffd, 2px 2px 2px #0001 inset, 2px 2px 4px #0001 inset, 2px 2px 8px #0001 inset; perspective: 150px; cursor: pointer; user-select: none; transition: box-shadow 0.05s linear, transform 0.05s linear; transform: scale(0.9); }
   .play-toggle { position: absolute; width: 100%; height: 100%; opacity: 0; z-index: 5; cursor: pointer; }
   .play-btn { display: flex; align-items: center; justify-content: start; gap: 0.25em; text-align: left; padding: 0 var(--height) 0 calc(var(--padding) * 2); width: calc(100% - 2 * var(--padding)); height: calc(100% - 2 * var(--padding)); border-radius: calc(var(--border-radius) - var(--padding)); border: none; cursor: pointer; background: linear-gradient(#fff2, #0001), var(--btn-color); box-shadow: 1px 1px 2px -1px #fff inset, 0 2px 1px #00000010, 0 4px 2px #00000010, 0 8px 4px #00000010, 0 16px 8px #00000010, 0 32px 16px #00000010; transition: transform 0.15s cubic-bezier(0.25, 1.5, 0.5, 1.5), box-shadow 0.15s ease, filter 0.15s ease; z-index: 2; }
@@ -333,6 +346,9 @@
   .play-wrapper:hover .play-btn, .play-wrapper:focus-within .play-btn { transform: translate3d(0, -2px, 2px); filter: drop-shadow(var(--padding) 0 var(--padding) rgba(170, 128, 255, 0.6)); }
   .play-wrapper:active .play-btn { transform: translate3d(0, 2px, -2px); box-shadow: 1px 1px 2px 0 #fff, 2px 2px 2px #0001 inset, 2px 2px 4px #0001 inset, 2px 2px 8px #0001 inset, 0 0 32px 2px rgba(170, 128, 255, 0.5) inset; }
 
+  .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(60px); background: linear-gradient(135deg, var(--gold), #d4af37); color: #000; font-weight: 600; padding: 16px 32px; border-radius: 100px; opacity: 0; transition: 0.4s; z-index: 999; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
   @media (max-width: 600px) {
     .wrap { padding: 20px 0 40px; width: min(100% - 20px, var(--max-w)); }
     .hero h1 { font-size: 36px; }
@@ -340,14 +356,15 @@
     .field-row { grid-template-columns: 1fr; }
     .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 16px 12px; }
     .btn-epic { max-width: 100%; font-size: 14px; padding: 0 20px; }
-    .reading-card { padding: 30px 20px; }
+    .reading-card { padding: 30px 20px 0; }
     .reading-head h4 { font-size: 28px; }
     .hold-area { width: 250px; height: 250px; }
     .hold-core { width: 160px; height: 160px; }
     .spread-grid { grid-template-columns: repeat(3, 1fr); }
     .theme-toggle-container { transform: scale(0.5); top: 10px; right: 10px; }
+    .guide-tooltip { width: 100%; }
+    .reading-footer { margin: 20px -20px -40px -20px; padding: 20px 20px 30px; }
   }
-  @property --progress { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
 </style>
 </head>
 <body>
@@ -382,7 +399,6 @@
           </button>
 
           <div class="field-row">
-            
             <div class="dob-row" id="dobRow">
               <div class="dob-box" id="dobBox">
                 <button id="dobBtn" class="field-btn" type="button">
@@ -409,7 +425,6 @@
               <label for="g-nu" class="gender-btn"><span>Nữ</span></label>
               <label for="g-khac" class="gender-btn"><span>Khác</span></label>
             </div>
-
           </div>
           
           <div id="zodiacBadge" class="zodiac-badge">✦ Hãy hoàn tất ngày sinh</div>
@@ -460,10 +475,39 @@
 
   <div class="modal" id="spreadModal">
     <div class="modal-card">
+      
+      <!-- Đưa Cẩm Nang Gợi Ý vào Header Modal -->
       <div class="modal-head">
-        <div><h3 class="serif-font">Số Lượng Lá Bài</h3></div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h3 class="serif-font" style="font-size: clamp(20px, 5vw, 32px);">Hướng dẫn chọn số lượng bài</h3>
+          
+          <!-- Nút Nutbam 'i' Tooltip -->
+          <div class="reject-checkbox guide-toggle-wrap">
+            <div class="checkbox-wrapper">
+              <input type="checkbox" id="guideToggleBtn" />
+              <label for="guideToggleBtn" title="Xem Cẩm Nang">
+                <div class="tick_mark"><div class="cross"></div></div>
+              </label>
+            </div>
+          </div>
+        </div>
+
         <button class="icon-btn" id="closeSpreadModal" type="button">&times;</button>
+        
+        <!-- Bảng Hướng Dẫn -->
+        <div id="guideTooltip" class="guide-tooltip">
+           <div class="guide-title">Cẩm Nang Trải Bài</div>
+           <div class="guide-item"><strong>1 Lá (Thức Tỉnh)</strong>Hỏi nhanh Có/Không hoặc xin 1 lời khuyên tức thời.</div>
+           <div class="guide-item"><strong>2 Lá (Ngã Rẽ)</strong>Đứng giữa 2 lựa chọn hoặc soi chiếu mối quan hệ.</div>
+           <div class="guide-item"><strong>3 Lá (Thời Gian)</strong>Quá khứ - Hiện tại - Tương lai. Tụ bài quốc dân.</div>
+           <div class="guide-item"><strong>4 Lá (La Bàn)</strong>Vấn đề - Rào cản - Lời khuyên - Kết quả.</div>
+           <div class="guide-item"><strong>5 Lá (Tiềm Thức)</strong>Mổ xẻ tâm lý, tìm ra nguyên nhân sâu xa.</div>
+           <div class="guide-item"><strong>7 Lá (Móng Ngựa)</strong>Dự đoán chi tiết biến động của một sự kiện.</div>
+           <div class="guide-item"><strong>10 Lá (Celtic Cross)</strong>Giải mã toàn diện một biến cố lớn trong đời.</div>
+           <div class="guide-item"><strong>12 Lá (Hoàng Đạo)</strong>Xem tổng quan vận hạn 12 tháng/12 khía cạnh.</div>
+        </div>
       </div>
+
       <div class="spread-grid" id="spreadGrid"></div>
       <div class="modal-foot">
         <button class="btn btn-primary" id="modalDoneBtn" type="button" style="width:100%">Xác Nhận</button>
@@ -471,14 +515,10 @@
     </div>
   </div>
 
-  <!-- Modal Lịch Chọn Ngày/Tháng -->
   <div id="calendarModal" class="cal-modal">
     <div class="cal-panel">
       <div class="cal-top">
-        <div>
-          <div id="monthLabel" class="cal-month serif-font">Tháng</div>
-          <div id="monthHint" class="cal-hint">Năm</div>
-        </div>
+        <div><div id="monthLabel" class="cal-month serif-font">Tháng</div><div id="monthHint" class="cal-hint">Năm</div></div>
         <div class="cal-navs">
           <button id="prevBtn" class="cal-nav" type="button">‹</button>
           <button id="nextBtn" class="cal-nav" type="button">›</button>
@@ -495,7 +535,6 @@
     </div>
   </div>
 
-  <!-- Modal Chọn Năm -->
   <div id="yearModal" class="cal-modal">
     <div class="cal-panel">
       <div class="cal-top" style="justify-content: center; margin-bottom: 20px;">
@@ -511,23 +550,37 @@
 
   <div class="reading-modal" id="aiReadingModal">
     <div class="reading-card">
-      <button class="close-reading-btn" id="closeReadingBtn">&times;</button>
       <div class="reading-head">
         <h4 class="serif-font">Lời Sấm Truyền</h4>
         <p>Trí tuệ vũ trụ đang luận giải</p>
       </div>
       <div class="reading-content" id="readingContent"></div>
       
-      <div class="play-container" id="playActionContainer">
-        <label class="play-wrapper">
-          <input type="checkbox" class="play-toggle" id="ttsPlayToggle"/>
-          <div class="play-btn">
-            <span class="play-txt play">Nghe AI</span>
-            <span class="play-txt playing">Đang Đọc</span>
-            <div class="play-dot"></div>
+      <!-- Footer Ghim Đáy chứa Nút Play, Nút X và Tiến Trình AI -->
+      <div class="reading-footer" id="readingFooter" style="display: none;">
+        <div class="footer-buttons">
+          <div class="play-container">
+            <label class="play-wrapper">
+              <input type="checkbox" class="play-toggle" id="ttsPlayToggle"/>
+              <div class="play-btn">
+                <span class="play-txt play">Nghe AI</span>
+                <span class="play-txt playing">Tạm Dừng</span>
+                <div class="play-dot"></div>
+              </div>
+            </label>
           </div>
-        </label>
+          
+          <button class="close-nutbam" id="closeReadingBtn" type="button" title="Đóng Bảng Đọc">
+            <div class="cross"></div>
+          </button>
+        </div>
+        
+        <!-- Vệt sáng theo dõi tiến trình chạy phía dưới nút -->
+        <div class="tts-progress-bg" id="ttsProgressBg">
+           <div class="tts-progress-bar" id="ttsProgressBar"></div>
+        </div>
       </div>
+
     </div>
   </div>
 
@@ -578,8 +631,10 @@
     rerollBtn: document.getElementById("rerollBtn"), overlay: document.getElementById("overlay"), 
     holdArea: document.getElementById("holdArea"), holdCore: document.getElementById("holdCore"), 
     holdRing: document.getElementById("holdRing"), toast: document.getElementById("toast"), 
-    themeCheckbox: document.getElementById("theme-checkbox"), playActionContainer: document.getElementById("playActionContainer"), 
-    ttsPlayToggle: document.getElementById("ttsPlayToggle")
+    themeCheckbox: document.getElementById("theme-checkbox"),
+    playActionContainer: document.getElementById("playActionContainer"), ttsPlayToggle: document.getElementById("ttsPlayToggle"),
+    guideToggleBtn: document.getElementById("guideToggleBtn"), guideTooltip: document.getElementById("guideTooltip"),
+    readingFooter: document.getElementById("readingFooter"), ttsProgressBar: document.getElementById("ttsProgressBar")
   };
 
   const randInt = (max) => crypto.getRandomValues(new Uint32Array(1))[0] % max;
@@ -588,6 +643,35 @@
   elements.themeCheckbox.addEventListener('change', (e) => {
     if(e.target.checked) document.body.classList.add('light-mode');
     else document.body.classList.remove('light-mode');
+  });
+
+  // --- LOGIC TOOLTIP HƯỚNG DẪN TRONG MODAL ---
+  elements.guideToggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    elements.guideTooltip.classList.toggle('show');
+  });
+  elements.guideTooltip.addEventListener('click', (e) => {
+    e.stopPropagation(); 
+  });
+  elements.openSpreadModal.addEventListener('click', (e) => {
+    elements.spreadGrid.innerHTML = "";
+    spreadOptions.forEach(num => {
+      const btn = document.createElement("div");
+      btn.className = "spread-option" + (num === selectedSpread ? " active" : "");
+      btn.innerHTML = `<span class="big serif-font">${num}</span><span class="small">Lá</span>`;
+      btn.onclick = () => { selectedSpread = num; [...elements.spreadGrid.children].forEach(b => b.classList.remove("active")); btn.classList.add("active"); };
+      elements.spreadGrid.appendChild(btn);
+    });
+    elements.spreadModal.classList.add("show");
+  });
+
+  document.addEventListener('click', (e) => {
+    if (elements.guideToggleBtn && elements.guideTooltip) {
+      if (!elements.guideToggleBtn.contains(e.target) && !elements.guideTooltip.contains(e.target)) {
+        elements.guideTooltip.classList.remove('show');
+        elements.guideToggleBtn.checked = false;
+      }
+    }
   });
 
   function getZodiac(day, month) {
@@ -634,7 +718,7 @@
   function renderCalendar() {
     dobElements.days.innerHTML = '';
     const y = dobState.currentViewDate.getFullYear(), m = dobState.currentViewDate.getMonth();
-    dobElements.monthLbl.textContent = monthNames[m]; dobElements.monthHnt.textContent = `Năm ${y}`;
+    dobElements.monthLbl.textContent = monthNames[m]; dobElements.monthHnt.textContent = ``;
     const firstDay = new Date(y, m, 1).getDay(), lastDate = new Date(y, m + 1, 0).getDate(), prevLastDate = new Date(y, m, 0).getDate();
     
     const createBtn = (dObj, lbl, isOther) => {
@@ -687,37 +771,24 @@
   
   renderCalendar();
 
-  /* ==================================================
-     LOGIC RÚT BÀI & AI CŨ
-     ================================================== */
+  elements.closeSpreadModal.onclick = elements.modalDoneBtn.onclick = () => {
+    elements.selectedSpreadText.innerHTML = `${selectedSpread} lá <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>`;
+    elements.spreadModal.classList.remove("show");
+    elements.guideTooltip.classList.remove('show');
+    elements.guideToggleBtn.checked = false;
+  };
+
   function drawCards(count) {
     const arr = [...fullDeck];
     for (let i = arr.length - 1; i > 0; i--) { const j = randInt(i + 1); [arr[i], arr[j]] = [arr[j], arr[i]]; }
     return arr.slice(0, count).map(card => ({ ...card, reversed: randInt(2) === 1 }));
   }
 
-  elements.openSpreadModal.onclick = () => {
-    elements.spreadGrid.innerHTML = "";
-    spreadOptions.forEach(num => {
-      const btn = document.createElement("div");
-      btn.className = "spread-option" + (num === selectedSpread ? " active" : "");
-      btn.innerHTML = `<span class="big serif-font">${num}</span><span class="small">Lá</span>`;
-      btn.onclick = () => { selectedSpread = num; [...elements.spreadGrid.children].forEach(b => b.classList.remove("active")); btn.classList.add("active"); };
-      elements.spreadGrid.appendChild(btn);
-    });
-    elements.spreadModal.classList.add("show");
-  };
-  
-  elements.closeSpreadModal.onclick = elements.modalDoneBtn.onclick = () => {
-    elements.selectedSpreadText.innerHTML = `${selectedSpread} lá <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>`;
-    elements.spreadModal.classList.remove("show");
-  };
-
   elements.readyBtn.onclick = () => {
     currentQuestion = elements.questionInput.value.trim();
     if (currentQuestion.length < 5) return toastMsg("Hãy nhập câu hỏi rõ ràng hơn chút nhé.");
     elements.resultsSection.classList.remove("show"); elements.revealAiBtn.style.display = "none";
-    aiReadingFetched = false; aiReadingText = ""; elements.playActionContainer.style.display = 'none';
+    aiReadingFetched = false; aiReadingText = ""; elements.readingFooter.style.display = 'none';
     elements.overlay.classList.add("show"); elements.holdRing.style.setProperty("--progress", "0%");
   };
 
@@ -776,25 +847,65 @@
     setTimeout(() => elements.resultsSection.scrollIntoView({ behavior: 'smooth' }), 500);
   }
 
+  /* ==================================================
+     LOGIC TTS (PAUSE/RESUME & LỌC CHỮ MƯỢT MÀ)
+     ================================================== */
   elements.revealAiBtn.onclick = () => { elements.aiReadingModal.classList.add("show"); if (!aiReadingFetched) fetchGeminiReading(); };
-  elements.closeReadingBtn.onclick = () => { elements.aiReadingModal.classList.remove("show"); window.speechSynthesis.cancel(); elements.ttsPlayToggle.checked = false; };
+  
+  elements.closeReadingBtn.onclick = () => { 
+    elements.aiReadingModal.classList.remove("show"); 
+    synth.cancel(); 
+    elements.ttsPlayToggle.checked = false; 
+    elements.ttsProgressBar.style.width = "0%";
+  };
 
   const synth = window.speechSynthesis;
   let aiUtterance = null;
 
+  function sanitizeTextForTTS(rawText) {
+    let text = rawText.replace(/[*_#~`]/g, '');
+    text = text.replace(/(?:Phần\s*\d+|Mở bài|Thân bài|Kết bài|Lời khuyên|Kết luận)[\:\.]?\s*/gi, '');
+    text = text.replace(/^\s*\d+[\.\)\-]\s*/gm, '');
+    text = text.replace(/\n+/g, '. '); 
+    return text;
+  }
+
   function playReadingVoice(text) {
-    if (synth.speaking) synth.cancel();
-    const cleanText = text.replace(/[*_#~`]/g, '');
+    if (synth.speaking && !synth.paused) return; 
+    
+    if (synth.paused) {
+       synth.resume();
+       return;
+    }
+    
+    const cleanText = sanitizeTextForTTS(text);
     aiUtterance = new SpeechSynthesisUtterance(cleanText);
     aiUtterance.lang = 'vi-VN';
     aiUtterance.rate = 1.0; 
     aiUtterance.pitch = 1.0; 
-    aiUtterance.onend = () => { elements.ttsPlayToggle.checked = false; };
+    
+    aiUtterance.onboundary = (event) => {
+       if (event.name === 'word') {
+          const progress = (event.charIndex / cleanText.length) * 100;
+          elements.ttsProgressBar.style.width = `${progress}%`;
+       }
+    };
+    
+    aiUtterance.onend = () => { 
+       elements.ttsPlayToggle.checked = false; 
+       elements.ttsProgressBar.style.width = `100%`;
+       setTimeout(() => elements.ttsProgressBar.style.width = `0%`, 500);
+    };
+    
     synth.speak(aiUtterance);
   }
 
   elements.ttsPlayToggle.addEventListener('change', (e) => {
-    if (e.target.checked) { if (aiReadingText) playReadingVoice(aiReadingText); } else { synth.cancel(); }
+    if (e.target.checked) { 
+        if (aiReadingText) playReadingVoice(aiReadingText); 
+    } else { 
+        if(synth.speaking) synth.pause(); 
+    }
   });
 
   async function fetchGeminiReading() {
@@ -803,7 +914,6 @@
     
     const dobStr = (dobState.day && dobState.month && dobState.year) ? `${dobState.day}/${dobState.month}/${dobState.year}` : "Không rõ ngày sinh";
     const dobParam = dobStr !== "Không rõ ngày sinh" ? `Ngày sinh: ${dobStr}` : dobStr;
-    
     const selectedGenderBtn = document.querySelector('input[name="gender"]:checked');
     const rawGender = selectedGenderBtn ? selectedGenderBtn.value : "";
     const genderStr = rawGender ? `Giới tính: ${rawGender}` : "Không rõ giới tính";
@@ -829,7 +939,7 @@ Yêu cầu cấu trúc bài giải (Trả lời bằng text thuần, chia đoạ
       const data = await res.json();
       aiReadingText = data.candidates[0].content.parts[0].text;
       elements.readingContent.innerHTML = "";
-      elements.playActionContainer.style.display = 'flex';
+      elements.readingFooter.style.display = 'flex';
       let i = 0;
       const typeWriter = setInterval(() => {
         let char = aiReadingText.charAt(i);
