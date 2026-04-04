@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg-base: #030108;
+    --bg-base: #260a6d;
     --glass-bg: rgba(12, 7, 24, 0.35);
     --glass-border: rgba(255, 255, 255, 0.08);
     
@@ -37,17 +37,18 @@
     --text-main: #1a1a2e;
     --text-muted: rgba(50, 50, 80, 0.7);
     
-    --gold: #d4af37;
+    --gold: #433400;
     --purple: #6b21a8;
     --cyan: #0891b2;
     
     --shadow-heavy: 0 40px 80px rgba(0, 0, 0, 0.15);
   }
-  body.light-mode .bg-nebula::before { background: rgba(120, 40, 220, 0.15); }
-  body.light-mode .bg-nebula::after { background: rgba(40, 120, 220, 0.15); }
-  body.light-mode .bg-nebula-core { background: rgba(242, 208, 128, 0.2); }
+  
+  body.light-mode .bg-nebula::before { background: radial-gradient(circle, rgba(120, 40, 220, 0.25) 0%, transparent 70%); }
+  body.light-mode .bg-nebula::after { background: radial-gradient(circle, rgba(40, 120, 220, 0.25) 0%, transparent 70%); }
+  body.light-mode .bg-nebula-core { background: radial-gradient(circle, rgba(242, 208, 128, 0.3) 0%, transparent 70%); }
   body.light-mode .stardust { filter: invert(1); opacity: 0.15; }
-  body.light-mode .card-face.front { background: #fff; }
+  body.light-mode .card-face.front { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
   body.light-mode .card-info .name { color: #1a1a2e; }
   body.light-mode .select-btn { background: rgba(255, 255, 255, 0.6); color: #000; }
   body.light-mode .field input { background: rgba(255, 255, 255, 0.6); color: #000; border: 1px solid rgba(0,0,0,0.1); }
@@ -55,12 +56,19 @@
   body.light-mode .reading-card { background: rgba(255, 255, 255, 0.85); box-shadow: 0 30px 80px rgba(0,0,0,0.2); border-color: var(--gold); }
   body.light-mode .reading-content { color: #222; }
   body.light-mode .close-reading-btn { color: #000; }
-  body.light-mode .fallback-bg { background: #fdfdfd; }
-  body.light-mode .modal-card { background: #fff; }
+  body.light-mode .fallback-bg { background: rgba(255,255,255,0.8); }
   body.light-mode .spread-option { color: #333; }
   body.light-mode .icon-btn { color: #333; }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* Tinh chỉnh Modal sang suốt ở Light Mode */
+  body.light-mode .modal-card { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+  body.light-mode .cal-panel { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-color: rgba(212, 175, 55, 0.5); box-shadow: 0 20px 50px rgba(0,0,0,0.1);}
+  body.light-mode .cal-nav { background: rgba(255, 255, 255, 0.5); border-color: rgba(0,0,0,0.1); color: #333;}
+  body.light-mode .year-item { background: rgba(255, 255, 255, 0.4); border-color: transparent; color: #333;}
+  body.light-mode .year-item:hover { background: rgba(255, 255, 255, 0.8); }
+
+  /* Xóa highlight xanh mặc định trên điện thoại iOS/Android */
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; outline: none; }
   
   html, body {
     min-height: 100vh;
@@ -69,23 +77,24 @@
     color: var(--text-main);
     overflow-x: hidden;
     scroll-behavior: smooth;
-    transition: background-color 0.5s ease, color 0.5s ease;
+    transition: background-color 0.25s linear, color 0.25s linear; 
   }
 
   h1, h2, h3, h4, .serif-font, .spread-option .big, .card-info .name, .hold-core strong, .value {
     font-family: 'Cormorant Garamond', serif;
   }
 
-  /* --- STUNNING BACKGROUNDS --- */
-  .bg-nebula { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at 50% 50%, transparent 0%, transparent 100%); overflow: hidden; }
-  .bg-nebula::before, .bg-nebula::after, .bg-nebula-core { content: ""; position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.5; animation: floatOrb 25s infinite alternate ease-in-out; transition: background 0.5s ease;}
-  .bg-nebula::before { width: 70vw; height: 70vw; top: -20vh; left: -10vw; background: rgba(120, 40, 220, 0.35); }
-  .bg-nebula::after { width: 60vw; height: 60vw; bottom: -20vh; right: -10vw; background: rgba(40, 120, 220, 0.25); animation-delay: -12s; }
-  .bg-nebula-core { width: 40vw; height: 40vw; top: 30vh; left: 30vw; background: rgba(242, 208, 128, 0.15); animation-duration: 30s; }
-  
-  .bg-mystic-dust { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" opacity="0.03"><circle cx="60" cy="60" r="40" stroke="%23aa80ff" stroke-width="1" fill="none"/></svg>'); background-size: 150px 150px; animation: mysticFloat 60s linear infinite; }
-  
-  .stardust { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8) 1px, transparent 1px), radial-gradient(2px 2px at 30% 50%, rgba(242,208,128,0.7) 1px, transparent 1px); background-size: 200px 200px; animation: twinkle 6s infinite alternate ease-in-out; opacity: 0.6; transition: 0.5s ease;}
+  /* --- BACKGROUNDS TỐI ƯU --- */
+  .bg-nebula { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .bg-nebula::before, .bg-nebula::after, .bg-nebula-core { 
+    content: ""; position: absolute; border-radius: 50%; opacity: 0.5; 
+    animation: floatOrb 25s infinite alternate ease-in-out; will-change: transform; 
+  }
+  .bg-nebula::before { width: 70vw; height: 70vw; top: -20vh; left: -10vw; background: radial-gradient(circle, rgba(120, 40, 220, 0.5) 0%, transparent 70%); }
+  .bg-nebula::after { width: 60vw; height: 60vw; bottom: -20vh; right: -10vw; background: radial-gradient(circle, rgba(40, 120, 220, 0.4) 0%, transparent 70%); animation-delay: -12s; }
+  .bg-nebula-core { width: 40vw; height: 40vw; top: 30vh; left: 30vw; background: radial-gradient(circle, rgba(242, 208, 128, 0.25) 0%, transparent 70%); animation-duration: 30s; }
+  .bg-mystic-dust { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" opacity="0.03"><circle cx="60" cy="60" r="40" stroke="%23aa80ff" stroke-width="1" fill="none"/></svg>'); background-size: 150px 150px; animation: mysticFloat 60s linear infinite; will-change: transform; }
+  .stardust { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8) 1px, transparent 1px), radial-gradient(2px 2px at 30% 50%, rgba(242,208,128,0.7) 1px, transparent 1px); background-size: 200px 200px; animation: twinkle 6s infinite alternate ease-in-out; opacity: 0.6; transition: 0.5s ease; will-change: transform, opacity; }
 
   @keyframes floatOrb { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(10vw, 15vh) scale(1.15); } }
   @keyframes twinkle { 0% { opacity: 0.3; transform: translateY(0); } 100% { opacity: 0.8; transform: translateY(-15px); } }
@@ -94,7 +103,7 @@
   .wrap { position: relative; z-index: 10; width: min(100% - 32px, var(--max-w)); margin: 0 auto; padding: 60px 0 80px; animation: slideUpFade 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
   @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-  .glass-panel { background: var(--glass-bg); backdrop-filter: blur(28px) saturate(1.2); -webkit-backdrop-filter: blur(28px) saturate(1.2); border: 1px solid var(--glass-border); border-top: 1px solid rgba(255, 255, 255, 0.15); border-left: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-xl); box-shadow: var(--shadow-heavy); overflow: hidden; transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease; }
+  .glass-panel { background: var(--glass-bg); backdrop-filter: blur(28px) saturate(1.2); -webkit-backdrop-filter: blur(28px) saturate(1.2); border: 1px solid var(--glass-border); border-top: 1px solid rgba(255, 255, 255, 0.15); border-left: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-xl); box-shadow: var(--shadow-heavy); overflow: hidden; }
 
   .hero { padding: 48px; margin-bottom: 32px; text-align: center; }
   .hero h1 { font-size: clamp(40px, 6vw, 76px); line-height: 1.1; margin-bottom: 10px; background: linear-gradient(to bottom right, var(--text-main) 20%, var(--gold) 80%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
@@ -105,39 +114,57 @@
   .section-title h2 { font-size: 32px; color: var(--gold); text-shadow: 0 0 20px rgba(242, 208, 128, 0.3); font-weight: 600; display: inline-flex; align-items: center; gap: 16px; margin: 0; }
   .section-title h2::before, .section-title h2::after { content: "✧"; font-size: 20px; opacity: 0.7;}
 
-  /* --- FORM NHẬP LIỆU NÂNG CẤP THÔNG MINH --- */
-  .setup-stack { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 380px; margin: 0 auto; }
+  /* --- FORM NHẬP LIỆU --- */
+  .setup-stack { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 440px; margin: 0 auto; }
 
   .select-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 60px; padding: 0 28px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border); border-radius: 100px; color: var(--text-main); cursor: pointer; transition: 0.3s; }
   .select-btn:hover { border-color: var(--purple); background: rgba(170, 128, 255, 0.1); transform: translateY(-2px); }
   .select-btn .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;}
   .select-btn .value { font-size: 24px; font-weight: 600; color: var(--cyan); text-shadow: 0 0 15px rgba(102,224,255,0.3);}
 
-  .field-row { display: grid; grid-template-columns: 140px 1fr; gap: 12px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   
-  .field input { width: 100%; height: 60px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); padding: 0 20px; border-radius: 100px; font-size: 14px; font-family: 'Montserrat', sans-serif; transition: 0.3s; outline: none; text-align: center; }
-  .field input::placeholder { color: var(--text-muted); font-style: italic; opacity: 0.7; }
-  .field input:focus { border-color: var(--purple); box-shadow: 0 0 0 4px rgba(170, 128, 255, 0.15); }
+  .field input[type="text"] { width: 100%; height: 60px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); padding: 0 20px; border-radius: 100px; font-size: 14px; font-family: 'Montserrat', sans-serif; transition: 0.3s; text-align: center; }
+  .field input[type="text"]::placeholder { color: var(--text-muted); font-style: italic; opacity: 0.7; }
+  .field input[type="text"]:focus { border-color: var(--purple); box-shadow: 0 0 0 4px rgba(170, 128, 255, 0.15); }
   
-  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8) opacity(0.6); cursor: pointer; transition: 0.3s; }
-  body.light-mode input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0) opacity(0.6); }
-  input[type="date"]::-webkit-calendar-picker-indicator:hover { filter: invert(1) opacity(1) drop-shadow(0 0 5px var(--cyan)); }
+  /* Cụm Segmented Control Giới Tính Nâng Cấp (Slider Animation) */
+  .gender-group { position: relative; display: flex; height: 60px; background: rgba(0,0,0,0.5); border-radius: 100px; padding: 4px; border: 1px solid rgba(255,255,255,0.1); isolation: isolate; }
+  .gender-group input { display: none; }
+  .gender-slider { position: absolute; top: 4px; bottom: 4px; width: calc(33.33% - 2.66px); background: linear-gradient(135deg, rgba(170, 128, 255, 0.4), rgba(102, 224, 255, 0.3)); border-radius: 100px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.3s; z-index: 1; opacity: 0; border: 1px solid rgba(170, 128, 255, 0.5); box-shadow: 0 0 15px rgba(170,128,255,0.2);}
+  body.light-mode .gender-slider { background: var(--purple); border: none; box-shadow: 0 4px 10px rgba(107, 33, 168, 0.3);}
   
-  /* Cụm Segmented Control Giới Tính */
-  .gender-group { display: flex; gap: 6px; height: 60px; background: rgba(0,0,0,0.5); border-radius: 100px; padding: 4px; border: 1px solid rgba(255,255,255,0.1); }
-  .gender-btn { flex: 1; position: relative; cursor: pointer; }
-  .gender-btn input { display: none; }
-  .gender-btn span { display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; border-radius: 100px; color: var(--text-muted); font-size: 13px; font-weight: 600; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;}
-  .gender-btn input:checked + span { background: linear-gradient(135deg, rgba(170, 128, 255, 0.3), rgba(102, 224, 255, 0.2)); color: var(--text-main); box-shadow: inset 0 0 10px rgba(170,128,255,0.4); text-shadow: 0 0 10px rgba(255,255,255,0.5); border: 1px solid rgba(170,128,255,0.4); }
-  body.light-mode .gender-btn input:checked + span { background: var(--purple); color: #fff; text-shadow: none;}
+  #g-nam:checked ~ .gender-slider { transform: translateX(0); opacity: 1; }
+  #g-nu:checked ~ .gender-slider { transform: translateX(calc(100% + 4px)); opacity: 1; }
+  #g-khac:checked ~ .gender-slider { transform: translateX(calc(200% + 8px)); opacity: 1; }
+  
+  .gender-btn { flex: 1; z-index: 2; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
+  .gender-btn span { color: var(--text-muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+  
+  #g-nam:checked ~ label[for="g-nam"] span, #g-nu:checked ~ label[for="g-nu"] span, #g-khac:checked ~ label[for="g-khac"] span { color: var(--text-main); text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+  body.light-mode #g-nam:checked ~ label[for="g-nam"] span, body.light-mode #g-nu:checked ~ label[for="g-nu"] span, body.light-mode #g-khac:checked ~ label[for="g-khac"] span { color: #fff; text-shadow: none; }
+
+  /* Ngày tháng DOB UI mới */
+  .dob-row { display: flex; gap: 8px; width: 100%; transition: gap 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.15); height: 60px;}
+  .dob-row.compact { gap: 6px; }
+  .dob-box, .year-box { position: relative; border-radius: 100px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.15); }
+  body.light-mode .dob-box, body.light-mode .year-box { background: rgba(255, 255, 255, 0.6); border-color: rgba(0,0,0,0.1); }
+  
+  .dob-box { flex: 1; min-width: 0; }
+  .year-box { width: 0; opacity: 0; transform: translateX(20px) scale(0.9); pointer-events: none; }
+  .year-box.show { width: 100px; opacity: 1; transform: translateX(0) scale(1); pointer-events: auto; }
+  
+  .field-btn { width: 100%; height: 100%; border: 0; background: transparent; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.2s ease; }
+  .field-btn:hover { background: rgba(170, 128, 255, 0.1); }
+  .field-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .dob-icon { font-size: 16px; opacity: 0.8;}
+  .dob-val { font-size: 14px; font-weight: 500; color: var(--text-muted); font-family: 'Montserrat', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.3s;}
+  .dob-val.active { color: var(--text-main); font-weight: 600;}
+  body.light-mode .dob-val.active { color: var(--text-main); }
+  .year-box .field-btn { justify-content: center; padding: 0; }
 
   /* Zodiac Badge */
-  .zodiac-badge {
-    background: rgba(170, 128, 255, 0.15); border: 1px solid rgba(170, 128, 255, 0.4); color: var(--gold);
-    padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600;
-    display: none; align-items: center; justify-content: center; width: 100%;
-    margin-top: -4px; animation: slideUpFade 0.4s forwards;
-  }
+  .zodiac-badge { background: rgba(170, 128, 255, 0.15); border: 1px solid rgba(170, 128, 255, 0.4); color: var(--gold); padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 600; display: none; align-items: center; justify-content: center; width: 100%; margin-top: -4px; animation: slideUpFade 0.4s forwards; }
   .zodiac-badge.show { display: flex; }
 
   .btn { border: none; height: 60px; padding: 0 28px; border-radius: 100px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px; letter-spacing: 2px; cursor: pointer; transition: all 0.3s; text-transform: uppercase; display: inline-flex; align-items: center; justify-content: center; width: 100%; }
@@ -148,13 +175,7 @@
   .btn-ghost:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.4); transform: translateY(-2px); }
 
   /* EPIC BUTTON */
-  .btn-epic {
-    background: linear-gradient(45deg, #4c1d95, #aa80ff, #0891b2, #4c1d95); background-size: 300% 300%;
-    color: white; border: 1px solid var(--gold);
-    box-shadow: 0 0 25px rgba(170, 128, 255, 0.6), inset 0 0 10px rgba(242, 208, 128, 0.4);
-    animation: shineGradient 4s infinite linear;
-    height: 64px; font-size: 16px; margin: 40px auto 0; max-width: 400px;
-  }
+  .btn-epic { background: linear-gradient(45deg, #4c1d95, #aa80ff, #0891b2, #4c1d95); background-size: 300% 300%; color: white; border: 1px solid var(--gold); box-shadow: 0 0 25px rgba(170, 128, 255, 0.6), inset 0 0 10px rgba(242, 208, 128, 0.4); animation: shineGradient 4s infinite linear; height: 64px; font-size: 16px; margin: 40px auto 0; max-width: 400px; }
   .btn-epic:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 0 40px rgba(170, 128, 255, 0.8), inset 0 0 15px rgba(242, 208, 128, 0.6); }
   @keyframes shineGradient { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
 
@@ -177,7 +198,7 @@
   @keyframes spinLayer { 100% { transform: rotate(360deg); } }
 
   /* --- CARDS RENDERING --- */
-  .results { margin-top: 50px; display: none; opacity: 0; transform: translateY(40px); transition: 0.8s; }
+  .results { margin-top: 50px; display: none; opacity: 0; transform: translateY(40px); transition: 0.8s; content-visibility: auto; contain-intrinsic-size: 800px; }
   .results.show { display: block; opacity: 1; transform: translateY(0); }
   .results-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; flex-wrap: wrap; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 24px;}
   .results-head h3 { font-size: 32px; color: var(--gold); margin-bottom: 8px; font-weight: 600;}
@@ -187,55 +208,23 @@
   .tarot-card { position: relative; width: 100%; cursor: pointer; opacity: 0; transform: translateY(50px) rotateX(-10deg); animation: epicCardEntrance 0.8s forwards; animation-delay: var(--delay, 0ms); }
   @keyframes epicCardEntrance { to { opacity: 1; transform: translateY(0) rotateX(0); } }
   
-  .card-stack { width: 100%; aspect-ratio: 300 / 527; position: relative; transform-style: preserve-3d; transition: transform 0.8s; box-shadow: 0 20px 40px rgba(0,0,0,0.7); border-radius: 18px; }
-  
+  .card-stack { width: 100%; aspect-ratio: 300 / 527; position: relative; transform-style: preserve-3d; transition: transform 0.8s; box-shadow: 0 20px 40px rgba(0,0,0,0.7); border-radius: 18px; will-change: transform; }
   .tarot-card.flipped .card-stack { transform: rotateY(180deg); }
   .tarot-card:hover .card-stack { transform: translateY(-10px) scale(1.02); box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 40px rgba(170, 128, 255, 0.2); }
   .tarot-card.flipped:hover .card-stack { transform: rotateY(180deg) translateY(-10px) scale(1.02); box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 40px rgba(102, 224, 255, 0.2); }
 
   .card-face { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 18px; overflow: hidden; border: 2px solid rgba(255,255,255,0.15); transform: translate3d(0,0,0); }
-  
-  .card-face.back {
-    background: radial-gradient(circle at center, #1a0b2e 0%, #05020a 100%);
-    display: flex; align-items: center; justify-content: center; position: relative;
-    border: 2px solid rgba(242, 208, 128, 0.25);
-  }
-  .card-face.back::before {
-    content: ""; position: absolute; inset: 10px; border: 1px solid rgba(170, 128, 255, 0.3); border-radius: 12px; pointer-events: none;
-  }
-  .card-face.back::after {
-    content: ""; position: absolute; inset: 0;
-    background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px);
-    background-size: 15px 15px; opacity: 0.3; pointer-events: none;
-  }
-  .astral-portal {
-    width: 80px; height: 80px;
-    background: radial-gradient(circle, rgba(242, 208, 128, 0.15), transparent 70%);
-    border: 1px solid rgba(242, 208, 128, 0.5); border-radius: 50%;
-    position: relative; box-shadow: 0 0 25px rgba(170,128,255,0.5), inset 0 0 15px rgba(242,208,128,0.2);
-    display: flex; align-items: center; justify-content: center; z-index: 2;
-  }
-  .astral-portal::before {
-    content: "✧"; font-size: 36px; color: var(--gold); animation: pulseGlow 2s infinite alternate; text-shadow: 0 0 15px var(--gold);
-  }
-  .astral-ring {
-    position: absolute; inset: -14px; border: 1px dashed rgba(102, 224, 255, 0.6); border-radius: 50%;
-    animation: spinLayer 12s linear infinite; opacity: 0.8;
-  }
-  .astral-ring-2 {
-    position: absolute; inset: -24px; border: 1px solid rgba(170, 128, 255, 0.4); border-radius: 50%;
-    border-top-color: transparent; border-bottom-color: transparent;
-    animation: spinLayer 8s linear infinite reverse; opacity: 0.6;
-  }
+  .card-face.back { background: radial-gradient(circle at center, #1a0b2e 0%, #05020a 100%); display: flex; align-items: center; justify-content: center; position: relative; border: 2px solid rgba(242, 208, 128, 0.25); }
+  .card-face.back::before { content: ""; position: absolute; inset: 10px; border: 1px solid rgba(170, 128, 255, 0.3); border-radius: 12px; pointer-events: none; }
+  .card-face.back::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px); background-size: 15px 15px; opacity: 0.3; pointer-events: none; }
+  .astral-portal { width: 80px; height: 80px; background: radial-gradient(circle, rgba(242, 208, 128, 0.15), transparent 70%); border: 1px solid rgba(242, 208, 128, 0.5); border-radius: 50%; position: relative; box-shadow: 0 0 25px rgba(170,128,255,0.5), inset 0 0 15px rgba(242,208,128,0.2); display: flex; align-items: center; justify-content: center; z-index: 2; }
+  .astral-portal::before { content: "✧"; font-size: 36px; color: var(--gold); animation: pulseGlow 2s infinite alternate; text-shadow: 0 0 15px var(--gold); }
+  .astral-ring { position: absolute; inset: -14px; border: 1px dashed rgba(102, 224, 255, 0.6); border-radius: 50%; animation: spinLayer 12s linear infinite; opacity: 0.8; }
+  .astral-ring-2 { position: absolute; inset: -24px; border: 1px solid rgba(170, 128, 255, 0.4); border-radius: 50%; border-top-color: transparent; border-bottom-color: transparent; animation: spinLayer 8s linear infinite reverse; opacity: 0.6; }
   @keyframes pulseGlow { from { transform: scale(0.9); opacity: 0.8;} to { transform: scale(1.1); opacity: 1;} }
 
   .card-face.front { transform: rotateY(180deg); background: #050505; border-color: var(--cyan); display: flex; align-items: center; justify-content: center;}
-  
-  .fallback-bg {
-    position: absolute; inset: 0; background: #0b0714;
-    display: flex; align-items: center; justify-content: center; text-align: center;
-    padding: 16px; border: 1px solid rgba(242,208,128,0.3); border-radius: 16px; margin: 8px; z-index: 0;
-  }
+  .fallback-bg { position: absolute; inset: 0; background: #0b0714; display: flex; align-items: center; justify-content: center; text-align: center; padding: 16px; border: 1px solid rgba(242,208,128,0.3); border-radius: 16px; margin: 8px; z-index: 0; }
   .fallback-bg span { color: var(--gold); font-size: 22px; font-weight: 600; line-height: 1.3;}
   .card-img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; }
   .card-img.reversed { transform: rotate(180deg); }
@@ -247,21 +236,9 @@
   .card-info .state { font-size: 12px; color: var(--cyan); font-style: italic; letter-spacing: 1px;}
 
   /* --- EPIC AI READING MODAL --- */
-  .reading-modal {
-    position: fixed; inset: 0; z-index: 300; background: rgba(2, 0, 8, 0.85);
-    backdrop-filter: blur(25px); display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 20px;
-  }
+  .reading-modal { position: fixed; inset: 0; z-index: 300; background: rgba(2, 0, 8, 0.85); backdrop-filter: blur(25px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); padding: 20px; }
   .reading-modal.show { opacity: 1; pointer-events: auto; }
-  .reading-card {
-    width: 100%; max-width: 800px; max-height: 85vh; overflow-y: auto;
-    background: rgba(12, 7, 24, 0.9); border: 1px solid var(--purple);
-    border-radius: var(--radius-xl); padding: 40px;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.9), inset 0 0 50px rgba(170,128,255,0.1);
-    transform: scale(0.9) translateY(30px); transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    scrollbar-width: thin; scrollbar-color: var(--purple) transparent;
-  }
+  .reading-card { width: 100%; max-width: 800px; max-height: 85vh; overflow-y: auto; background: rgba(12, 7, 24, 0.9); border: 1px solid var(--purple); border-radius: var(--radius-xl); padding: 40px; box-shadow: 0 30px 80px rgba(0,0,0,0.9), inset 0 0 50px rgba(170,128,255,0.1); transform: scale(0.9) translateY(30px); transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); position: relative; scrollbar-width: thin; scrollbar-color: var(--purple) transparent; }
   .reading-modal.show .reading-card { transform: scale(1) translateY(0); }
   .reading-card::-webkit-scrollbar { width: 6px; }
   .reading-card::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 10px; }
@@ -271,7 +248,6 @@
   .reading-head p { color: var(--gold); font-size: 14px; letter-spacing: 2px; text-transform: uppercase;}
   .close-reading-btn { position: absolute; top: 0; right: 0; background: transparent; border: none; color: #fff; font-size: 32px; cursor: pointer; opacity: 0.5; transition: 0.3s; }
   .close-reading-btn:hover { opacity: 1; color: var(--cyan); transform: rotate(90deg); }
-
   .reading-content { font-size: 16px; line-height: 1.9; color: rgba(255,255,255,0.9); text-align: justify; white-space: pre-line; transition: color 0.3s ease;}
   
   /* Spread Modal & Toast */
@@ -291,181 +267,69 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* ==================================================
-     PHẦN CSS MỚI TÍCH HỢP (THEME SWITCHER)
+     CALENDAR & YEAR MODALS
      ================================================== */
-  .theme-toggle-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    transform: scale(0.65);
-    transform-origin: top right;
-  }
-  .theme-label {
-    height: 60px;
-    width: 120px;
-    background-color: #ffffff;
-    border-radius: 30px;
-    -webkit-box-shadow: inset 0 0 5px 4px rgba(255, 255, 255, 1),
-      inset 0 0 20px 1px rgba(0, 0, 0, 0.488), 10px 20px 30px rgba(0, 0, 0, 0.096),
-      inset 0 0 0 3px rgba(0, 0, 0, 0.3);
-    box-shadow: inset 0 0 5px 4px rgba(255, 255, 255, 1),
-      inset 0 0 20px 1px rgba(0, 0, 0, 0.488), 10px 20px 30px rgba(0, 0, 0, 0.096),
-      inset 0 0 0 3px rgba(0, 0, 0, 0.3);
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    position: relative;
-    transition: transform 0.4s;
-  }
+  .cal-modal { position: fixed; left: 50%; top: 50%; width: min(92vw, 360px); transform: translate(-50%, -45%) scale(0.95); opacity: 0; pointer-events: none; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.4s; z-index: 250; }
+  .cal-modal.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+  .cal-panel { border-radius: 24px; border: 1px solid var(--purple); background: var(--bg-base); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 40px 100px rgba(0,0,0,0.9); overflow: hidden; display: flex; flex-direction: column; padding: 24px; }
+  
+  .cal-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .cal-month { font-size: 20px; font-weight: 700; color: var(--gold);}
+  .cal-hint { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .cal-navs { display: flex; gap: 8px; }
+  .cal-nav { width: 36px; height: 36px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.4); color: var(--text-main); cursor: pointer; display: grid; place-items: center; transition: 0.2s; }
+  .cal-nav:hover { background: rgba(170,128,255,0.2); border-color: var(--purple); }
+  
+  .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 12px; color: var(--text-muted); font-size: 11px; font-weight: 600; text-transform: uppercase; text-align: center; }
+  .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cal-days button { width: 100%; aspect-ratio: 1; border: 0; border-radius: 8px; background: transparent; color: var(--text-main); font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.2s; position: relative; }
+  .cal-days button:hover:not(.selected) { background: rgba(255,255,255,0.1); }
+  .cal-days button.other { color: rgba(255, 255, 255, 0.2); }
+  .cal-days button.today::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--cyan); }
+  .cal-days button.selected { background: var(--purple); color: #fff; font-weight: 600; box-shadow: 0 4px 12px rgba(170,128,255,0.4); }
+
+  .cal-actions { display: flex; gap: 12px; margin-top: 24px; }
+  .cal-actions .btn { height: 48px; font-size: 13px; border-radius: 12px; }
+
+  .year-list { max-height: 250px; overflow-y: auto; padding-right: 8px; display: flex; flex-direction: column; gap: 8px; scroll-behavior: smooth; }
+  .year-list::-webkit-scrollbar { width: 4px; }
+  .year-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+  .year-item { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid transparent; background: rgba(0,0,0,0.3); color: var(--text-main); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 15px; font-weight: 500; transition: 0.2s; }
+  .year-item:hover { background: rgba(255,255,255,0.05); }
+  .year-item.active { background: rgba(170, 128, 255, 0.15); border-color: var(--purple); }
+  .year-badge { font-size: 11px; font-weight: 600; color: var(--cyan); opacity: 0; transform: translateX(10px); transition: 0.3s; }
+  .year-item.active .year-badge { opacity: 1; transform: translateX(0); }
+
+  /* THEME SWITCHER */
+  .theme-toggle-container { position: fixed; top: 20px; right: 20px; z-index: 1000; transform: scale(0.65); transform-origin: top right; }
+  .theme-label { height: 60px; width: 120px; background-color: #ffffff; border-radius: 30px; box-shadow: inset 0 0 5px 4px rgba(255, 255, 255, 1), inset 0 0 20px 1px rgba(0, 0, 0, 0.488), 10px 20px 30px rgba(0, 0, 0, 0.096), inset 0 0 0 3px rgba(0, 0, 0, 0.3); display: flex; align-items: center; cursor: pointer; position: relative; transition: transform 0.4s; }
   .theme-label:hover { transform: perspective(100px) rotateX(5deg) rotateY(-5deg); }
   #theme-checkbox:checked ~ .theme-label:hover { transform: perspective(100px) rotateX(-5deg) rotateY(5deg); }
   #theme-checkbox { display: none; }
-  #theme-checkbox:checked ~ .theme-label::before {
-    left: 70px;
-    background-color: #000000;
-    background-image: linear-gradient(315deg, #000000 0%, #414141 70%);
-    transition: 0.4s;
-  }
-  .theme-label::before {
-    position: absolute;
-    content: "";
-    height: 40px;
-    width: 40px;
-    border-radius: 50%;
-    background-color: #000000;
-    background-image: linear-gradient(130deg, #757272 10%, #ffffff 11%, #726f6f 62%);
-    left: 10px;
-    box-shadow: 0 2px 1px rgba(0, 0, 0, 0.3), 10px 10px 10px rgba(0, 0, 0, 0.3);
-    transition: 0.4s;
-  }
+  #theme-checkbox:checked ~ .theme-label::before { left: 70px; background-color: #260a6d; background-image: linear-gradient(315deg, #000000 0%, #414141 70%); transition: 0.4s; }
+  .theme-label::before { position: absolute; content: ""; height: 40px; width: 40px; border-radius: 50%; background-color: #000000; background-image: linear-gradient(130deg, #757272 10%, #ffffff 11%, #726f6f 62%); left: 10px; box-shadow: 0 2px 1px rgba(0, 0, 0, 0.3), 10px 10px 10px rgba(0, 0, 0, 0.3); transition: 0.4s; }
 
-  /* ==================================================
-     PHẦN CSS MỚI TÍCH HỢP (LOADING ANIMATION - CON MẮT)
-     ================================================== */
-  .loading-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 180px;
-    padding: 20px 0;
-  }
-  .eye-lid {
-    background-color: rgb(0, 0, 0);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 9px 0 2px rgba(0, 0, 0, 0.2), 0 0 20px rgba(170, 128, 255, 0.3);
-    width: 150px;
-    height: 150px;
-  }
-  .eye {
-    background-color: #fffcf4;
-    border-radius: 50%;
-    transform: translate3d(0, 0, 0) rotate(90deg);
-    width: 120px;
-    height: 120px;
-    animation: eye 5s infinite;
-  }
-  @keyframes eye {
-    12%, 25% { width: 100px; height: 110px; }
-    37%, 50% { width: 60px; height: 130px; }
-    63%, 75% { width: 100px; height: 103px; }
-    87% { width: 100px; height: 100px; }
-  }
-  .cornea {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgb(0, 0, 0);
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: eye-color 5s infinite;
-  }
-  @keyframes eye-color {
-    63%, 75% { background-color: rgb(137, 1, 1); }
-  }
-  .white-pupil {
-    position: absolute;
-    top: 70%;
-    left: 10%;
-    border-radius: 50%;
-    background-color: #fffcf4;
-    width: 20px;
-    height: 20px;
-  }
+  /* LOADING ANIMATION - CON MẮT */
+  .loading-wrapper { display: flex; justify-content: center; align-items: center; min-height: 180px; padding: 20px 0; }
+  .eye-lid { background-color: rgb(0, 0, 0); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 9px 0 2px rgba(0, 0, 0, 0.2), 0 0 20px rgba(170, 128, 255, 0.3); width: 150px; height: 150px; }
+  .eye { background-color: #fffcf4; border-radius: 50%; transform: translate3d(0, 0, 0) rotate(90deg); width: 120px; height: 120px; animation: eye 5s infinite; }
+  @keyframes eye { 12%, 25% { width: 100px; height: 110px; } 37%, 50% { width: 60px; height: 130px; } 63%, 75% { width: 100px; height: 103px; } 87% { width: 100px; height: 100px; } }
+  .cornea { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgb(0, 0, 0); border-radius: 50%; width: 50px; height: 50px; animation: eye-color 5s infinite; }
+  @keyframes eye-color { 63%, 75% { background-color: rgb(137, 1, 1); } }
+  .white-pupil { position: absolute; top: 70%; left: 10%; border-radius: 50%; background-color: #fffcf4; width: 20px; height: 20px; }
 
-  /* ==================================================
-     PHẦN CSS MỚI TÍCH HỢP (PLAY BUTTON TTS)
-     ================================================== */
-  .play-container {
-    display: none; /* Ẩn cho đến khi AI trả lời xong */
-    justify-content: center;
-    margin-top: 30px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    padding-top: 20px;
-  }
-  .play-wrapper {
-    --width: 150px;
-    --height: 60px;
-    --padding: 8px;
-    --border-radius: 24px;
-    --dot-size: 8px;
-    --btn-color: #000000;
-    --hue: 14deg;
-    --animation-duration: 1.2s;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--width);
-    height: var(--height);
-    border-radius: var(--border-radius);
-    background-color: #00000008;
-    box-shadow: 1px 1px 2px 0 #fffd, 2px 2px 2px #0001 inset, 2px 2px 4px #0001 inset, 2px 2px 8px #0001 inset;
-    perspective: 150px;
-    cursor: pointer;
-    user-select: none;
-    transition: box-shadow 0.05s linear, transform 0.05s linear;
-    transform: scale(0.9);
-  }
-  .play-toggle {
-    position: absolute; width: 100%; height: 100%; opacity: 0; z-index: 5; cursor: pointer;
-  }
-  .play-btn {
-    display: flex; align-items: center; justify-content: start; gap: 0.25em; text-align: left;
-    padding: 0 var(--height) 0 calc(var(--padding) * 2); width: calc(100% - 2 * var(--padding)); height: calc(100% - 2 * var(--padding));
-    border-radius: calc(var(--border-radius) - var(--padding)); border: none; cursor: pointer;
-    background: linear-gradient(#fff2, #0001), var(--btn-color);
-    box-shadow: 1px 1px 2px -1px #fff inset, 0 2px 1px #00000010, 0 4px 2px #00000010, 0 8px 4px #00000010, 0 16px 8px #00000010, 0 32px 16px #00000010;
-    transition: transform 0.15s cubic-bezier(0.25, 1.5, 0.5, 1.5), box-shadow 0.15s ease, filter 0.15s ease;
-    z-index: 2;
-  }
-  .play-txt {
-    position: absolute; font-family: "Montserrat", "Manrope", sans-serif; font-weight: 500; font-size: 16px;
-    color: rgba(255, 255, 255, 0.616); background-image: linear-gradient(#000a, #555); background-clip: text;
-    filter: drop-shadow(0 1px 0px #fff) drop-shadow(0 -1px 0px #0005); transition: opacity 0.2s ease;
-  }
+  /* PLAY BUTTON TTS */
+  .play-container { display: none; justify-content: center; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+  .play-wrapper { --width: 150px; --height: 60px; --padding: 8px; --border-radius: 24px; --dot-size: 8px; --btn-color: #000000; --hue: 14deg; --animation-duration: 1.2s; position: relative; display: flex; align-items: center; justify-content: center; width: var(--width); height: var(--height); border-radius: var(--border-radius); background-color: #00000008; box-shadow: 1px 1px 2px 0 #fffd, 2px 2px 2px #0001 inset, 2px 2px 4px #0001 inset, 2px 2px 8px #0001 inset; perspective: 150px; cursor: pointer; user-select: none; transition: box-shadow 0.05s linear, transform 0.05s linear; transform: scale(0.9); }
+  .play-toggle { position: absolute; width: 100%; height: 100%; opacity: 0; z-index: 5; cursor: pointer; }
+  .play-btn { display: flex; align-items: center; justify-content: start; gap: 0.25em; text-align: left; padding: 0 var(--height) 0 calc(var(--padding) * 2); width: calc(100% - 2 * var(--padding)); height: calc(100% - 2 * var(--padding)); border-radius: calc(var(--border-radius) - var(--padding)); border: none; cursor: pointer; background: linear-gradient(#fff2, #0001), var(--btn-color); box-shadow: 1px 1px 2px -1px #fff inset, 0 2px 1px #00000010, 0 4px 2px #00000010, 0 8px 4px #00000010, 0 16px 8px #00000010, 0 32px 16px #00000010; transition: transform 0.15s cubic-bezier(0.25, 1.5, 0.5, 1.5), box-shadow 0.15s ease, filter 0.15s ease; z-index: 2; }
+  .play-txt { position: absolute; font-family: "Montserrat", "Manrope", sans-serif; font-weight: 500; font-size: 16px; color: rgba(255, 255, 255, 0.616); background-image: linear-gradient(#000a, #555); background-clip: text; filter: drop-shadow(0 1px 0px #fff) drop-shadow(0 -1px 0px #0005); transition: opacity 0.2s ease; }
   .play-txt.playing { opacity: 0; }
   .play-toggle:checked ~ .play-btn .play-txt.play { opacity: 0; }
   .play-toggle:checked ~ .play-btn .play-txt.playing { opacity: 1; color: var(--gold); background-image: none; filter: none;}
-  .play-dot {
-    position: absolute; top: 50%; right: calc(var(--height) / 2 - var(--padding) / 2); width: var(--dot-size); aspect-ratio: 1/1;
-    border-radius: 50%; background-color: hsla(var(--hue), 0%, 50%, 0.1); border: 1px solid hsla(var(--hue), 0%, 60%, 0.6);
-    box-shadow: 1px 1px 2px -1px #fffe inset, 0 2px 1px #00000010, 0 4px 2px #00000010, 0 8px 4px #00000010;
-    pointer-events: none; z-index: 3; transform: translateY(-50%); transition: all 0.15s ease;
-  }
-  @keyframes play-pulse {
-    0%, 100% { transform: scale(0.8) translateY(-50%); opacity: 0.4; }
-    50% { transform: scale(1.3) translateY(-50%); opacity: 1; }
-  }
-  .play-toggle:checked ~ .play-btn .play-dot {
-    animation: play-pulse var(--animation-duration) ease-in-out infinite; background-color: var(--cyan);
-    box-shadow: 0 0 6px 1px var(--cyan), 0 0 20px 5px rgba(102, 224, 255, 0.4); border-color: transparent;
-  }
+  .play-dot { position: absolute; top: 50%; right: calc(var(--height) / 2 - var(--padding) / 2); width: var(--dot-size); aspect-ratio: 1/1; border-radius: 50%; background-color: hsla(var(--hue), 0%, 50%, 0.1); border: 1px solid hsla(var(--hue), 0%, 60%, 0.6); box-shadow: 1px 1px 2px -1px #fffe inset, 0 2px 1px #00000010, 0 4px 2px #00000010, 0 8px 4px #00000010; pointer-events: none; z-index: 3; transform: translateY(-50%); transition: all 0.15s ease; }
+  @keyframes play-pulse { 0%, 100% { transform: scale(0.8) translateY(-50%); opacity: 0.4; } 50% { transform: scale(1.3) translateY(-50%); opacity: 1; } }
+  .play-toggle:checked ~ .play-btn .play-dot { animation: play-pulse var(--animation-duration) ease-in-out infinite; background-color: var(--cyan); box-shadow: 0 0 6px 1px var(--cyan), 0 0 20px 5px rgba(102, 224, 255, 0.4); border-color: transparent; }
   .play-wrapper:hover .play-btn, .play-wrapper:focus-within .play-btn { transform: translate3d(0, -2px, 2px); filter: drop-shadow(var(--padding) 0 var(--padding) rgba(170, 128, 255, 0.6)); }
   .play-wrapper:active .play-btn { transform: translate3d(0, 2px, -2px); box-shadow: 1px 1px 2px 0 #fff, 2px 2px 2px #0001 inset, 2px 2px 4px #0001 inset, 2px 2px 8px #0001 inset, 0 0 32px 2px rgba(170, 128, 255, 0.5) inset; }
 
@@ -488,7 +352,6 @@
 </head>
 <body>
   
-  <!-- Nút Chuyển Chế Độ Sáng Tối (Mới Thêm) -->
   <div class="theme-toggle-container">
     <input type="checkbox" name="theme-checkbox" id="theme-checkbox" />
     <label for="theme-checkbox" class="theme-label"></label>
@@ -519,28 +382,37 @@
           </button>
 
           <div class="field-row">
-            <div class="field">
-              <input id="dobInput" type="date" placeholder="Ngày sinh" />
+            
+            <div class="dob-row" id="dobRow">
+              <div class="dob-box" id="dobBox">
+                <button id="dobBtn" class="field-btn" type="button">
+                  <div class="field-left">
+                    <div class="dob-icon">📅</div>
+                    <div id="dobValue" class="dob-val">Ngày sinh</div>
+                  </div>
+                  <span class="chev">›</span>
+                </button>
+              </div>
+              <div class="year-box" id="yearBox">
+                <button id="yearBtn" class="field-btn" type="button">
+                  <div id="yearValue" class="dob-val active" style="width:100%; text-align:center;">Năm</div>
+                </button>
+              </div>
             </div>
+
             <div class="field gender-group">
-              <label class="gender-btn">
-                <input type="radio" name="gender" value="Nam">
-                <span>Nam</span>
-              </label>
-              <label class="gender-btn">
-                <input type="radio" name="gender" value="Nữ">
-                <span>Nữ</span>
-              </label>
-              <label class="gender-btn">
-                <input type="radio" name="gender" value="Khác">
-                <span>Khác</span>
-              </label>
+              <input type="radio" name="gender" id="g-nam" value="Nam">
+              <input type="radio" name="gender" id="g-nu" value="Nữ">
+              <input type="radio" name="gender" id="g-khac" value="Khác">
+              <div class="gender-slider"></div>
+              <label for="g-nam" class="gender-btn"><span>Nam</span></label>
+              <label for="g-nu" class="gender-btn"><span>Nữ</span></label>
+              <label for="g-khac" class="gender-btn"><span>Khác</span></label>
             </div>
+
           </div>
           
-          <div id="zodiacBadge" class="zodiac-badge">
-             ✦ Hãy chọn ngày sinh
-          </div>
+          <div id="zodiacBadge" class="zodiac-badge">✦ Hãy hoàn tất ngày sinh</div>
 
           <div class="field">
             <input id="questionInput" type="text" placeholder="Thông điệp bạn muốn hỏi..." autocomplete="off" />
@@ -564,7 +436,6 @@
           <div class="cards-grid" id="cardsGrid"></div>
 
           <button class="btn btn-epic" id="revealAiBtn" style="display: none;">✧ Mở Khóa Thông Điệp Từ AI ✧</button>
-          
         </section>
       </div>
     </section>
@@ -590,14 +461,50 @@
   <div class="modal" id="spreadModal">
     <div class="modal-card">
       <div class="modal-head">
-        <div>
-          <h3 class="serif-font">Số Lượng Lá Bài</h3>
-        </div>
+        <div><h3 class="serif-font">Số Lượng Lá Bài</h3></div>
         <button class="icon-btn" id="closeSpreadModal" type="button">&times;</button>
       </div>
       <div class="spread-grid" id="spreadGrid"></div>
       <div class="modal-foot">
         <button class="btn btn-primary" id="modalDoneBtn" type="button" style="width:100%">Xác Nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Lịch Chọn Ngày/Tháng -->
+  <div id="calendarModal" class="cal-modal">
+    <div class="cal-panel">
+      <div class="cal-top">
+        <div>
+          <div id="monthLabel" class="cal-month serif-font">Tháng</div>
+          <div id="monthHint" class="cal-hint">Năm</div>
+        </div>
+        <div class="cal-navs">
+          <button id="prevBtn" class="cal-nav" type="button">‹</button>
+          <button id="nextBtn" class="cal-nav" type="button">›</button>
+        </div>
+      </div>
+      <div class="cal-week">
+        <div>CN</div><div>T2</div><div>T3</div><div>T4</div><div>T5</div><div>T6</div><div>T7</div>
+      </div>
+      <div id="days" class="cal-days"></div>
+      <div class="cal-actions">
+        <button id="cancelCalBtn" class="btn btn-ghost" type="button" style="flex:1">Hủy</button>
+        <button id="confirmCalBtn" class="btn btn-primary" type="button" style="flex:1">Tiếp tục</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Chọn Năm -->
+  <div id="yearModal" class="cal-modal">
+    <div class="cal-panel">
+      <div class="cal-top" style="justify-content: center; margin-bottom: 20px;">
+        <div class="cal-month serif-font" style="font-size: 22px;">Chọn Năm Sinh</div>
+      </div>
+      <div id="yearList" class="year-list"></div>
+      <div class="cal-actions">
+        <button id="backYearBtn" class="btn btn-ghost" type="button" style="flex:1">Quay lại</button>
+        <button id="finishYearBtn" class="btn btn-primary" type="button" style="flex:1">Hoàn tất</button>
       </div>
     </div>
   </div>
@@ -609,11 +516,8 @@
         <h4 class="serif-font">Lời Sấm Truyền</h4>
         <p>Trí tuệ vũ trụ đang luận giải</p>
       </div>
-      <div class="reading-content" id="readingContent">
-        <!-- Text Typewriter sẽ ở đây -->
-      </div>
+      <div class="reading-content" id="readingContent"></div>
       
-      <!-- Khối nút Play (Mới thêm) -->
       <div class="play-container" id="playActionContainer">
         <label class="play-wrapper">
           <input type="checkbox" class="play-toggle" id="ttsPlayToggle"/>
@@ -624,16 +528,12 @@
           </div>
         </label>
       </div>
-
     </div>
   </div>
 
   <div class="toast" id="toast">Thông báo</div>
 
 <script>
-  // ==========================================
-  // ĐIỀN API KEY CỦA MÀY VÀO ĐÂY ĐỂ AI HOẠT ĐỘNG
-  // ==========================================
   const GEMINI_API_KEY = atob("QUl6YVN5Q21hZ3pVckl2QmJPSzMwUEJudHIzd1VoQ2VNalkxREpN"); 
   
   const BASE_PATH = "images/";
@@ -661,54 +561,35 @@
   let selectedSpread = 3;
   let currentQuestion = "";
   let currentCards = [];
-  let isHolding = false, holdStart = 0, shuffleTimer, holdRAF;
+  let isHolding = false, holdStart = 0, shuffleTimer;
   let aiReadingFetched = false;
   let aiReadingText = "";
   let userZodiac = "";
 
   const elements = {
-    spreadModal: document.getElementById("spreadModal"),
-    spreadGrid: document.getElementById("spreadGrid"),
-    openSpreadModal: document.getElementById("openSpreadModal"),
-    closeSpreadModal: document.getElementById("closeSpreadModal"),
-    modalDoneBtn: document.getElementById("modalDoneBtn"),
-    selectedSpreadText: document.getElementById("selectedSpreadText"),
-    questionInput: document.getElementById("questionInput"),
-    dobInput: document.getElementById("dobInput"),
-    zodiacBadge: document.getElementById("zodiacBadge"),
-    readyBtn: document.getElementById("readyBtn"),
-    quickResetBtn: document.getElementById("quickResetBtn"),
-    resultsSection: document.getElementById("resultsSection"),
-    cardsGrid: document.getElementById("cardsGrid"),
-    revealAiBtn: document.getElementById("revealAiBtn"),
-    aiReadingModal: document.getElementById("aiReadingModal"),
-    readingContent: document.getElementById("readingContent"),
-    closeReadingBtn: document.getElementById("closeReadingBtn"),
-    rerollBtn: document.getElementById("rerollBtn"),
-    overlay: document.getElementById("overlay"),
-    holdArea: document.getElementById("holdArea"),
-    holdCore: document.getElementById("holdCore"),
-    holdRing: document.getElementById("holdRing"),
-    toast: document.getElementById("toast"),
-    // Elements mới
-    themeCheckbox: document.getElementById("theme-checkbox"),
-    playActionContainer: document.getElementById("playActionContainer"),
+    spreadModal: document.getElementById("spreadModal"), spreadGrid: document.getElementById("spreadGrid"),
+    openSpreadModal: document.getElementById("openSpreadModal"), closeSpreadModal: document.getElementById("closeSpreadModal"),
+    modalDoneBtn: document.getElementById("modalDoneBtn"), selectedSpreadText: document.getElementById("selectedSpreadText"),
+    questionInput: document.getElementById("questionInput"), zodiacBadge: document.getElementById("zodiacBadge"), 
+    readyBtn: document.getElementById("readyBtn"), quickResetBtn: document.getElementById("quickResetBtn"), 
+    resultsSection: document.getElementById("resultsSection"), cardsGrid: document.getElementById("cardsGrid"), 
+    revealAiBtn: document.getElementById("revealAiBtn"), aiReadingModal: document.getElementById("aiReadingModal"), 
+    readingContent: document.getElementById("readingContent"), closeReadingBtn: document.getElementById("closeReadingBtn"), 
+    rerollBtn: document.getElementById("rerollBtn"), overlay: document.getElementById("overlay"), 
+    holdArea: document.getElementById("holdArea"), holdCore: document.getElementById("holdCore"), 
+    holdRing: document.getElementById("holdRing"), toast: document.getElementById("toast"), 
+    themeCheckbox: document.getElementById("theme-checkbox"), playActionContainer: document.getElementById("playActionContainer"), 
     ttsPlayToggle: document.getElementById("ttsPlayToggle")
   };
 
   const randInt = (max) => crypto.getRandomValues(new Uint32Array(1))[0] % max;
   const toastMsg = (msg) => { elements.toast.textContent = msg; elements.toast.classList.add("show"); setTimeout(() => elements.toast.classList.remove("show"), 2500); };
 
-  // --- Logic Chuyển Chế Độ Sáng/Tối ---
   elements.themeCheckbox.addEventListener('change', (e) => {
-    if(e.target.checked) {
-      document.body.classList.add('light-mode');
-    } else {
-      document.body.classList.remove('light-mode');
-    }
+    if(e.target.checked) document.body.classList.add('light-mode');
+    else document.body.classList.remove('light-mode');
   });
 
-  // --- Logic Cung Hoàng Đạo ---
   function getZodiac(day, month) {
       if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return "Bạch Dương ♈";
       if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return "Kim Ngưu ♉";
@@ -725,25 +606,93 @@
       return "";
   }
 
-  elements.dobInput.addEventListener('change', (e) => {
-      const date = new Date(e.target.value);
-      if(isNaN(date)) {
-          elements.zodiacBadge.classList.remove("show");
-          userZodiac = "";
-          return;
-      }
-      userZodiac = getZodiac(date.getDate(), date.getMonth() + 1);
-      if(userZodiac) {
-          elements.zodiacBadge.textContent = "Năng lượng chòm sao: " + userZodiac;
-          elements.zodiacBadge.classList.add("show");
-      }
-  });
+  /* ==================================================
+     LOGIC DOB PICKER
+     ================================================== */
+  const dobElements = {
+    btn: document.getElementById('dobBtn'), val: document.getElementById('dobValue'),
+    yearBtn: document.getElementById('yearBtn'), yearVal: document.getElementById('yearValue'),
+    yearBox: document.getElementById('yearBox'), row: document.getElementById('dobRow'),
+    calModal: document.getElementById('calendarModal'), yearModal: document.getElementById('yearModal'),
+    cancel: document.getElementById('cancelCalBtn'), confirm: document.getElementById('confirmCalBtn'),
+    back: document.getElementById('backYearBtn'), finish: document.getElementById('finishYearBtn'),
+    prev: document.getElementById('prevBtn'), next: document.getElementById('nextBtn'),
+    days: document.getElementById('days'), monthLbl: document.getElementById('monthLabel'),
+    monthHnt: document.getElementById('monthHint'), yearList: document.getElementById('yearList')
+  };
 
+  const monthNames = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+  const today = new Date();
+  let dobState = { currentViewDate: new Date(today.getFullYear(), today.getMonth(), 1), day: null, month: null, year: null, activeYear: today.getFullYear() };
+  const pad = (num) => String(num).padStart(2, '0');
+
+  function toggleDobModal(modal, show) {
+    if (show) { elements.overlay.classList.add('show'); modal.classList.add('show'); } 
+    else { modal.classList.remove('show'); if (!dobElements.calModal.classList.contains('show') && !dobElements.yearModal.classList.contains('show')) { elements.overlay.classList.remove('show'); } }
+  }
+
+  function renderCalendar() {
+    dobElements.days.innerHTML = '';
+    const y = dobState.currentViewDate.getFullYear(), m = dobState.currentViewDate.getMonth();
+    dobElements.monthLbl.textContent = monthNames[m]; dobElements.monthHnt.textContent = `Năm ${y}`;
+    const firstDay = new Date(y, m, 1).getDay(), lastDate = new Date(y, m + 1, 0).getDate(), prevLastDate = new Date(y, m, 0).getDate();
+    
+    const createBtn = (dObj, lbl, isOther) => {
+      const b = document.createElement('button'); b.textContent = lbl;
+      if (isOther) b.classList.add('other');
+      if (dobState.day === dObj.getDate() && dobState.month === dObj.getMonth() + 1) b.classList.add('selected');
+      b.onclick = () => { dobState.day = dObj.getDate(); dobState.month = dObj.getMonth() + 1; dobState.currentViewDate = new Date(dObj.getFullYear(), dObj.getMonth(), 1); renderCalendar(); };
+      return b;
+    };
+    for (let i = firstDay - 1; i >= 0; i--) dobElements.days.appendChild(createBtn(new Date(y, m - 1, prevLastDate - i), prevLastDate - i, true));
+    for (let d = 1; d <= lastDate; d++) dobElements.days.appendChild(createBtn(new Date(y, m, d), d, false));
+    const remain = 42 - dobElements.days.children.length;
+    for (let d = 1; d <= remain; d++) dobElements.days.appendChild(createBtn(new Date(y, m + 1, d), d, true));
+  }
+
+  function renderYears() {
+    dobElements.yearList.innerHTML = ''; const currY = today.getFullYear(); let activeNode = null;
+    for (let y = currY; y >= 1950; y--) {
+      const itm = document.createElement('div'); const isActive = y === dobState.activeYear;
+      itm.className = `year-item ${isActive ? 'active' : ''}`; itm.innerHTML = `<span>${y}</span><span class="year-badge">Đã chọn</span>`;
+      itm.onclick = () => { dobState.activeYear = y; dobState.year = y; dobElements.yearVal.textContent = y; renderYears(); };
+      dobElements.yearList.appendChild(itm); if (isActive) activeNode = itm;
+    }
+    if (activeNode) setTimeout(() => activeNode.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+  }
+
+  dobElements.btn.onclick = () => { renderCalendar(); toggleDobModal(dobElements.calModal, true); };
+  dobElements.yearBtn.onclick = () => { renderYears(); toggleDobModal(dobElements.yearModal, true); };
+  dobElements.cancel.onclick = () => toggleDobModal(dobElements.calModal, false);
+  dobElements.back.onclick = () => { toggleDobModal(dobElements.yearModal, false); setTimeout(() => toggleDobModal(dobElements.calModal, true), 300); };
+  dobElements.prev.onclick = () => { dobState.currentViewDate.setMonth(dobState.currentViewDate.getMonth() - 1); renderCalendar(); };
+  dobElements.next.onclick = () => { dobState.currentViewDate.setMonth(dobState.currentViewDate.getMonth() + 1); renderCalendar(); };
+
+  dobElements.confirm.onclick = () => {
+    if (!dobState.day || !dobState.month) return;
+    dobElements.val.textContent = `${pad(dobState.day)}/${pad(dobState.month)}`;
+    dobElements.val.classList.add('active');
+    toggleDobModal(dobElements.calModal, false);
+    dobElements.yearBox.classList.add('show'); dobElements.row.classList.add('compact');
+    if (!dobState.year) dobElements.yearVal.textContent = 'Chọn';
+    setTimeout(() => { toggleDobModal(dobElements.yearModal, true); renderYears(); }, 300);
+  };
+
+  dobElements.finish.onclick = () => {
+    if (!dobState.day || !dobState.month || !dobState.year) return;
+    toggleDobModal(dobElements.yearModal, false);
+    userZodiac = getZodiac(dobState.day, dobState.month);
+    if(userZodiac) { elements.zodiacBadge.textContent = "Năng lượng chòm sao: " + userZodiac; elements.zodiacBadge.classList.add("show"); }
+  };
+  
+  renderCalendar();
+
+  /* ==================================================
+     LOGIC RÚT BÀI & AI CŨ
+     ================================================== */
   function drawCards(count) {
     const arr = [...fullDeck];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = randInt(i + 1); [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
+    for (let i = arr.length - 1; i > 0; i--) { const j = randInt(i + 1); [arr[i], arr[j]] = [arr[j], arr[i]]; }
     return arr.slice(0, count).map(card => ({ ...card, reversed: randInt(2) === 1 }));
   }
 
@@ -767,28 +716,26 @@
   elements.readyBtn.onclick = () => {
     currentQuestion = elements.questionInput.value.trim();
     if (currentQuestion.length < 5) return toastMsg("Hãy nhập câu hỏi rõ ràng hơn chút nhé.");
-    
-    elements.resultsSection.classList.remove("show");
-    elements.revealAiBtn.style.display = "none";
-    aiReadingFetched = false;
-    aiReadingText = "";
-    elements.playActionContainer.style.display = 'none'; // Ẩn nút đọc
-    
-    elements.overlay.classList.add("show");
-    elements.holdRing.style.setProperty("--progress", "0%");
+    elements.resultsSection.classList.remove("show"); elements.revealAiBtn.style.display = "none";
+    aiReadingFetched = false; aiReadingText = ""; elements.playActionContainer.style.display = 'none';
+    elements.overlay.classList.add("show"); elements.holdRing.style.setProperty("--progress", "0%");
   };
 
   elements.quickResetBtn.onclick = elements.rerollBtn.onclick = () => {
-    elements.questionInput.value = "";
-    elements.resultsSection.classList.remove("show");
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    window.speechSynthesis.cancel(); // Tắt đọc nếu đang đọc
+    elements.questionInput.value = ""; elements.resultsSection.classList.remove("show");
+    window.scrollTo({ top: 0, behavior: 'smooth' }); window.speechSynthesis.cancel();
   };
 
   function startShuffle() {
     isHolding = true; elements.holdCore.classList.add("active");
     shuffleTimer = setInterval(() => {}, 100); holdStart = Date.now();
     animateHold();
+    
+    window.preloadedCards = drawCards(selectedSpread);
+    window.preloadedCards.forEach(card => {
+        const img = new Image();
+        img.src = BASE_PATH + card.file;
+    });
   }
 
   function animateHold() {
@@ -803,44 +750,25 @@
     isHolding = false; clearInterval(shuffleTimer); elements.holdCore.classList.remove("active");
     elements.overlay.classList.remove("show");
     
-    currentCards = drawCards(selectedSpread);
+    currentCards = window.preloadedCards || drawCards(selectedSpread);
     renderCards(currentCards);
   }
 
   function renderCards(cards) {
-    elements.resultsSection.classList.add("show");
-    elements.cardsGrid.innerHTML = "";
-    let flippedCount = 0;
-    
+    elements.resultsSection.classList.add("show"); elements.cardsGrid.innerHTML = ""; let flippedCount = 0;
     cards.forEach((card, i) => {
       const item = document.createElement("div"); item.className = "tarot-card"; item.style.setProperty("--delay", `${i * 150}ms`);
-      
       const fallbackHTML = `<div class="fallback-bg"><span class="serif-font">${card.name}</span></div>`;
-      
       item.innerHTML = `
         <div class="card-stack">
-          <div class="card-face back">
-            <div class="astral-portal"><div class="astral-ring"></div><div class="astral-ring-2"></div></div>
-          </div>
-          <div class="card-face front">
-            ${fallbackHTML}
-            <img class="card-img ${card.reversed ? 'reversed' : ''}" src="${BASE_PATH}${card.file}" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'">
-          </div>
+          <div class="card-face back"><div class="astral-portal"><div class="astral-ring"></div><div class="astral-ring-2"></div></div></div>
+          <div class="card-face front">${fallbackHTML}<img class="card-img ${card.reversed ? 'reversed' : ''}" src="${BASE_PATH}${card.file}" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'"></div>
         </div>
-        <div class="card-info">
-          <div class="num">Lá ${i + 1}</div>
-          <div class="name serif-font">${card.name}</div>
-          <div class="state">${card.reversed ? 'Reversed' : 'Upright'}</div>
-        </div>`;
-        
+        <div class="card-info"><div class="num">Lá ${i + 1}</div><div class="name serif-font">${card.name}</div><div class="state">${card.reversed ? 'Reversed' : 'Upright'}</div></div>`;
       item.onclick = () => {
         if (!item.classList.contains("flipped")) {
-          item.classList.add("flipped");
-          flippedCount++;
-          if (flippedCount === cards.length) {
-            elements.revealAiBtn.style.display = "flex";
-            elements.revealAiBtn.style.animation = "slideUpFade 0.8s forwards";
-          }
+          item.classList.add("flipped"); flippedCount++;
+          if (flippedCount === cards.length) { elements.revealAiBtn.style.display = "flex"; elements.revealAiBtn.style.animation = "slideUpFade 0.8s forwards"; }
         }
       };
       elements.cardsGrid.appendChild(item);
@@ -848,91 +776,50 @@
     setTimeout(() => elements.resultsSection.scrollIntoView({ behavior: 'smooth' }), 500);
   }
 
-  // AI Logic & TTS
-  elements.revealAiBtn.onclick = () => {
-    elements.aiReadingModal.classList.add("show");
-    if (!aiReadingFetched) fetchGeminiReading();
-  };
+  elements.revealAiBtn.onclick = () => { elements.aiReadingModal.classList.add("show"); if (!aiReadingFetched) fetchGeminiReading(); };
+  elements.closeReadingBtn.onclick = () => { elements.aiReadingModal.classList.remove("show"); window.speechSynthesis.cancel(); elements.ttsPlayToggle.checked = false; };
 
-  elements.closeReadingBtn.onclick = () => {
-    elements.aiReadingModal.classList.remove("show");
-    window.speechSynthesis.cancel();
-    elements.ttsPlayToggle.checked = false;
-  };
-
-  // Logic Web Speech API (Đọc Văn Bản)
   const synth = window.speechSynthesis;
   let aiUtterance = null;
 
   function playReadingVoice(text) {
-    if (synth.speaking) synth.cancel(); // Reset nếu đang đọc
-    
-    // Xóa các ký tự đặc biệt của markdown để đọc mượt hơn
+    if (synth.speaking) synth.cancel();
     const cleanText = text.replace(/[*_#~`]/g, '');
-    
     aiUtterance = new SpeechSynthesisUtterance(cleanText);
     aiUtterance.lang = 'vi-VN';
-    aiUtterance.rate = 1.0; // Bình thường, giữ nguyên tốc độ tự nhiên
-    aiUtterance.pitch = 1.0; // Tự nhiên, không ép trầm xuống nữa
-    
-    aiUtterance.onend = () => {
-      elements.ttsPlayToggle.checked = false;
-    };
-    
+    aiUtterance.rate = 1.0; 
+    aiUtterance.pitch = 1.0; 
+    aiUtterance.onend = () => { elements.ttsPlayToggle.checked = false; };
     synth.speak(aiUtterance);
   }
 
   elements.ttsPlayToggle.addEventListener('change', (e) => {
-    if (e.target.checked) {
-      if (aiReadingText) playReadingVoice(aiReadingText);
-    } else {
-      synth.cancel();
-    }
+    if (e.target.checked) { if (aiReadingText) playReadingVoice(aiReadingText); } else { synth.cancel(); }
   });
 
   async function fetchGeminiReading() {
     aiReadingFetched = true;
+    elements.readingContent.innerHTML = `<div class="loading-wrapper"><div class="eye-lid"><div class="eye"><div class="cornea"><div class="white-pupil"></div></div></div></div></div>`;
     
-    // Đã thay thế loading bar bằng Animation con mắt ma thuật
-    elements.readingContent.innerHTML = `
-      <div class="loading-wrapper">
-        <div class="eye-lid">
-          <div class="eye">
-            <div class="cornea">
-              <div class="white-pupil"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
+    const dobStr = (dobState.day && dobState.month && dobState.year) ? `${dobState.day}/${dobState.month}/${dobState.year}` : "Không rõ ngày sinh";
+    const dobParam = dobStr !== "Không rõ ngày sinh" ? `Ngày sinh: ${dobStr}` : dobStr;
     
-    const dob = elements.dobInput.value ? `Ngày sinh: ${elements.dobInput.value}` : "Không rõ ngày sinh";
     const selectedGenderBtn = document.querySelector('input[name="gender"]:checked');
     const rawGender = selectedGenderBtn ? selectedGenderBtn.value : "";
     const genderStr = rawGender ? `Giới tính: ${rawGender}` : "Không rõ giới tính";
     const zodiacStr = userZodiac ? `(${userZodiac})` : "";
     
-    // Logic xưng hô
-    let tone = "bạn";
-    if (rawGender === "Nam") tone = "ông";
-    else if (rawGender === "Nữ") tone = "bà";
-
+    let tone = "bạn"; if (rawGender === "Nam") tone = "ông"; else if (rawGender === "Nữ") tone = "bà";
     const cardText = currentCards.map((c, i) => `Lá ${i+1}: ${c.name} (${c.reversed ? "Ngược" : "Xuôi"})`).join(", ");
     
     const prompt = `Đóng vai một Tarot Reader Gen Z thế hệ mới, tâm lý, hiểu chuyện nhưng thỉnh thoảng hơi "mỏ hỗn" và thích trêu chọc khách hàng một cách duyên dáng.
-Khách hàng: ${genderStr} (xưng hô: tôi và ${tone}), ${dob} ${zodiacStr}. 
-Hỏi: "${currentQuestion}". 
-Rút được: ${cardText}.
-
+Khách hàng: ${genderStr} (xưng hô: tôi và ${tone}), ${dobParam} ${zodiacStr}. Hỏi: "${currentQuestion}". Rút được: ${cardText}.
 Yêu cầu cấu trúc bài giải (Trả lời bằng text thuần, chia đoạn rõ ràng):
 1. Mở bài: Dựa vào tổng quan các lá bài và cung hoàng đạo (nếu có), hãy buông 1 câu trêu đùa/nhận xét cực kỳ trendy, hài hước (không vô duyên) về tình trạng hiện tại của ${tone}.
 2. Thân bài: Giải mã sâu sắc, nghiêm túc, đúng trọng tâm vấn đề. Kết nối ý nghĩa các lá bài lại thành một câu chuyện hợp lý.
 3. Kết bài: Đưa ra lời khuyên thiết thực. Chốt lại bằng một câu trêu đùa hoặc cà khịa nhẹ nhàng cuối cùng để tạo tiếng cười.`;
 
-    if(GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
-        elements.readingContent.innerHTML = `<span style="color: #ff8888;">Năng lượng vũ trụ đang bị nghẽn (Thiếu API Key). Mày cần thay mã GEMINI_API_KEY trong file HTML để AI có thể kết nối.</span>`;
-        return;
-    }
+    if(GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") { elements.readingContent.innerHTML = `<span style="color: #ff8888;">Thiếu API Key.</span>`; return; }
 
     try {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -941,36 +828,28 @@ Yêu cầu cấu trúc bài giải (Trả lời bằng text thuần, chia đoạ
       });
       const data = await res.json();
       aiReadingText = data.candidates[0].content.parts[0].text;
-      
       elements.readingContent.innerHTML = "";
-      
-      // Hiện khu vực chứa nút Play
       elements.playActionContainer.style.display = 'flex';
-      
       let i = 0;
       const typeWriter = setInterval(() => {
         let char = aiReadingText.charAt(i);
-        if (char === '\n') {
-            elements.readingContent.innerHTML += '<br/>';
-        } else if (char === '*' && aiReadingText.charAt(i+1) === '*') {
-            i++; 
-        } else {
-            elements.readingContent.innerHTML += char;
-        }
-        
+        if (char === '\n') elements.readingContent.innerHTML += '<br/>';
+        else if (char === '*' && aiReadingText.charAt(i+1) === '*') i++; 
+        else elements.readingContent.innerHTML += char;
         i++;
-
-        if (i >= aiReadingText.length) {
-            clearInterval(typeWriter);
-        }
-      }, 20); // Tốc độ gõ chữ
-    } catch(e) {
-      elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Có nhiễu loạn sóng vũ trụ. Hãy tải lại và thử lại sau.</span>";
-    }
+        if (i >= aiReadingText.length) clearInterval(typeWriter);
+      }, 20);
+    } catch(e) { elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Có nhiễu loạn sóng vũ trụ. Hãy tải lại và thử lại sau.</span>"; }
   }
 
-  // Pointer Events
-  elements.holdArea.addEventListener("pointerdown", (e) => { e.preventDefault(); if(elements.overlay.classList.contains("show")) startShuffle(); }, {passive: false});
+  elements.overlay.addEventListener("pointerdown", (e) => {
+    if (dobElements.calModal.classList.contains("show") || dobElements.yearModal.classList.contains("show")) {
+       toggleDobModal(dobElements.calModal, false);
+       toggleDobModal(dobElements.yearModal, false);
+    }
+  });
+
+  elements.holdArea.addEventListener("pointerdown", (e) => { e.preventDefault(); if(elements.overlay.classList.contains("show") && !dobElements.calModal.classList.contains("show") && !dobElements.yearModal.classList.contains("show")) startShuffle(); }, {passive: false});
   const stopEvt = (e) => { if(isHolding) stopShuffle(); };
   elements.holdArea.addEventListener("pointerup", stopEvt); elements.holdArea.addEventListener("pointercancel", stopEvt);
 </script>
