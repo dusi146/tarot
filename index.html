@@ -22,6 +22,12 @@
     --purple: #8e44ad;
     --purple-glow: rgba(142, 68, 173, 0.5);
     --cyan: #48cae4;
+    
+    /* Aura Colors for Dark Mode */
+    --aura-1: rgba(142, 68, 173, 0.7); 
+    --aura-2: rgba(72, 202, 228, 0.8);
+    --aura-core: rgba(20, 10, 40, 0.95);
+
     --shadow-heavy: 0 40px 80px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 0, 0, 0.5);
     --radius-xl: 36px;
     --radius-lg: 20px;
@@ -40,6 +46,12 @@
     --gold: #b07d10;
     --purple: #6a1b9a;
     --cyan: #0277bd;
+    
+    /* Aura Colors for Light Mode */
+    --aura-1: rgba(226, 194, 117, 0.9);
+    --aura-2: rgba(106, 27, 154, 0.8);
+    --aura-core: rgba(255, 255, 255, 0.95);
+
     --shadow-heavy: 0 30px 60px rgba(0, 0, 0, 0.08), 0 0 20px rgba(0, 0, 0, 0.03);
   }
 
@@ -216,12 +228,23 @@
   .field input[type="text"]:focus { border-color: var(--cyan); background: rgba(0,0,0,0.4); box-shadow: 0 0 0 4px rgba(72, 202, 228, 0.1), 0 12px 25px rgba(0,0,0,0.2); transform: translateY(-2px);}
   body.light-mode .field input[type="text"]:focus { box-shadow: 0 0 0 4px rgba(2, 119, 189, 0.1), 0 12px 25px rgba(0,0,0,0.05); background: #fff;}
   
-  .gender-group { position: relative; display: flex; background: rgba(0,0,0,0.2); padding: 6px; border: 1px solid var(--glass-border); isolation: isolate; box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 8px 20px rgba(0,0,0,0.15);}
+  .gender-group { 
+      position: relative; display: flex; background: rgba(0,0,0,0.2); padding: 6px; 
+      border: 1px solid var(--glass-border); border-radius: 18px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 8px 20px rgba(0,0,0,0.15);
+  }
   .gender-group input { display: none; }
-  .gender-slider { position: absolute; top: 6px; bottom: 6px; width: calc(33.33% - 4px); background: linear-gradient(135deg, var(--purple), #5e2a7a); border-radius: 14px; transition: transform 0.5s var(--ease-out-spring), opacity 0.3s; z-index: 1; opacity: 0; box-shadow: 0 6px 15px rgba(142, 68, 173, 0.3);}
+  .gender-slider { 
+      position: absolute; top: 6px; bottom: 6px; left: 6px; width: calc((100% - 12px) / 3); 
+      background: linear-gradient(135deg, rgba(142, 68, 173, 0.75), rgba(94, 42, 122, 0.85)); 
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border-radius: 14px; transition: transform 0.5s var(--ease-out-spring), opacity 0.3s; 
+      z-index: 1; opacity: 0; box-shadow: 0 6px 15px rgba(142, 68, 173, 0.3);
+  }
   #g-nam:checked ~ .gender-slider { transform: translateX(0); opacity: 1; }
-  #g-nu:checked ~ .gender-slider { transform: translateX(calc(100% + 6px)); opacity: 1; }
-  #g-khac:checked ~ .gender-slider { transform: translateX(calc(200% + 12px)); opacity: 1; }
+  #g-nu:checked ~ .gender-slider { transform: translateX(100%); opacity: 1; }
+  #g-khac:checked ~ .gender-slider { transform: translateX(200%); opacity: 1; }
+  
   .gender-btn { flex: 1; z-index: 2; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; border-radius: 14px;}
   .gender-btn span { color: var(--text-muted); font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s; }
   .gender-btn:hover span { color: var(--text-main); }
@@ -263,9 +286,9 @@
   .warn { font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 16px; font-style: italic; line-height: 1.6; opacity: 0.7; letter-spacing: 0.5px;}
 
   /* =========================================
-     RITUAL OVERLAY & HOLD
+     RITUAL OVERLAY & HOLD (NĂNG LƯỢNG TỤ KHÍ CAO CẤP)
      ========================================= */
-  .overlay { position: fixed; inset: 0; z-index: 100; background: radial-gradient(circle at center, rgba(5, 2, 15, 0.9), rgba(0, 0, 5, 0.98)); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.8s var(--ease-slow); }
+  .overlay { position: fixed; inset: 0; z-index: 100; background: radial-gradient(circle at center, rgba(5, 2, 15, 0.95), rgba(0, 0, 5, 0.98)); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.8s var(--ease-slow); }
   .overlay.show { opacity: 1; pointer-events: auto; }
   
   .ritual-box { text-align: center; max-width: 600px; width: 90%; transform: scale(0.9); opacity: 0; transition: transform 0.8s var(--ease-out-spring), opacity 0.8s; }
@@ -273,19 +296,57 @@
   .ritual-head h3 { font-size: clamp(40px, 6vw, 60px); color: var(--gold); margin-bottom: 20px; font-weight: 500; text-shadow: 0 0 30px rgba(226, 194, 117, 0.3);}
   .ritual-head p { color: var(--text-muted); font-size: 17px; margin-bottom: 70px; line-height: 1.7;}
 
-  .hold-area { position: relative; width: 340px; height: 340px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; cursor: pointer; user-select: none; touch-action: none; transition: transform 0.4s var(--ease-smooth); }
-  .hold-area:hover { transform: scale(1.05); }
-  .hold-ring-1 { position: absolute; inset: -24px; border-radius: 50%; border: 2px dashed rgba(142, 68, 173, 0.3); animation: spinLayer 25s linear infinite; pointer-events: none; }
-  .hold-ring-progress { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, var(--cyan), var(--purple) var(--progress, 0%), transparent 0); mask: radial-gradient(transparent 68%, black 69%); -webkit-mask: radial-gradient(transparent 68%, black 69%); transition: --progress 0.15s linear; pointer-events: none; filter: drop-shadow(0 0 15px var(--cyan));}
+  .hold-area { position: relative; width: 340px; height: 340px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; cursor: pointer; transition: transform 0.4s var(--ease-smooth); }
+  .hold-area:active { transform: scale(0.95); } /* Cảm giác vật lý khi ấn */
   
-  .hold-core { position: relative; z-index: 2; width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #30114a, #0b0217); border: 2px solid rgba(142, 68, 173, 0.4); display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: inset 0 0 60px rgba(0,0,0,0.9), 0 15px 40px rgba(0,0,0,0.6); transition: all 0.5s var(--ease-out-spring); }
-  .hold-core strong { font-size: 36px; color: #fff; margin-bottom: 10px; font-weight: 500; text-shadow: 0 4px 15px rgba(0,0,0,0.8);}
-  .hold-core span { font-size: 13px; color: var(--gold); letter-spacing: 4px; text-transform: uppercase;}
-  .hold-core.active { transform: scale(1.15); border-color: var(--cyan); box-shadow: inset 0 0 80px rgba(72, 202, 228, 0.15), 0 0 50px rgba(72, 202, 228, 0.3); }
+  /* Các vòng năng lượng */
+  .hold-aura { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, var(--aura-1) 0%, transparent 70%); filter: blur(20px); transition: opacity 0.3s, transform 0.1s linear; pointer-events: none; transform: scale(calc(1 + (var(--energy, 0) / 100) * 0.5)); opacity: calc(0.1 + (var(--energy, 0) / 100) * 0.7); }
+  .hold-aura-2 { position: absolute; inset: 20px; border-radius: 50%; background: radial-gradient(circle, var(--aura-2) 0%, transparent 70%); filter: blur(15px); transition: opacity 0.3s, transform 0.1s linear; pointer-events: none; transform: scale(calc(1 + (var(--energy, 0) / 100) * 0.8)); opacity: calc(0.05 + (var(--energy, 0) / 100) * 0.8); mix-blend-mode: screen; }
+
+  /* Magic Rings Xoay lồng nhau */
+  .magic-ring {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%;
+    opacity: calc(0.05 + (var(--energy, 0) / 100) * 0.95);
+    transition: opacity 0.2s, transform 0.2s; pointer-events: none;
+  }
+  .ring-1 { width: 260px; height: 260px; border: 2px dashed var(--aura-1); animation: spinLayer 15s linear infinite; }
+  .ring-2 { width: 290px; height: 290px; border: 3px double var(--aura-2); animation: spinLayer 10s linear infinite reverse; }
+  .ring-3 { width: 330px; height: 330px; border: 1px solid var(--gold); border-top-color: transparent; border-bottom-color: transparent; animation: spinLayer 20s linear infinite; filter: drop-shadow(0 0 8px var(--gold-glow)); opacity: calc((var(--energy, 0) / 100)); }
+
+  .hold-core { position: relative; z-index: 2; width: 200px; height: 200px; border-radius: 50%; background: transparent; border: 2px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.5s var(--ease-out-spring); overflow: hidden; box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 15px 40px rgba(0,0,0,0.6); }
+  
+  .hold-core::before { content: ''; position: absolute; inset: -50%; background: conic-gradient(from 0deg, transparent, var(--aura-1), var(--aura-2), transparent); animation: spinLayer 4s linear infinite; opacity: 0; transition: opacity 0.5s ease; }
+  .hold-core::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; background: radial-gradient(circle at 50% 50%, var(--aura-core), var(--bg-base)); transition: all 0.5s ease; z-index: -1; }
+
+  .hold-core strong { font-size: 32px; color: var(--text-main); margin-bottom: 6px; font-weight: 600; text-shadow: 0 4px 15px rgba(0,0,0,0.8); z-index: 2; transition: color 0.3s;}
+  .hold-core span { font-size: 13px; color: var(--gold); letter-spacing: 4px; text-transform: uppercase; z-index: 2; transition: color 0.3s;}
+  body.light-mode .hold-core strong { text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+
+  /* Trạng thái khi dí vào (Tụ Khí) */
+  .hold-core.active { border-color: var(--aura-2); box-shadow: 0 0 calc(var(--energy, 0) * 1px) var(--aura-1), inset 0 0 calc(var(--energy, 0) * 0.5px) var(--aura-2); transform: scale(1.1); }
+  .hold-core.active::before { opacity: 1; animation-duration: 1.5s; }
+
+  /* Trạng thái Full Power - Sẵn Sàng Nhả Khí */
+  .hold-core.full-power { 
+    animation: pulseCore 0.6s ease-in-out infinite alternate;
+    border-color: var(--gold); 
+    box-shadow: 0 0 80px var(--gold-glow), inset 0 0 60px var(--gold-glow);
+  }
+  .hold-core.full-power #holdTitle { color: var(--gold); text-shadow: 0 0 15px var(--gold); }
+  .hold-core.full-power #holdSubtitle { color: #fff; text-shadow: 0 0 10px #fff;}
+
+  @keyframes pulseCore { 0% { transform: scale(1.1); } 100% { transform: scale(1.18); box-shadow: 0 0 100px var(--gold), inset 0 0 80px var(--gold); } }
   @keyframes spinLayer { 100% { transform: rotate(360deg); } }
 
+  .hold-area, .hold-core, .hold-core * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: none;
+  }
+
   /* =========================================
-     CARDS RENDERING
+     CARDS RENDERING (CĂN GIỮA VÀ RESPONSIVE)
      ========================================= */
   .results { margin-top: 80px; display: none; opacity: 0; transform: translateY(60px); transition: 1s var(--ease-slow); content-visibility: auto; contain-intrinsic-size: 800px; scroll-margin-top: 60px;}
   .results.show { display: block; opacity: 1; transform: translateY(0); }
@@ -293,8 +354,9 @@
   .results-head h3 { font-size: 40px; color: var(--gold); margin-bottom: 12px; font-weight: 500;}
   .results-head p { color: var(--text-muted); font-size: 17px; }
 
-  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 40px; perspective: 3000px; }
-  .tarot-card { position: relative; width: 100%; cursor: pointer; opacity: 0; transform: translateY(60px) rotateX(-15deg); animation: epicCardEntrance 1s var(--ease-out-spring) forwards; animation-delay: var(--delay, 0ms); transition: transform 0.5s var(--ease-smooth), filter 0.5s ease;}
+  /* Sử dụng flex để căn giữa đẹp mắt mọi số lượng bài */
+  .cards-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; perspective: 3000px; width: 100%;}
+  .tarot-card { position: relative; width: 280px; max-width: 100%; cursor: pointer; opacity: 0; transform: translateY(60px) rotateX(-15deg); animation: epicCardEntrance 1s var(--ease-out-spring) forwards; animation-delay: var(--delay, 0ms); transition: transform 0.5s var(--ease-smooth), filter 0.5s ease;}
   @keyframes epicCardEntrance { to { opacity: 1; transform: translateY(0) rotateX(0); } }
   
   .card-stack { width: 100%; aspect-ratio: 300 / 527; position: relative; transform-style: preserve-3d; transition: transform 0.9s var(--ease-out-spring), box-shadow 0.6s ease; box-shadow: 0 25px 50px rgba(0,0,0,0.7); border-radius: 20px; will-change: transform; }
@@ -519,7 +581,8 @@
     .select-btn .value { font-size: 24px; }
     .btn-epic { font-size: 16px; padding: 0 24px; height: 70px; }
     
-    .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 24px 16px; }
+    .cards-grid { gap: 24px 16px; }
+    .tarot-card { width: calc(50% - 8px); } /* 2 cột trên mobile */
     .tarot-card:hover .card-stack { transform: translateY(-8px) scale(1.03); }
     
     .reading-card { padding: 40px 24px 0; border-radius: 28px; }
@@ -529,8 +592,8 @@
     .footer-buttons { gap: 24px; }
     
     .hold-area { width: 280px; height: 280px; }
-    .hold-core { width: 190px; height: 190px; }
-    .hold-core strong { font-size: 28px; }
+    .hold-core { width: 170px; height: 170px; }
+    .hold-core strong { font-size: 24px; }
     
     .spread-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
     .spread-option { padding: 20px 10px; }
@@ -544,12 +607,6 @@
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
   }
-.hold-area, .hold-core, .hold-core * {
-  -webkit-touch-callout: none; /* Chặn hiện menu copy/share */
-  -webkit-user-select: none;   /* Chặn bôi đen text */
-  user-select: none;
-  touch-action: none;          /* Chặn nháy đúp phóng to */
-}
 </style>
 </head>
 <body class="intro-active">
@@ -665,11 +722,14 @@
     <div class="ritual-box">
       <div class="ritual-head">
         <h3 class="serif-font">Nhắm Mắt Lại</h3>
-        <p>Tập trung năng lượng vào câu hỏi của mày.<br>Nhấn giữ tụ sáng để kết nối với vũ trụ.</p>
+        <p>Tập trung năng lượng vào câu hỏi của mày.<br>Nhấn giữ tụ khí, thả tay ra để giải nghiệp.</p>
       </div>
       <div class="hold-area" id="holdArea">
-        <div class="hold-ring-1"></div>
-        <div class="hold-ring-progress" id="holdRing"></div>
+        <div class="hold-aura"></div>
+        <div class="hold-aura-2"></div>
+        <div class="magic-ring ring-1"></div>
+        <div class="magic-ring ring-2"></div>
+        <div class="magic-ring ring-3"></div>
         <div class="hold-core" id="holdCore">
           <strong id="holdTitle">Chạm & Giữ</strong>
           <span id="holdSubtitle">Tụ Năng Lượng</span>
@@ -772,7 +832,7 @@
             <label class="play-wrapper">
               <input type="checkbox" class="play-toggle" id="ttsPlayToggle"/>
               <div class="play-btn">
-                <span class="play-txt play">Play</span>
+                <span class="play-txt play">Nghe Đọc</span>
                 <span class="play-txt playing">Sì Tốp</span>
                 <div class="play-dot"></div>
               </div>
@@ -805,11 +865,10 @@
         document.getElementById('intro-screen').style.display = 'none';
         document.body.classList.remove('intro-active');
         document.querySelector('.wrap').classList.add('loaded');
-      }, 1500); // Đợi CSS fade out hoàn tất
-    }, 2500); // Thời gian show màn intro
+      }, 1500);
+    }, 2500);
   });
 
-  // GIỮ NGUYÊN LOGIC CỦA JS CŨ (Tùy chỉnh Prompt AI)
   const GEMINI_API_KEY = atob("QUl6YVN5QzhyMkdxdXFrWHBNRlVNTlM4clVvVVVZU0tLRFhpMTd3"); 
   
   const BASE_PATH = "images/";
@@ -837,7 +896,13 @@
   let selectedSpread = 3;
   let currentQuestion = "";
   let currentCards = [];
-  let isHolding = false, holdStart = 0, shuffleTimer;
+  
+  // Biến cho logic hold mới
+  let isHolding = false;
+  let holdProgress = 0;
+  let holdAnimFrame;
+  let lastHoldTime = 0;
+  
   let aiReadingFetched = false;
   let aiReadingText = "";
   let userZodiac = "";
@@ -852,8 +917,9 @@
     revealAiBtn: document.getElementById("revealAiBtn"), aiReadingModal: document.getElementById("aiReadingModal"), 
     readingContent: document.getElementById("readingContent"), closeReadingBtn: document.getElementById("closeReadingBtn"), 
     rerollBtn: document.getElementById("rerollBtn"), overlay: document.getElementById("overlay"), 
-    holdArea: document.getElementById("holdArea"), holdCore: document.getElementById("holdCore"), 
-    holdRing: document.getElementById("holdRing"), toast: document.getElementById("toast"), 
+    holdArea: document.getElementById("holdArea"), holdCore: document.getElementById("holdCore"),
+    holdTitle: document.getElementById("holdTitle"), holdSubtitle: document.getElementById("holdSubtitle"), 
+    toast: document.getElementById("toast"), 
     themeCheckbox: document.getElementById("theme-checkbox"),
     ttsPlayToggle: document.getElementById("ttsPlayToggle"),
     guideToggleBtn: document.getElementById("guideToggleBtn"), guideTooltip: document.getElementById("guideTooltip"),
@@ -868,12 +934,23 @@
     else document.body.classList.remove('light-mode');
   });
 
-  // LOGIC TOOLTIP
-  elements.guideToggleBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    elements.guideTooltip.classList.toggle('show');
+  const guideWrap = document.querySelector('.guide-toggle-wrap');
+  elements.guideToggleBtn.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      elements.guideTooltip.classList.add('show');
+    } else {
+      elements.guideTooltip.classList.remove('show');
+    }
   });
-  elements.guideTooltip.addEventListener('click', (e) => { e.stopPropagation(); });
+
+  document.addEventListener('click', (e) => {
+    if (guideWrap && elements.guideTooltip) {
+      if (!guideWrap.contains(e.target) && !elements.guideTooltip.contains(e.target)) {
+        elements.guideTooltip.classList.remove('show');
+        elements.guideToggleBtn.checked = false;
+      }
+    }
+  });
   
   elements.openSpreadModal.addEventListener('click', (e) => {
     elements.spreadGrid.innerHTML = "";
@@ -885,15 +962,6 @@
       elements.spreadGrid.appendChild(btn);
     });
     elements.spreadModal.classList.add("show");
-  });
-
-  document.addEventListener('click', (e) => {
-    if (elements.guideToggleBtn && elements.guideTooltip) {
-      if (!elements.guideToggleBtn.contains(e.target) && !elements.guideTooltip.contains(e.target)) {
-        elements.guideTooltip.classList.remove('show');
-        elements.guideToggleBtn.checked = false;
-      }
-    }
   });
 
   function getZodiac(day, month) {
@@ -1009,7 +1077,7 @@
     if (currentQuestion.length < 5) return toastMsg("Viết câu hỏi rõ ràng có tâm xíu đi mày.");
     elements.resultsSection.classList.remove("show"); elements.revealAiBtn.style.display = "none";
     aiReadingFetched = false; aiReadingText = ""; elements.readingFooter.style.display = 'none';
-    elements.overlay.classList.add("show"); elements.holdRing.style.setProperty("--progress", "0%");
+    elements.overlay.classList.add("show"); elements.holdArea.style.setProperty("--energy", "0");
   };
 
   elements.quickResetBtn.onclick = elements.rerollBtn.onclick = () => {
@@ -1018,31 +1086,66 @@
   };
 
   function startShuffle() {
-    isHolding = true; elements.holdCore.classList.add("active");
-    shuffleTimer = setInterval(() => {}, 100); holdStart = Date.now();
-    animateHold();
+    isHolding = true; 
+    elements.holdCore.classList.add("active");
+    elements.holdTitle.textContent = "Đang Tụ Khí...";
+    elements.holdSubtitle.textContent = "Giữ yên tay";
     
     window.preloadedCards = drawCards(selectedSpread);
     window.preloadedCards.forEach(card => {
-        const img = new Image();
-        img.src = BASE_PATH + card.file;
+        const img = new Image(); img.src = BASE_PATH + card.file;
     });
-  }
 
-  function animateHold() {
-    if (!isHolding) return;
-    const progress = Math.min(100, ((Date.now() - holdStart) / 2000) * 100);
-    elements.holdRing.style.setProperty("--progress", `${progress}%`);
-    requestAnimationFrame(animateHold);
+    lastHoldTime = performance.now();
+    
+    function animate(time) {
+        if (!isHolding) return;
+        let delta = time - lastHoldTime;
+        lastHoldTime = time;
+        
+        holdProgress += (delta / 2500) * 100; // Tốn khoảng 2.5s để đầy 100%
+        if (holdProgress > 100) holdProgress = 100;
+        
+        elements.holdArea.style.setProperty("--energy", holdProgress);
+        
+        if (holdProgress >= 100) {
+            elements.holdCore.classList.add("full-power");
+            elements.holdTitle.textContent = "";
+            elements.holdSubtitle.textContent = "";
+        }
+        
+        holdAnimFrame = requestAnimationFrame(animate);
+    }
+    
+    holdAnimFrame = requestAnimationFrame(animate);
   }
 
   function stopShuffle() {
     if (!isHolding) return;
-    isHolding = false; clearInterval(shuffleTimer); elements.holdCore.classList.remove("active");
-    elements.overlay.classList.remove("show");
+    isHolding = false; 
+    cancelAnimationFrame(holdAnimFrame);
     
-    currentCards = window.preloadedCards || drawCards(selectedSpread);
-    renderCards(currentCards);
+    if (holdProgress >= 100) {
+        // Trả kết quả thành công
+        elements.holdCore.classList.remove("active", "full-power");
+        elements.holdArea.style.setProperty("--energy", "0");
+        elements.overlay.classList.remove("show");
+        holdProgress = 0;
+        
+        elements.holdTitle.textContent = "Chạm & Giữ";
+        elements.holdSubtitle.textContent = "Tụ Năng Lượng";
+        
+        currentCards = window.preloadedCards || drawCards(selectedSpread);
+        renderCards(currentCards);
+    } else {
+        // Nhả ra sớm quá -> Reset lại
+        holdProgress = 0;
+        elements.holdArea.style.setProperty("--energy", "0");
+        elements.holdCore.classList.remove("active", "full-power");
+        elements.holdTitle.textContent = "Chạm & Giữ";
+        elements.holdSubtitle.textContent = "Tụ Năng Lượng";
+        toastMsg("Tụ khí chưa xong đã nhả tay! Làm lại đi mày.");
+    }
   }
 
   function renderCards(cards) {
@@ -1082,6 +1185,9 @@
 
   function sanitizeTextForTTS(rawText) {
     let text = rawText.replace(/[*_#~`]/g, '');
+    text = text.replace(/\[.*?\]/g, ''); 
+    text = text.replace(/\([^)]*nghĩa là.*?\)/gi, '');
+    
     text = text.replace(/(?:Phần\s*\d+|Mở bài|Thân bài|Kết bài|Lời khuyên|Kết luận)[\:\.]?\s*/gi, '');
     text = text.replace(/^\s*\d+[\.\)\-]\s*/gm, '');
     text = text.replace(/\n+/g, '. '); 
@@ -1141,7 +1247,6 @@
 
     const cardText = currentCards.map((c, i) => `Lá ${i+1}: ${c.name} (${c.reversed ? "Ngược" : "Xuôi"})`).join(", ");
     
-    // Tối ưu lại prompt theo phong cách Ta Văn Rót xưng mày/tao
     const prompt = `Đóng vai "Ta Văn Rót", một Tarot Reader Gen Z kiêm linh vật vũ trụ. Tính cách: tâm lý, hiểu chuyện nhưng mỏ hỗn, thích trêu chọc cà khịa duyên dáng, hay dùng từ lóng trend TikTok.
 Khách hàng: ${genderStr} (BẮT BUỘC xưng hô với khách là: "tao" và "mày" cho thân thiện, tự nhiên nhưng những ai lớn hơn 2006 thì xưng hô sao cho đúng), ${dobParam} ${zodiacStr}. 
 Hỏi: "${currentQuestion}". 
@@ -1149,7 +1254,7 @@ Rút được: ${cardText}.
 
 Yêu cầu cấu trúc bài giải (Trả lời bằng text thuần, chia đoạn rõ ràng):
 1. Mở bài: BẮT BUỘC MỞ ĐẦU BẰNG CÂU SAU (không sửa lại): "${randomGreeting}". Sau đó hãy buông 1 câu trêu đùa/nhận xét cực kỳ trendy, hài hước (không vô duyên) về tình trạng hiện tại của mày dựa vào cung hoàng đạo hoặc câu hỏi.
-2. Thân bài: Giải mã sâu sắc, nghiêm túc, đúng trọng tâm vấn đề. Kết nối ý nghĩa các lá bài lại thành một câu chuyện hợp lý.
+2. Thân bài: Giải mã sâu sắc, nghiêm túc, đúng trọng tâm vấn đề. Kết nối ý nghĩa các lá bài lại thành một câu chuyện hợp lý. NẾU CÓ DÙNG TỪ TIẾNG ANH, TỪ LÓNG, HAY THUẬT NGỮ (Ví dụ: red flag, ghosting...), BẮT BUỘC PHẢI GIẢI THÍCH CHÚNG TRONG DẤU NGOẶC VUÔNG (Ví dụ: [nghĩa là...]). TUYỆT ĐỐI KHÔNG DÙNG NGOẶC TRÒN CHO VIỆC GIẢI THÍCH NÀY.
 3. Kết bài: Đưa ra lời khuyên thiết thực. Chốt lại bằng một câu trêu đùa hoặc cà khịa nhẹ nhàng cuối cùng để tạo tiếng cười.`;
 
     if(GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") { elements.readingContent.innerHTML = `<span style="color: #ff8888;">Thiếu API Key.</span>`; return; }
@@ -1182,10 +1287,20 @@ Yêu cầu cấu trúc bài giải (Trả lời bằng text thuần, chia đoạ
     }
   });
 
-  elements.holdArea.addEventListener("pointerdown", (e) => { e.preventDefault(); if(elements.overlay.classList.contains("show") && !dobElements.calModal.classList.contains("show") && !dobElements.yearModal.classList.contains("show")) startShuffle(); }, {passive: false});
-  const stopEvt = (e) => { if(isHolding) stopShuffle(); };
-  elements.holdArea.addEventListener("pointerup", stopEvt); elements.holdArea.addEventListener("pointercancel", stopEvt);
-elements.holdArea.addEventListener("contextmenu", (e) => e.preventDefault());
+  elements.holdArea.addEventListener("pointerdown", (e) => { 
+    e.preventDefault(); 
+    if(elements.overlay.classList.contains("show") && !dobElements.calModal.classList.contains("show") && !dobElements.yearModal.classList.contains("show")) {
+       startShuffle(); 
+    }
+  }, {passive: false});
+  
+  const endHold = (e) => { if(isHolding) stopShuffle(); };
+  
+  // Lắng nghe sự kiện thả tay trên toàn bộ window để không bị trượt ra ngoài
+  window.addEventListener("pointerup", endHold); 
+  window.addEventListener("pointercancel", endHold);
+  
+  elements.holdArea.addEventListener("contextmenu", (e) => e.preventDefault());
 </script>
 </body>
 </html>
