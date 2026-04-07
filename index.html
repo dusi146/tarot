@@ -631,7 +631,7 @@
     <!-- Hero Section -->
     <section class="glass-panel hero">
       <h1 class="serif-font">Nghi Thức Tarot</h1>
-      <p>"Vũ trụ thấu hiểu mày qua từng lá bài."</p>
+      <p>"Vũ trụ sẽ thấu hiểu qua từng lá bài."</p>
     </section>
 
     <!-- Main Setup Section -->
@@ -1195,8 +1195,17 @@
   }
 
   function playReadingVoice(text) {
-    if (synth.speaking && !synth.paused) return; 
-    if (synth.paused) { synth.resume(); return; }
+    // Nếu AI đang bị tạm dừng (pause), thì cho đọc tiếp tục (resume)
+    if (synth.paused) {
+      synth.resume();
+      return;
+    }
+    
+    // Nếu AI đang đọc bình thường thì không làm gì cả
+    if (synth.speaking) return;
+    
+    // Nếu chưa đọc, hoặc đã đọc xong và muốn đọc lại từ đầu:
+    synth.cancel(); // Dọn dẹp bộ nhớ đệm
     
     const cleanText = sanitizeTextForTTS(text);
     aiUtterance = new SpeechSynthesisUtterance(cleanText);
@@ -1221,8 +1230,15 @@
   }
 
   elements.ttsPlayToggle.addEventListener('change', (e) => {
-    if (e.target.checked) { if (aiReadingText) playReadingVoice(aiReadingText); } 
-    else { if(synth.speaking) synth.pause(); }
+    if (e.target.checked) { 
+        // Bấm Play (hoặc Resume)
+        if (aiReadingText) playReadingVoice(aiReadingText); 
+    } else { 
+        // Bấm Tạm dừng (Sì tốp)
+        if (synth.speaking) {
+            synth.pause(); 
+        }
+    }
   });
 
   async function fetchGeminiReading() {
