@@ -870,8 +870,31 @@
     }, 2500);
   });
 
-  const GEMINI_API_KEY = atob("QUl6YVN5QkNEajQxQ051M0tuSXNPUVZoTVBRWmlWMWFiSUVtdU80"); 
+  const GEMINI_API_KEY = atob("QUl6YVN5Q3djM2JFaU94ZDdLT2ViS2drNnZma0RwaFMzMkJIWlRR"); 
   
+  // ==========================================
+  // HỆ THỐNG LOAD KEY CHỐNG BOT FPT.AI
+  // ==========================================
+  let fptKeys = [];
+  let currentKeyIndex = 0;
+  let currentAudio = null;
+
+  async function loadKeys() {
+      try {
+          const response = await fetch('images/imnaocobe.txt');
+          const text = await response.text();
+          
+          fptKeys = text.split('\n')
+              .filter(line => line.trim() !== '')
+              .map(line => atob(line.trim()).split('').reverse().join(''));
+              
+          console.log("Đã load xong list Key chống bot FPT!");
+      } catch (e) {
+          console.error("Lỗi đọc file key: ", e);
+      }
+  }
+  loadKeys();
+
   const BASE_PATH = "images/";
   const deck = [
     { file: "00-TheFool.png", name: "The Fool" }, { file: "01-TheMagician.png", name: "The Magician" },
@@ -1086,8 +1109,9 @@
     elements.resultsSection.classList.remove("show");
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
     
-    // Ngắt hẳn giọng cũ khi rút tụ mới
-    window.speechSynthesis.cancel();
+    // Ngắt Audio khi reset
+    synth.cancel(); 
+    if(currentAudio) { currentAudio.pause(); currentAudio = null; }
     elements.ttsPlayToggle.checked = false;
     elements.ttsProgressBar.style.width = "0%";
   };
@@ -1177,52 +1201,78 @@
     setTimeout(() => elements.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 500);
   }
 
-  // LOGIC TTS & AI GEMINI PROMPT
-  elements.revealAiBtn.onclick = () => { elements.aiReadingModal.classList.add("show"); if (!aiReadingFetched) fetchGeminiReading(); };
-  
-  elements.closeReadingBtn.onclick = () => { 
-    elements.aiReadingModal.classList.remove("show"); 
-    
-    if (synth.speaking && !synth.paused) {
-        synth.pause(); // Tạm dừng, không reset phần trăm đọc
-    }
-    
-    elements.ttsPlayToggle.checked = false; 
-  };
-
+  // ==========================================
+  // LOGIC TTS KẾT HỢP FPT VÀ FALLBACK
+  // ==========================================
   const synth = window.speechSynthesis;
   let aiUtterance = null;
 
   function sanitizeTextForTTS(rawText) {
     let text = rawText.replace(/[*_#~`]/g, '');
     text = text.replace(/\[.*?\]/g, ''); 
-    text = text.replace(/\([^)]*nghĩa là.*?\)/gi, '');
-    
+    text = text.replace(/\([^)]*\)/g, ''); // Bỏ ngoặc đơn
     text = text.replace(/(?:Phần\s*\d+|Mở bài|Thân bài|Kết bài|Lời khuyên|Kết luận)[\:\.]?\s*/gi, '');
     text = text.replace(/^\s*\d+[\.\)\-]\s*/gm, '');
     text = text.replace(/\n+/g, '. '); 
     return text;
   }
 
-  function playReadingVoice(text) {
-    if (synth.paused) {
-      synth.resume();
-      return;
+  async function tryFptTTS(text) {
+    if (currentKeyIndex >= fptKeys.length) {
+        console.log("Hết sạch Key FPT. Fallback về Web Speech.");
+        return fallbackWebSpeech(text);
     }
-    
-    if (synth.speaking) return;
-    
-    synth.cancel(); 
-    
-    const cleanText = sanitizeTextForTTS(text);
-    aiUtterance = new SpeechSynthesisUtterance(cleanText);
+
+    try {
+        const response = await fetch("https://api.fpt.ai/hmi/tts/v5", {
+            method: "POST",
+            headers: { 
+                "api-key": fptKeys[currentKeyIndex], 
+                "voice": "giahuy", 
+                "speed": "0" 
+            },
+            body: text
+        });
+
+        if (!response.ok) {
+            console.log(`Key số ${currentKeyIndex + 1} tạch, xoay sang key tiếp theo...`);
+            currentKeyIndex++;
+            return tryFptTTS(text);
+        }
+
+        const data = await response.json();
+        
+        currentAudio = new Audio(data.async);
+        
+        currentAudio.addEventListener('timeupdate', () => {
+            if (currentAudio.duration) {
+                const progress = (currentAudio.currentTime / currentAudio.duration) * 100;
+                elements.ttsProgressBar.style.width = `${progress}%`;
+            }
+        });
+
+        currentAudio.addEventListener('ended', () => {
+            elements.ttsPlayToggle.checked = false; 
+            elements.ttsProgressBar.style.width = `100%`;
+            setTimeout(() => elements.ttsProgressBar.style.width = `0%`, 500);
+        });
+
+        currentAudio.play();
+
+    } catch (error) {
+        console.error("Lỗi kết nối FPT. Fallback về Web Speech.", error);
+        fallbackWebSpeech(text);
+    }
+  }
+
+  function fallbackWebSpeech(text) {
+    aiUtterance = new SpeechSynthesisUtterance(text);
     aiUtterance.lang = 'vi-VN';
     aiUtterance.rate = 1.0; 
-    aiUtterance.pitch = 1.0; 
     
     aiUtterance.onboundary = (event) => {
        if (event.name === 'word') {
-          const progress = (event.charIndex / cleanText.length) * 100;
+          const progress = (event.charIndex / text.length) * 100;
           elements.ttsProgressBar.style.width = `${progress}%`;
        }
     };
@@ -1236,15 +1286,52 @@
     synth.speak(aiUtterance);
   }
 
+  async function playReadingVoice(text) {
+    if (synth.speaking && synth.paused) {
+      synth.resume();
+      return;
+    }
+    
+    if (currentAudio && currentAudio.paused) {
+        currentAudio.play();
+        return;
+    }
+    
+    if (synth.speaking || (currentAudio && !currentAudio.paused)) return;
+    
+    synth.cancel(); 
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+    }
+    
+    const cleanText = sanitizeTextForTTS(text);
+    await tryFptTTS(cleanText);
+  }
+
   elements.ttsPlayToggle.addEventListener('change', (e) => {
     if (e.target.checked) { 
         if (aiReadingText) playReadingVoice(aiReadingText); 
     } else { 
-        if (synth.speaking) {
-            synth.pause(); 
-        }
+        if (synth.speaking) synth.pause(); 
+        if (currentAudio) currentAudio.pause();
     }
   });
+
+  elements.closeReadingBtn.onclick = () => { 
+    elements.aiReadingModal.classList.remove("show"); 
+    
+    if (synth.speaking && !synth.paused) synth.pause(); 
+    if (currentAudio && !currentAudio.paused) currentAudio.pause(); 
+    
+    elements.ttsPlayToggle.checked = false; 
+    elements.ttsProgressBar.style.width = "0%";
+  };
+
+  // ==========================================
+  // LOGIC GEMINI API (CẬP NHẬT PROMPT NGHỆ AN)
+  // ==========================================
+  elements.revealAiBtn.onclick = () => { elements.aiReadingModal.classList.add("show"); if (!aiReadingFetched) fetchGeminiReading(); };
 
   async function fetchGeminiReading() {
     aiReadingFetched = true;
@@ -1258,24 +1345,28 @@
     const zodiacStr = userZodiac ? `(${userZodiac})` : "";
     
     const greetings = [
-      "Hi, tao là Ta Văn Rót đây, linh vật vũ trụ kiêm người giải nghiệp cho mày.",
-      "Alo alo, Ta Văn Rót đã kết nối. Khổ gì nói nghe chơi coi?",
-      "Vũ trụ gọi, Ta Văn Rót trả lời! Lại có chuyện gì sầu đời hả?",
-      "Chào đằng ấy, Ta Văn Rót hiện hồn để bói cho một quẻ đây.",
-      "Ê, tao là Ta Văn Rót. Năng lượng vũ trụ đang tụ tập lại đây để soi xét cái nết của mày."
+      "Chào mi, tau là Ta Văn Rót đây. Lại có chuyện chi sầu đời hả?",
+      "Alo alo, Ta Văn Rót đã kết nối. Khổ chi nói tau nghe coi?",
+      "Vũ trụ gọi, Ta Văn Rót trả lời! Bữa ni răng rứa?",
+      "Trời đất ơi, chưa chi đã thấy cái nết rồi. Lại đây tau coi cho một quẻ."
     ];
     const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
 
     const cardText = currentCards.map((c, i) => `Lá ${i+1}: ${c.name} (${c.reversed ? "Ngược" : "Xuôi"})`).join(", ");
     
-    const prompt = `Đóng vai "Ta Văn Rót", một Tarot Reader Gen Z kiêm linh vật vũ trụ. Tính cách: tâm lý, hiểu chuyện nhưng mỏ hỗn, thích trêu chọc cà khịa duyên dáng, hay dùng từ lóng trend TikTok.
-Khách hàng: ${genderStr} (BẮT BUỘC xưng hô với khách là: "tao" và "mày" cho thân thiện, tự nhiên nhưng những ai lớn hơn 2006 thì xưng hô sao cho đúng), ${dobParam} ${zodiacStr}. 
+    const prompt = `Đóng vai "Ta Văn Rót", một Tarot Reader Gen Z gốc Nghệ An kiêm linh vật vũ trụ. Tính cách: tâm lý, hiểu chuyện nhưng mỏ hỗn, thích trêu chọc cà khịa duyên dáng, hay dùng từ lóng trend TikTok.
+Khách hàng: ${genderStr} (BẮT BUỘC xưng hô với khách là: "tau" và "mi"). Ngày sinh: ${dobParam} ${zodiacStr}. 
 Hỏi: "${currentQuestion}". 
 Rút được: ${cardText}.
 
-Yêu cầu cấu trúc bài giải (Trả lời bằng text thuần, chia đoạn rõ ràng):
-1. Mở bài: BẮT BUỘC MỞ ĐẦU BẰNG CÂU SAU (không sửa lại): "${randomGreeting}". Sau đó hãy buông 1 câu trêu đùa/nhận xét cực kỳ trendy, hài hước (không vô duyên) về tình trạng hiện tại của mày dựa vào cung hoàng đạo hoặc câu hỏi.
-2. Thân bài: Giải mã sâu sắc, nghiêm túc, đúng trọng tâm vấn đề. Kết nối ý nghĩa các lá bài lại thành một câu chuyện hợp lý. NẾU CÓ DÙNG TỪ TIẾNG ANH, TỪ LÓNG, HAY THUẬT NGỮ (Ví dụ: red flag, ghosting...), BẮT BUỘC PHẢI GIẢI THÍCH CHÚNG TRONG DẤU NGOẶC VUÔNG (Ví dụ: [nghĩa là...]). TUYỆT ĐỐI KHÔNG DÙNG NGOẶC TRÒN CHO VIỆC GIẢI THÍCH NÀY.
+YÊU CẦU QUAN TRỌNG:
+- Sử dụng từ ngữ địa phương Nghệ An (ví dụ: răng, rứa, nỏ, chi, mô, mi, tau, trớt quớt, nỏ biết...) pha trộn với cách nói chuyện Gen Z tự nhiên.
+- TUYỆT ĐỐI KHÔNG dùng dấu ngoặc đơn hay ngoặc vuông để giải thích từ vựng. Cứ nói chuyện trơn tru tự nhiên như văn nói bình thường.
+- Trả lời bằng text thuần, viết liền mạch, KHÔNG dùng các ký tự đặc biệt như * hay #, để hệ thống đọc giọng nói (TTS) đọc được mượt mà nhất. Chia thành 3 đoạn văn rõ ràng.
+
+Cấu trúc bài giải:
+1. Mở bài: BẮT BUỘC MỞ ĐẦU BẰNG CÂU SAU (không sửa lại): "${randomGreeting}". Sau đó buông 1 câu trêu đùa mỏ hỗn, hài hước (không vô duyên) về tình trạng hiện tại của "mi" dựa vào cung hoàng đạo hoặc câu hỏi.
+2. Thân bài: Giải mã sâu sắc, nghiêm túc, đúng trọng tâm vấn đề. Kết nối ý nghĩa các lá bài lại thành một câu chuyện hợp lý.
 3. Kết bài: Đưa ra lời khuyên thiết thực. Chốt lại bằng một câu trêu đùa hoặc cà khịa nhẹ nhàng cuối cùng để tạo tiếng cười.`;
 
     if(GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") { elements.readingContent.innerHTML = `<span style="color: #ff8888;">Thiếu API Key.</span>`; return; }
@@ -1293,7 +1384,6 @@ Yêu cầu cấu trúc bài giải (Trả lời bằng text thuần, chia đoạ
       const typeWriter = setInterval(() => {
         let char = aiReadingText.charAt(i);
         if (char === '\n') elements.readingContent.innerHTML += '<br/>';
-        else if (char === '*' && aiReadingText.charAt(i+1) === '*') i++; 
         else elements.readingContent.innerHTML += char;
         i++;
         if (i >= aiReadingText.length) clearInterval(typeWriter);
