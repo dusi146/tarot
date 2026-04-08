@@ -1228,20 +1228,22 @@
             method: "POST",
             headers: { 
                 "api-key": fptKeys[currentKeyIndex], 
-                "voice": "giahuy", 
+                "voice": "giahuy", // Giọng nam miền Trung chuẩn Nghệ An
                 "speed": "0" 
             },
             body: text
         });
 
-        if (!response.ok) {
-            console.log(`Key số ${currentKeyIndex + 1} tạch, xoay sang key tiếp theo...`);
-            currentKeyIndex++;
-            return tryFptTTS(text);
-        }
-
         const data = await response.json();
+
+        // Kiểm tra xem FPT có trả về link mp3 xịn không (data.async)
+        if (!response.ok || !data.async || data.error !== 0) {
+            console.log(`Key số ${currentKeyIndex + 1} có vấn đề hoặc hết hạn mức, xoay sang key tiếp theo...`);
+            currentKeyIndex++;
+            return tryFptTTS(text); // Thử key khác ngay lập tức
+        }
         
+        // Chỉ khởi tạo Audio khi chắc chắn có link source
         currentAudio = new Audio(data.async);
         
         currentAudio.addEventListener('timeupdate', () => {
@@ -1257,14 +1259,17 @@
             setTimeout(() => elements.ttsProgressBar.style.width = `0%`, 500);
         });
 
-        currentAudio.play();
+        currentAudio.play().catch(e => {
+            console.error("Lỗi phát audio:", e);
+            fallbackWebSpeech(text); // Nếu vẫn lỗi thì dùng giọng mặc định máy tính
+        });
 
     } catch (error) {
-        console.error("Lỗi kết nối FPT. Fallback về Web Speech.", error);
-        fallbackWebSpeech(text);
+        console.error("Lỗi kết nối FPT. Thử key tiếp theo hoặc Fallback.");
+        currentKeyIndex++;
+        return tryFptTTS(text);
     }
   }
-
   function fallbackWebSpeech(text) {
     aiUtterance = new SpeechSynthesisUtterance(text);
     aiUtterance.lang = 'vi-VN';
