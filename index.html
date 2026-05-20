@@ -1090,10 +1090,56 @@
     elements.guideToggleBtn.checked = false;
   };
 
+  // =========================================
+  // THUẬT TOÁN SHUFFLE SIÊU NHẠY THEO MICRO GIÂY + DOB
+  // =========================================
   function drawCards(count) {
     const arr = [...fullDeck];
-    for (let i = arr.length - 1; i > 0; i--) { const j = randInt(i + 1); [arr[i], arr[j]] = [arr[j], arr[i]]; }
-    return arr.slice(0, count).map(card => ({ ...card, reversed: randInt(2) === 1 }));
+    
+    // 1. Lấy chuỗi ngày sinh từ dobState (nếu chưa chọn thì dùng chuỗi mặc định)
+    const year = dobState.year || "0000";
+    const month = String(dobState.month || "00").padStart(2, '0');
+    const day = String(dobState.day || "00").padStart(2, '0');
+    const dobStr = `${year}${month}${day}`;
+
+    // 2. Lấy mốc thời gian thực chính xác đến micro giây lúc bấm
+    const exactTime = performance.now() + performance.timeOrigin;
+    
+    // 3. Ghép chuỗi hạt giống (Seed) cực kỳ nhạy bén
+    const seedStr = `${dobStr}_${exactTime}`;
+
+    // 4. Thuật toán MurmurHash chuyển hóa Seed thành Hash Integer tạo hiệu ứng thác đổ
+    let hash = 2166136261;
+    for (let i = 0; i < seedStr.length; i++) {
+      hash ^= seedStr.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    hash ^= hash >>> 16;
+    hash = Math.imul(hash, 2246822507);
+    hash ^= hash >>> 13;
+    hash = Math.imul(hash, 3266489909);
+    hash ^= hash >>> 16;
+    let seed = hash >>> 0;
+
+    // 5. Bộ sinh số ngẫu nhiên giả lập Xorshift tốc độ siêu việt
+    function seededRandom() {
+      seed ^= seed << 13;
+      seed ^= seed >>> 17;
+      seed ^= seed << 5;
+      return (seed >>> 0) / 4294967296;
+    }
+
+    // 6. Trộn bài bằng thuật toán Fisher-Yates dựa trên nguồn số ngẫu nhiên của Seed
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(seededRandom() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]]; // Tráo đổi vị trí các lá bài
+    }
+
+    // 7. Cắt mảng lấy số lá bài và quyết định thuộc tính Xuôi/Ngược cũng dựa vào Seed
+    return arr.slice(0, count).map(card => ({
+      ...card,
+      reversed: seededRandom() < 0.5
+    }));
   }
 
   elements.readyBtn.onclick = () => {
@@ -1345,7 +1391,7 @@ Rút được: ${cardText}.
 
 YÊU CẦU QUAN TRỌNG:
 - TUYỆT ĐỐI KHÔNG dùng ký tự đặc biệt (*, #), KHÔNG dùng dấu ngoặc đơn (). Trả lời bằng text thuần, chia thành 3 đoạn văn.
-- Nếu cung hoàng đạo của khách hợp với tình huống, hãy khịa nhẹ một câu tự nhiên. Không hợp thì bỏ qua.
+- If cung hoàng đạo của khách hợp với tình huống, hãy khịa nhẹ một câu tự nhiên. Không hợp thì bỏ qua.
 
 Cấu trúc:
 1. Mở bài: Chào theo đúng xưng hô, báo tin ông anh đang kẹt xe ở đa vũ trụ nên tui coi thay. Khịa khách một câu.
