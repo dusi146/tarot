@@ -1122,10 +1122,12 @@
       b.onclick = () => { dobState.day = dObj.getDate(); dobState.month = dObj.getMonth() + 1; dobState.currentViewDate = new Date(dObj.getFullYear(), dObj.getMonth(), 1); renderCalendar(); };
       return b;
     };
-    for (let i = firstDay - 1; i >= 0; i--) dobElements.days.appendChild(createBtn(new Date(y, m - 1, prevLastDate - i), true));
-    for (let d = 1; d <= lastDate; d++) dobElements.days.appendChild(createBtn(new Date(y, m, d), false));
+    
+    // Đã sửa lại tham số truyền vào: thêm prevLastDate - i và d vào làm lbl
+    for (let i = firstDay - 1; i >= 0; i--) dobElements.days.appendChild(createBtn(new Date(y, m - 1, prevLastDate - i), prevLastDate - i, true));
+    for (let d = 1; d <= lastDate; d++) dobElements.days.appendChild(createBtn(new Date(y, m, d), d, false));
     const remain = 42 - dobElements.days.children.length;
-    for (let d = 1; d <= remain; d++) dobElements.days.appendChild(createBtn(new Date(y, m + 1, d), true));
+    for (let d = 1; d <= remain; d++) dobElements.days.appendChild(createBtn(new Date(y, m + 1, d), d, true));
   }
 
   function renderYears() {
