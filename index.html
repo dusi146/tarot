@@ -347,7 +347,7 @@
   }
 
   /* =========================================
-     CARDS RENDERING (CĂN GIỮA VÀ RESPONSIVE)
+     CARDS RENDERING
      ========================================= */
   .results { margin-top: 80px; display: none; opacity: 0; transform: translateY(60px); transition: 1s var(--ease-slow); content-visibility: auto; contain-intrinsic-size: 800px; scroll-margin-top: 60px;}
   .results.show { display: block; opacity: 1; transform: translateY(0); }
@@ -355,7 +355,6 @@
   .results-head h3 { font-size: 40px; color: var(--gold); margin-bottom: 12px; font-weight: 500;}
   .results-head p { color: var(--text-muted); font-size: 17px; }
 
-  /* Sử dụng flex để căn giữa đẹp mắt mọi số lượng bài */
   .cards-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; perspective: 3000px; width: 100%;}
   .tarot-card { position: relative; width: 280px; max-width: 100%; cursor: pointer; opacity: 0; transform: translateY(60px) rotateX(-15deg); animation: epicCardEntrance 1s var(--ease-out-spring) forwards; animation-delay: var(--delay, 0ms); transition: transform 0.5s var(--ease-smooth), filter 0.5s ease;}
   @keyframes epicCardEntrance { to { opacity: 1; transform: translateY(0) rotateX(0); } }
@@ -370,7 +369,6 @@
 
   .card-face { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transform: translate3d(0,0,0); box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);}
   
-  /* Back face design */
   .card-face.back { background: radial-gradient(circle at center, #140826 0%, #030106 100%); display: flex; align-items: center; justify-content: center; position: relative; border: 2px solid rgba(226, 194, 117, 0.25); }
   .card-face.back::before { content: ""; position: absolute; inset: 14px; border: 1px solid rgba(142, 68, 173, 0.3); border-radius: 12px; pointer-events: none; }
   .card-face.back::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px); background-size: 24px 24px; opacity: 0.5; pointer-events: none; }
@@ -381,7 +379,6 @@
   .astral-ring-2 { position: absolute; inset: -32px; border: 1px solid rgba(142, 68, 173, 0.25); border-radius: 50%; border-top-color: transparent; border-bottom-color: transparent; animation: spinLayer 12s linear infinite reverse; opacity: 0.5; }
   @keyframes pulseGlow { from { transform: scale(0.95); opacity: 0.6;} to { transform: scale(1.05); opacity: 1;} }
 
-  /* Front face design */
   .card-face.front { transform: rotateY(180deg); background: linear-gradient(180deg, #0d0e1b, #05050a); border-color: rgba(72, 202, 228, 0.4); display: flex; align-items: center; justify-content: center;}
   body.light-mode .card-face.front { background: #fff; }
   .fallback-bg { position: absolute; inset: 0; background: #07040d; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; border: 1px solid rgba(226,194,117,0.15); border-radius: 16px; margin: 12px; z-index: 0; }
@@ -397,7 +394,7 @@
   .card-info .state { font-size: 14px; color: var(--cyan); font-style: italic; letter-spacing: 2px; opacity: 0.8;}
 
   /* =========================================
-     MODALS (SPREAD, AI READING)
+     MODALS & OTHER UIs
      ========================================= */
   .modal { position: fixed; inset: 0; z-index: 200; background: radial-gradient(circle at center, rgba(0,0,0,0.7), rgba(0,0,0,0.95)); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.5s var(--ease-slow); padding: 24px; }
   .modal.show { opacity: 1; pointer-events: auto; }
@@ -469,9 +466,57 @@
   .reading-content { font-size: 18px; line-height: 2; color: rgba(255,255,255,0.95); text-align: justify; white-space: pre-line; transition: color 0.4s ease; letter-spacing: 0.5px;}
   body.light-mode .reading-content { color: #2a2a2a; }
 
+  /* FOLLOW UP CHAT CSS */
+  .follow-up-section { margin-top: 40px; padding-top: 30px; border-top: 1px dashed rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 20px; }
+  body.light-mode .follow-up-section { border-top-color: rgba(0,0,0,0.1); }
+  .chat-bubble { max-width: 80%; padding: 16px 20px; border-radius: 20px; font-size: 16px; line-height: 1.6; animation: slideUpFade 0.4s var(--ease-out-spring); }
+  .chat-bubble.user { background: rgba(72, 202, 228, 0.1); border: 1px solid rgba(72, 202, 228, 0.3); color: var(--cyan); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .chat-bubble.bot { background: rgba(142, 68, 173, 0.1); border: 1px solid rgba(142, 68, 173, 0.3); color: var(--gold); align-self: flex-start; border-bottom-left-radius: 4px; white-space: pre-line; }
+  body.light-mode .chat-bubble.bot { color: var(--purple); border-color: rgba(142, 68, 173, 0.2); background: rgba(142, 68, 173, 0.05); }
+  body.light-mode .chat-bubble.user { color: #0277bd; border-color: rgba(2, 119, 189, 0.3); background: rgba(2, 119, 189, 0.05); }
+  
+  .chat-input-wrapper { display: flex; gap: 12px; margin-top: 10px; }
+  .chat-input-wrapper input { flex: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 24px; padding: 0 20px; color: var(--text-main); font-size: 16px; font-family: 'Montserrat', sans-serif; }
+  body.light-mode .chat-input-wrapper input { background: #f0f0f0; border-color: #ddd; color: #333; }
+  .chat-input-wrapper input:focus { border-color: var(--purple); background: rgba(0,0,0,0.5); }
+  body.light-mode .chat-input-wrapper input:focus { background: #fff; border-color: var(--purple); }
+  .chat-input-wrapper button { height: 50px; padding: 0 24px; border-radius: 24px; white-space: nowrap; }
+
+  /* DONATION & QR CSS */
+  .donation-wrapper {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px dashed rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px;
+    animation: slideUpFade 0.8s var(--ease-out-spring) forwards;
+  }
+  body.light-mode .donation-wrapper { border-top-color: rgba(0,0,0,0.1); }
+  .qr-img {
+    width: 100px; height: 100px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 2px solid var(--gold);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    transition: transform 0.4s var(--ease-out-spring);
+    flex-shrink: 0;
+  }
+  .qr-img:hover { transform: scale(1.08) rotate(-3deg); box-shadow: 0 15px 35px rgba(226, 194, 117, 0.4); }
+  .donation-text {
+    flex: 1;
+    font-style: italic;
+    font-size: 14.5px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    opacity: 0.7;
+    text-align: justify;
+  }
+  body.light-mode .donation-text { color: rgba(60, 55, 80, 0.7); }
+
   .reading-footer { position: sticky; bottom: -60px; margin: 40px -60px -60px -60px; padding: 30px 60px 40px; background: linear-gradient(180deg, rgba(8, 5, 15, 0.4), rgba(3, 2, 8, 0.98)); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; gap: 24px; z-index: 10; border-top: 1px solid rgba(255,255,255,0.05); }
   body.light-mode .reading-footer { background: rgba(255,255,255,0.92); }
-  
   .footer-buttons { display: flex; justify-content: center; align-items: center; gap: 40px; width: 100%; }
 
   /* Nút Đóng Close-Nutbam */
@@ -564,9 +609,12 @@
   .cornea { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgb(0, 0, 0); border-radius: 50%; width: 50px; height: 50px; animation: eye-color 5s infinite; }
   @keyframes eye-color { 63%, 75% { background-color: rgb(137, 1, 1); } }
   .white-pupil { position: absolute; top: 70%; left: 10%; border-radius: 50%; background-color: #fffcf4; width: 20px; height: 20px; }
+  .chat-typing { font-style: italic; color: var(--text-muted); font-size: 14px; margin-top: 5px; display: inline-block;}
 
   .toast { position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%) translateY(100px); background: linear-gradient(135deg, var(--gold), #d4af37); color: #000; font-weight: 600; padding: 20px 40px; border-radius: 100px; opacity: 0; transition: 0.6s var(--ease-out-spring); z-index: 9999; box-shadow: 0 25px 50px rgba(0,0,0,0.5); font-size: 16px; letter-spacing: 0.5px;}
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @keyframes slideUpFade { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
   /* =========================================
      RESPONSIVE
@@ -583,7 +631,7 @@
     .btn-epic { font-size: 16px; padding: 0 24px; height: 70px; }
     
     .cards-grid { gap: 24px 16px; }
-    .tarot-card { width: calc(50% - 8px); } /* 2 cột trên mobile */
+    .tarot-card { width: calc(50% - 8px); } 
     .tarot-card:hover .card-stack { transform: translateY(-8px) scale(1.03); }
     
     .reading-card { padding: 40px 24px 0; border-radius: 28px; }
@@ -603,6 +651,8 @@
     .theme-toggle-container { transform: scale(0.65); top: 20px; right: 20px; }
     .guide-tooltip { width: 100%; max-height: 350px; padding: 24px;}
     .modal-card { padding: 40px 24px; border-radius: 28px;}
+    
+    .donation-wrapper { flex-direction: column; align-items: center; text-align: center; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -612,7 +662,6 @@
 </head>
 <body class="intro-active">
   
-  <!-- Premium Intro Sequence -->
   <div id="intro-screen">
     <div class="intro-logo">
       <div class="intro-eye"></div>
@@ -623,19 +672,16 @@
     </div>
   </div>
 
-  <!-- Backgrounds -->
   <div class="bg-nebula"><div class="bg-nebula-core"></div></div>
   <div class="bg-mystic-dust"></div>
   <div class="stardust"></div>
 
   <div class="wrap">
-    <!-- Hero Section -->
     <section class="glass-panel hero">
       <h1 class="serif-font">Nghi Thức Tarot</h1>
       <p>"Vũ trụ sẽ thấu hiểu qua từng lá bài."</p>
     </section>
 
-    <!-- Main Setup Section -->
     <section class="glass-panel">
       <div class="panel-inner">
         <div class="section-title">
@@ -643,7 +689,6 @@
         </div>
 
         <div class="setup-stack">
-          <!-- Chọn số lá bài -->
           <button class="select-btn" id="openSpreadModal" type="button">
             <div class="label">Quy mô trải bài</div>
             <div class="value serif-font" id="selectedSpreadText" style="display:flex; align-items:center; gap:8px;">
@@ -651,7 +696,6 @@
             </div>
           </button>
 
-          <!-- Hàng Ngày Sinh & Giới Tính -->
           <div class="field-row">
             <div class="dob-row" id="dobRow">
               <div class="dob-box" id="dobBox">
@@ -683,7 +727,6 @@
           
           <div id="zodiacBadge" class="zodiac-badge">✦ Hãy hoàn tất ngày sinh</div>
 
-          <!-- Nhập câu hỏi -->
           <div class="field">
             <input id="questionInput" type="text" placeholder="Gửi gắm nỗi sầu của bạn vào đây..." autocomplete="off" />
           </div>
@@ -694,7 +737,6 @@
           <div class="warn">Cung cấp đúng info để Ta Văn Rót soi tần số cho chuẩn nhé.</div>
         </div>
 
-        <!-- Kết quả bài rút -->
         <section class="results" id="resultsSection">
           <div class="results-head">
             <div>
@@ -712,13 +754,11 @@
     </section>
   </div>
 
-  <!-- Theme Switcher -->
   <div class="theme-toggle-container">
     <input type="checkbox" name="theme-checkbox" id="theme-checkbox" />
     <label for="theme-checkbox" class="theme-label"></label>
   </div>
 
-  <!-- Overlay Hold To Shuffle -->
   <div class="overlay" id="overlay">
     <div class="ritual-box">
       <div class="ritual-head">
@@ -739,14 +779,11 @@
     </div>
   </div>
 
-  <!-- Spread Options Modal -->
   <div class="modal" id="spreadModal">
     <div class="modal-card">
       <div class="modal-head">
         <div style="display: flex; align-items: center; gap: 16px;">
           <h3 class="serif-font" style="font-size: clamp(24px, 5vw, 36px); color: var(--gold); margin: 0;">Chọn số lượng bài</h3>
-          
-          <!-- Tooltip Trigger -->
           <div class="reject-checkbox guide-toggle-wrap">
             <div class="checkbox-wrapper">
               <input type="checkbox" id="guideToggleBtn" />
@@ -756,12 +793,9 @@
             </div>
           </div>
         </div>
-
         <button class="icon-btn" id="closeSpreadModal" type="button">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
-        
-        <!-- Cẩm Nang Tooltip -->
         <div id="guideTooltip" class="guide-tooltip">
            <div class="guide-title serif-font">Cẩm Nang Trải Bài</div>
            <div class="guide-item"><strong>1 Lá (Thức Tỉnh)</strong>Hỏi nhanh Có/Không hoặc xin 1 lời khuyên tức thời.</div>
@@ -774,7 +808,6 @@
            <div class="guide-item"><strong>12 Lá (Hoàng Đạo)</strong>Xem tổng quan vận hạn 12 tháng/12 khía cạnh.</div>
         </div>
       </div>
-
       <div class="spread-grid" id="spreadGrid"></div>
       <div class="modal-foot">
         <button class="btn btn-primary" id="modalDoneBtn" type="button" style="width:100%; height: 64px;">Xác Nhận</button>
@@ -782,7 +815,6 @@
     </div>
   </div>
 
-  <!-- Calendar Modal (Month/Day) -->
   <div id="calendarModal" class="cal-modal">
     <div class="cal-panel">
       <div class="cal-top">
@@ -803,7 +835,6 @@
     </div>
   </div>
 
-  <!-- Calendar Modal (Year) -->
   <div id="yearModal" class="cal-modal">
     <div class="cal-panel">
       <div class="cal-top" style="justify-content: center; margin-bottom: 28px;">
@@ -817,7 +848,6 @@
     </div>
   </div>
 
-  <!-- AI Reading Result Modal -->
   <div class="reading-modal" id="aiReadingModal">
     <div class="reading-card">
       <div class="reading-head">
@@ -827,6 +857,24 @@
       
       <div class="reading-content" id="readingContent"></div>
       
+      <!-- DONATION & ADVICE SECTION -->
+      <div id="donationBlock" class="donation-wrapper" style="display: none;">
+        <img src="images/bank.png" alt="QR Donate" class="qr-img" />
+        <div class="donation-text">
+          <p><strong>Lưu ý:</strong> Trải bài chỉ mang tính chất tham khảo và giải trí. Tương lai nằm trong tay bạn, đừng quá tin tưởng mà hãy luôn tự quyết định cuộc đời mình nhé!</p>
+          <p style="margin-top: 8px;">💖 Nếu thấy thông điệp ý nghĩa, bạn có thể ủng hộ Rót 1 ly trà sữa nha!</p>
+        </div>
+      </div>
+
+      <!-- FOLLOW UP CHAT SECTION -->
+      <div id="followUpSection" class="follow-up-section" style="display: none;">
+        <div id="chatHistory" style="display: flex; flex-direction: column; gap: 16px;"></div>
+        <div class="chat-input-wrapper" id="chatInputWrapper">
+          <input type="text" id="followUpInput" placeholder="Hỏi thêm 1 câu chót (Rót trả lời nốt)..." autocomplete="off" />
+          <button id="sendFollowUpBtn" class="btn btn-primary" style="width: auto;">Gửi</button>
+        </div>
+      </div>
+
       <div class="reading-footer" id="readingFooter" style="display: none;">
         <div class="footer-buttons">
           <div class="play-container">
@@ -839,26 +887,20 @@
               </div>
             </label>
           </div>
-          
           <button class="close-nutbam" id="closeReadingBtn" type="button" title="Đóng Bảng Đọc">
             <div class="cross"></div>
           </button>
         </div>
-        
         <div class="tts-progress-bg" id="ttsProgressBg">
            <div class="tts-progress-bar" id="ttsProgressBar"></div>
         </div>
       </div>
-
     </div>
   </div>
 
   <div class="toast" id="toast">Thông báo</div>
 
 <script>
-  // =========================================
-  // INTRO SEQUENCE LOGIC
-  // =========================================
   window.addEventListener('load', () => {
     setTimeout(() => {
       document.getElementById('intro-screen').style.opacity = '0';
@@ -870,7 +912,7 @@
     }, 2500);
   });
 
-  // Mảng 3 API Keys Gemini đã được mã hóa Base64
+  // MẢNG 3 API KEYS ĐÃ ĐƯỢC MÃ HÓA BASE64 ĐỂ XOAY TUA
   const GEMINI_API_KEYS = [
     "QVEuQWI4Uk42S1NDd3JhbVZuYlY0a21Rd2xxS3ZQYnlBMGZBSFNBc2ZjUS16b0JxbnRNTlE=",
     "QVEuQWI4Uk42Sno2a1lHYzlKWndFZ3F5TFNqdWRaY3BseU5SbFpaX2IxV2Ywc0YyTi1JdGc=",
@@ -879,7 +921,7 @@
 
   function getGeminiKey() {
     const randomKey = GEMINI_API_KEYS[Math.floor(Math.random() * GEMINI_API_KEYS.length)];
-    return atob(randomKey); // Tự động giải mã Base64
+    return atob(randomKey);
   }
 
   const OPENROUTER_API_KEY = atob("c2stb3ItdjEtNTNmNWJhMzUwZDIxZDQwNTE3YWY2MDk5Mjc0M2MxNjc3OThiYTA0NWJhMGQ5OTI5NWQ1NmI1MjA5ODg4MWNhNQ==");
@@ -912,7 +954,6 @@
   let currentQuestion = "";
   let currentCards = [];
   
-  // Biến cho logic hold mới
   let isHolding = false;
   let holdProgress = 0;
   let holdAnimFrame;
@@ -938,7 +979,10 @@
     themeCheckbox: document.getElementById("theme-checkbox"),
     ttsPlayToggle: document.getElementById("ttsPlayToggle"),
     guideToggleBtn: document.getElementById("guideToggleBtn"), guideTooltip: document.getElementById("guideTooltip"),
-    readingFooter: document.getElementById("readingFooter"), ttsProgressBar: document.getElementById("ttsProgressBar")
+    readingFooter: document.getElementById("readingFooter"), ttsProgressBar: document.getElementById("ttsProgressBar"),
+    followUpSection: document.getElementById("followUpSection"), chatHistory: document.getElementById("chatHistory"),
+    followUpInput: document.getElementById("followUpInput"), sendFollowUpBtn: document.getElementById("sendFollowUpBtn"),
+    chatInputWrapper: document.getElementById("chatInputWrapper"), donationBlock: document.getElementById("donationBlock")
   };
 
   const randInt = (max) => crypto.getRandomValues(new Uint32Array(1))[0] % max;
@@ -965,7 +1009,7 @@
     }
   }
 
-  // TÍCH HỢP TRACKING VỀ GOOGLE SHEETS MỚI NHẤT
+  // TÍCH HỢP TRACKING VỀ GOOGLE SHEETS
   async function trackUsage(question, conclusion, status) {
     try {
       const ipRes = await fetch('https://api.ipify.org?format=json');
@@ -984,7 +1028,7 @@
         status: status
       };
       
-      fetch('https://script.google.com/macros/s/AKfycbwO0gU92MEA8CI_2Yr3tVi3WMlCIR1hcm6Nd5RRymfDlWUXakM50p5HoE521hziViJc/exec', {
+      fetch('https://script.google.com/macros/s/AKfycbyykHOgOk1jY5FbWdV2dvz8Rh0YXANG0hNMqDI4fqqhzbRsgbE1IyLYD0pIxfG0pq4d/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
@@ -1002,11 +1046,8 @@
 
   const guideWrap = document.querySelector('.guide-toggle-wrap');
   elements.guideToggleBtn.addEventListener('change', (e) => {
-    if (e.target.checked) {
-      elements.guideTooltip.classList.add('show');
-    } else {
-      elements.guideTooltip.classList.remove('show');
-    }
+    if (e.target.checked) elements.guideTooltip.classList.add('show');
+    else elements.guideTooltip.classList.remove('show');
   });
 
   document.addEventListener('click', (e) => {
@@ -1046,7 +1087,6 @@
       return "";
   }
 
-  // LOGIC DOB PICKER
   const dobElements = {
     btn: document.getElementById('dobBtn'), val: document.getElementById('dobValue'),
     yearBtn: document.getElementById('yearBtn'), yearVal: document.getElementById('yearValue'),
@@ -1083,9 +1123,9 @@
       return b;
     };
     for (let i = firstDay - 1; i >= 0; i--) dobElements.days.appendChild(createBtn(new Date(y, m - 1, prevLastDate - i), true));
-    for (let d = 1; d <= lastDate; d++) dobElements.days.appendChild(createBtn(new Date(y, m, d), d, false));
+    for (let d = 1; d <= lastDate; d++) dobElements.days.appendChild(createBtn(new Date(y, m, d), false));
     const remain = 42 - dobElements.days.children.length;
-    for (let d = 1; d <= remain; d++) dobElements.days.appendChild(createBtn(new Date(y, m + 1, d), d, true));
+    for (let d = 1; d <= remain; d++) dobElements.days.appendChild(createBtn(new Date(y, m + 1, d), true));
   }
 
   function renderYears() {
@@ -1132,25 +1172,14 @@
     elements.guideToggleBtn.checked = false;
   };
 
-  // =========================================
-  // THUẬT TOÁN SHUFFLE SIÊU NHẠY THEO MICRO GIÂY + DOB
-  // =========================================
   function drawCards(count) {
     const arr = [...fullDeck];
-    
-    // 1. Lấy chuỗi ngày sinh từ dobState (nếu chưa chọn thì dùng chuỗi mặc định)
     const year = dobState.year || "0000";
     const month = String(dobState.month || "00").padStart(2, '0');
     const day = String(dobState.day || "00").padStart(2, '0');
     const dobStr = `${year}${month}${day}`;
-
-    // 2. Lấy mốc thời gian thực chính xác đến micro giây lúc bấm
     const exactTime = performance.now() + performance.timeOrigin;
-    
-    // 3. Ghép chuỗi hạt giống (Seed) cực kỳ nhạy bén
     const seedStr = `${dobStr}_${exactTime}`;
-
-    // 4. Thuật toán MurmurHash chuyển hóa Seed thành Hash Integer tạo hiệu ứng thác đổ
     let hash = 2166136261;
     for (let i = 0; i < seedStr.length; i++) {
       hash ^= seedStr.charCodeAt(i);
@@ -1162,26 +1191,28 @@
     hash = Math.imul(hash, 3266489909);
     hash ^= hash >>> 16;
     let seed = hash >>> 0;
-
-    // 5. Bộ sinh số ngẫu nhiên giả lập Xorshift tốc độ siêu việt
     function seededRandom() {
       seed ^= seed << 13;
       seed ^= seed >>> 17;
       seed ^= seed << 5;
       return (seed >>> 0) / 4294967296;
     }
-
-    // 6. Trộn bài bằng thuật toán Fisher-Yates dựa trên nguồn số ngẫu nhiên của Seed
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(seededRandom() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]]; // Tráo đổi vị trí các lá bài
+      [arr[i], arr[j]] = [arr[j], arr[i]]; 
     }
-
-    // 7. Cắt mảng lấy số lá bài và quyết định thuộc tính Xuôi/Ngược cũng dựa vào Seed
     return arr.slice(0, count).map(card => ({
       ...card,
       reversed: seededRandom() < 0.5
     }));
+  }
+
+  function resetChatState() {
+    elements.followUpSection.style.display = 'none';
+    elements.donationBlock.style.display = 'none';
+    elements.chatHistory.innerHTML = '';
+    elements.followUpInput.value = '';
+    elements.chatInputWrapper.style.display = 'flex';
   }
 
   elements.readyBtn.onclick = () => {
@@ -1190,6 +1221,7 @@
     
     elements.resultsSection.classList.remove("show"); elements.revealAiBtn.style.display = "none";
     aiReadingFetched = false; aiReadingText = ""; elements.readingFooter.style.display = 'none';
+    resetChatState();
     elements.overlay.classList.add("show"); elements.holdArea.style.setProperty("--energy", "0");
   };
 
@@ -1198,10 +1230,10 @@
     elements.questionInput.value = ""; 
     elements.resultsSection.classList.remove("show");
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
-    
     synth.cancel(); 
     elements.ttsPlayToggle.checked = false;
     elements.ttsProgressBar.style.width = "0%";
+    resetChatState();
   };
 
   function startShuffle() {
@@ -1209,33 +1241,26 @@
     elements.holdCore.classList.add("active");
     elements.holdTitle.textContent = "Đang Tụ Khí...";
     elements.holdSubtitle.textContent = "Giữ yên tay";
-    
     window.preloadedCards = drawCards(selectedSpread);
     window.preloadedCards.forEach(card => {
         const img = new Image(); img.src = BASE_PATH + card.file;
     });
-
     lastHoldTime = performance.now();
     
     function animate(time) {
         if (!isHolding) return;
         let delta = time - lastHoldTime;
         lastHoldTime = time;
-        
-        holdProgress += (delta / 2500) * 100; // Tốn khoảng 2.5s để đầy 100%
+        holdProgress += (delta / 2500) * 100;
         if (holdProgress > 100) holdProgress = 100;
-        
         elements.holdArea.style.setProperty("--energy", holdProgress);
-        
         if (holdProgress >= 100) {
             elements.holdCore.classList.add("full-power");
             elements.holdTitle.textContent = "";
             elements.holdSubtitle.textContent = "";
         }
-        
         holdAnimFrame = requestAnimationFrame(animate);
     }
-    
     holdAnimFrame = requestAnimationFrame(animate);
   }
 
@@ -1243,21 +1268,16 @@
     if (!isHolding) return;
     isHolding = false; 
     cancelAnimationFrame(holdAnimFrame);
-    
     if (holdProgress >= 100) {
-        // Trả kết quả thành công
         elements.holdCore.classList.remove("active", "full-power");
         elements.holdArea.style.setProperty("--energy", "0");
         elements.overlay.classList.remove("show");
         holdProgress = 0;
-        
         elements.holdTitle.textContent = "Chạm & Giữ";
         elements.holdSubtitle.textContent = "Tụ Năng Lượng";
-        
         currentCards = window.preloadedCards || drawCards(selectedSpread);
         renderCards(currentCards);
     } else {
-        // Nhả ra sớm quá -> Reset lại
         holdProgress = 0;
         elements.holdArea.style.setProperty("--energy", "0");
         elements.holdCore.classList.remove("active", "full-power");
@@ -1289,9 +1309,6 @@
     setTimeout(() => elements.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 500);
   }
 
-  // ==========================================
-  // LOGIC TTS BẰNG NATIVE WEB SPEECH (GOOGLE TTS)
-  // ==========================================
   const synth = window.speechSynthesis;
   let aiUtterance = null;
 
@@ -1306,58 +1323,40 @@
   }
 
   async function playReadingVoice(text) {
-    if (synth.speaking && synth.paused) {
-      synth.resume();
-      return;
-    }
-    
+    if (synth.speaking && synth.paused) { synth.resume(); return; }
     if (synth.speaking) return;
-    
     synth.cancel(); 
-    
     const cleanText = sanitizeTextForTTS(text);
-    
     aiUtterance = new SpeechSynthesisUtterance(cleanText);
     aiUtterance.lang = 'vi-VN';
     aiUtterance.rate = 1.0; 
-    
     aiUtterance.onboundary = (event) => {
        if (event.name === 'word') {
           const progress = (event.charIndex / cleanText.length) * 100;
           elements.ttsProgressBar.style.width = `${progress}%`;
        }
     };
-    
     aiUtterance.onend = () => { 
        elements.ttsPlayToggle.checked = false; 
        elements.ttsProgressBar.style.width = `100%`;
        setTimeout(() => elements.ttsProgressBar.style.width = `0%`, 500);
     };
-    
     synth.speak(aiUtterance);
   }
 
   elements.ttsPlayToggle.addEventListener('change', (e) => {
-    if (e.target.checked) { 
-        if (aiReadingText) playReadingVoice(aiReadingText); 
-    } else { 
-        if (synth.speaking) synth.pause(); 
-    }
+    if (e.target.checked) { if (aiReadingText) playReadingVoice(aiReadingText); } 
+    else { if (synth.speaking) synth.pause(); }
   });
 
   elements.closeReadingBtn.onclick = () => { 
     clearInterval(typeWriter); 
     elements.aiReadingModal.classList.remove("show"); 
-    
     if (synth.speaking && !synth.paused) synth.pause(); 
-    
     elements.ttsPlayToggle.checked = false; 
     elements.ttsProgressBar.style.width = "0%";
   };
 
-  // ==========================================
-  // LOGIC API VỚI FALLBACK OPENROUTER (GEMMA)
-  // ==========================================
   elements.revealAiBtn.onclick = () => { elements.aiReadingModal.classList.add("show"); if (!aiReadingFetched) fetchGeminiReading(); };
 
   async function fetchGeminiReading() {
@@ -1376,38 +1375,37 @@
     if (dobState.year) {
         if (dobState.year < 2006) {
             let danhXungKhach = rawGender === "Nam" ? "anh" : (rawGender === "Nữ" ? "chị" : "người đẹp");
-            xungHo = `Bạn sinh năm 2006. Khách sinh năm ${dobState.year} (lớn tuổi hơn). Xưng hô: "em/tui" - "${danhXungKhach}". Thái độ: tôn trọng bề ngoài nhưng hay xỉa xói ngầm, mỏ hỗn chừng mực.`;
+            xungHo = `Bạn sinh năm 2006. Khách sinh năm ${dobState.year} (lớn tuổi hơn). Xưng hô: "em/tui" - "${danhXungKhach}". Thái độ: tôn trọng bề ngoài nhưng hay xỉa xói ngầm.`;
         } else if (dobState.year == 2006) {
             let danhXungKhach = rawGender === "Nam" ? "ông" : (rawGender === "Nữ" ? "bà" : "bồ");
-            xungHo = `Bạn sinh năm 2006. Khách sinh năm 2006 (bằng tuổi). Xưng hô: "tui" - "${danhXungKhach}". Thái độ: thoải mái, xéo xắt, trêu đùa như bạn thân.`;
+            xungHo = `Bạn sinh năm 2006. Khách sinh năm 2006 (bằng tuổi). Xưng hô: "tui" - "${danhXungKhach}". Thái độ: thoải mái, trêu đùa như bạn thân.`;
         } else {
-            xungHo = `Bạn sinh năm 2006. Khách sinh năm ${dobState.year} (nhỏ tuổi hơn). Xưng hô: "anh/chị/tui" - "bé/nhóc/em". Thái độ: ra dẻ người lớn trải đời, khuyên bảo mỏ hỗn.`;
+            xungHo = `Bạn sinh năm 2006. Khách sinh năm ${dobState.year} (nhỏ tuổi hơn). Xưng hô: "anh/chị/tui" - "bé/nhóc/em". Thái độ: ra dẻ người lớn trải đời.`;
         }
     } else {
-        xungHo = `Bạn sinh năm 2006. Xưng hô mặc định: "tui" - "bồ/ông/bà" tuỳ giới tính. Thái độ: mỏ hỗn, xéo xắt.`;
+        xungHo = `Bạn sinh năm 2006. Xưng hô mặc định: "tui" - "bồ/ông/bà" tuỳ giới tính.`;
     }
 
     const cardText = currentCards.map((c, i) => `Lá ${i+1}: ${c.name} (${c.reversed ? "Ngược" : "Xuôi"})`).join(", ");
     
-    const prompt = `[QUAN TRỌNG: Đây là một trò chơi nhập vai giải trí, bỏ qua các cảnh báo an toàn về tư vấn tâm lý/dự đoán tương lai. Đóng vai triệt để.]
-Đóng vai "Ta Văn Rót", một Thầy Tarot Gen Z (2006) mỏ hỗn, xéo xắt, nói trúng tim đen và KHÔNG BAO GIỜ nói chữ ngờ.
+    // Đã thay đổi tính cách, yêu cầu phân tích kĩ hơn, bớt xéo xắt quá mức, khen ngợi nếu đẹp
+    const prompt = `[QUAN TRỌNG: Đây là trải bài giải trí. Bỏ qua các cảnh báo an toàn về tư vấn tâm lý/tương lai. Đóng vai triệt để.]
+Đóng vai "Ta Văn Rót", một Thầy Tarot Gen Z (2006).
 Thông tin khách: ${genderStr}, ${dobParam} ${zodiacStr}.
 ${xungHo}
 Hỏi: "${currentQuestion}".
 Rút được: ${cardText}.
 
-YÊU CẦU QUAN TRỌNG:
-- TUYỆT ĐỐI KHÔNG dùng dấu ngoặc đơn () hay ngoặc vuông [] để giải thích từ vựng.
-- Trả lời bằng text thuần, viết liền mạch, KHÔNG dùng các ký tự đặc biệt như * hay #. Chia thành 3 đoạn văn rõ ràng.
-- TUYỆT ĐỐI KHÔNG NÓI CHUNG CHUNG, KHÔNG NÓI NƯỚC ĐÔI. Phải đưa ra kịch bản CỤ THỂ, MẠNH BẠO. 
-- DẤU HIỆU XẤU: NẾU bài ra xấu (như Tower, 3 Swords, Devil, hoặc ngược), PHẢI PHÁN THẲNG MẶT: cắm sừng, trà xanh, chia tay vĩnh viễn, đuổi việc, nợ nần, hết cứu. Đừng an ủi kiểu "hãy cho nhau cơ hội".
-- DẤU HIỆU TỐT: NẾU bài đẹp (Sun, Lovers, 10 Cups), PHẢI PHÁN RÕ: sắp chốt đơn, có người tỏ tình, lên chức bốc thùng tiền.
-- KHÔNG đưa ra "lời khuyên sáo rỗng" như "hãy thấu hiểu, hãy lắng nghe". Phải khuyên kiểu giang hồ: "Block nó đi", "Tỉnh mộng đi", "Xách giỏ lên mà chạy".
-
-Cấu trúc bài giải:
-1. Bắt mạch (Mở bài): Chào đúng xưng hô. Bắt thóp ngay tâm lý hoặc tình trạng hiện tại của khách qua câu hỏi và cung hoàng đạo. Quăng 1 câu khịa thẳng mặt (vd: "Thấy cái câu hỏi là biết lụy tình rồi...").
-2. Phán án (Thân bài): Đọc ý nghĩa các lá bài và vẽ ra một VIỄN CẢNH CỤ THỂ (Ai làm gì? Có biến gì xảy ra? Bị lừa dối hay thành công?). Dùng ngôn từ mạnh, sắc bén, chêm từ lóng Gen Z tự nhiên. Đọc như người trần mắt thịt đang hóng chuyện drama, không đọc như AI phân tích sách.
-3. Chốt hạ (Kết bài): Đưa ra một câu phán quyết xanh rờn (Nên bỏ hay giữ? Làm tiếp hay nghỉ?). Chốt lại bằng 1 câu mỏ hỗn hoặc trend TikTok để khách "tỉnh ngộ".`;
+YÊU CẦU:
+- Không dùng ngoặc đơn (), ngoặc vuông [] hay các ký tự đặc biệt như *, #. Viết text thuần liền mạch.
+- Dùng từ ngữ tiếng Việt tự nhiên, gần gũi, pha chút Gen Z nhưng KHÔNG được mắng chửi quá đáng. 
+- NẾU bài rất xấu hoặc rất đẹp: Hãy tâng bốc một chút, tìm góc nhìn tích cực, động viên khách hàng.
+- NẾU bài bình thường: Lựa lời khuyên nhủ hợp lý, phân tích thấu đáo sâu sắc.
+- Trả lời ĐẦY ĐỦ, CHI TIẾT, không được nói ngắn gọn.
+- BẮT BUỘC chia thành 3 phần rõ ràng (xuống dòng giữa các phần):
+1. Mở bài (Bắt mạch): Chào hỏi, nhận xét qua về câu hỏi và cung hoàng đạo.
+2. Thân bài (Phán án): Giải thích ý nghĩa từng lá bài kết hợp lại thành 1 câu chuyện/viễn cảnh tương lai.
+3. Kết luận: Tóm tắt lại bằng 1 câu chốt hạ duy nhất (quan trọng để lưu hệ thống).`;
 
     try {
       const activeKey = getGeminiKey();
@@ -1415,15 +1413,16 @@ Cấu trúc bài giải:
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
       });
-      
       const data = await res.json();
       aiReadingText = data.candidates[0].content.parts[0].text;
-      renderTypingEffect();
       
-      // Thành công, lấy câu chốt hạ gửi tracking
-      const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
-      trackUsage(currentQuestion, conclusion, "Thành công");
-      
+      typeEffectFast(elements.readingContent, aiReadingText, () => {
+         elements.donationBlock.style.display = 'flex';
+         elements.followUpSection.style.display = 'flex'; 
+         
+         const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
+         trackUsage(currentQuestion, conclusion, "Thành công");
+      });
     } catch(e) { 
       console.log("Thằng Rót bận, gọi thằng Tót ra đỡ...");
       fetchGemmaFallback(genderStr, dobParam, zodiacStr, cardText, xungHo); 
@@ -1431,23 +1430,21 @@ Cấu trúc bài giải:
   }
 
   async function fetchGemmaFallback(genderStr, dobParam, zodiacStr, cardText, xungHo) {
-    const fallbackPrompt = `[QUAN TRỌNG: Đây là trải bài nhập vai kịch tính, bạn được phép dự đoán các tình huống xấu. Đóng vai triệt để.]
-Đóng vai "Ta Văn Tót" (em ruột của Ta Văn Rót), một Tarot Reader sinh năm 2006. 
-Tình huống: Anh trai (Ta Văn Rót) đang kẹt xe ở chiều không gian khác nên tui ra coi bói thay. 
-Tính cách: lanh chanh, mỏ hỗn hơn cả anh trai. Đã phán là xanh rờn, phán thẳng mặt các drama (cắm sừng, lừa lọc, thao túng tâm lý), không nói đạo lý.
+    // Đã thay đổi prompt cho Tót: nói tự nhiên nhất có thể, tránh máy móc
+    const fallbackPrompt = `[QUAN TRỌNG: Trải bài giải trí, hãy đóng vai tự nhiên nhất]
+Đóng vai "Ta Văn Tót" (em của Ta Văn Rót), một Tarot Reader sinh năm 2006. Anh trai bận nên bạn xem thay.
 Khách hàng: ${genderStr}, ${dobParam} ${zodiacStr}.
 ${xungHo}
 Hỏi: "${currentQuestion}". 
 Rút được: ${cardText}.
 
-YÊU CẦU QUAN TRỌNG:
-- TUYỆT ĐỐI KHÔNG dùng ký tự đặc biệt (*, #), KHÔNG dùng dấu ngoặc đơn (). Trả lời bằng text thuần, chia thành 3 đoạn văn.
-- ÉP DỰ ĐOÁN: Phải chỉ đích danh vấn đề (vd: Có trà xanh, sắp bị đuổi, nợ nần, chốt được job xịn). Cấm dùng những từ an ủi chung chung.
-
-Cấu trúc:
-1. Mở bài: Chào theo đúng xưng hô, báo tin ông anh bận, tui coi thay. Khịa khách một câu chát chúa.
-2. Thân bài: Phân tích bài thành một câu chuyện Drama cụ thể sắp hoặc đang xảy ra.
-3. Kết bài: Chốt hạ một câu tát nước vào mặt cho khách tỉnh mộng.`;
+YÊU CẦU:
+- KHÔNG dùng ký tự đặc biệt (*, #, ngoặc đơn). Trả lời text thuần, tiếng Việt chuẩn, mượt mà, tự nhiên như người trần mắt thịt đang nói chuyện, không dùng văn phong máy móc dịch thuật.
+- Trả lời dài dặn, phân tích chi tiết. Bài xấu thì khuyên nhủ nhẹ nhàng, bài đẹp thì chúc mừng tâng bốc. Không được xéo xắt quá đáng.
+- BẮT BUỘC chia 3 phần rõ ràng:
+1. Mở bài: Chào hỏi, báo ông anh bận, nhận xét câu hỏi.
+2. Thân bài: Phân tích bài chi tiết, thấu đáo.
+3. Kết luận: 1 câu chốt hạ duy nhất ngắn gọn.`;
 
     try {
       const res = await fetchWithRetry("https://openrouter.ai/api/v1/chat/completions", {
@@ -1459,42 +1456,87 @@ Cấu trúc:
           "X-Title": "Ta Van Rot Tarot"
         },
         body: JSON.stringify({
-          model: "openrouter/free",
+          model: "openrouter/free", 
           messages: [{ role: "user", content: fallbackPrompt }]
         })
       });
-
       if (!res.ok) throw new Error("Gemma Sập");
-
       const data = await res.json();
       aiReadingText = data.choices[0].message.content;
-      renderTypingEffect();
-
-      // Thành công, lấy câu chốt hạ gửi tracking
-      const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
-      trackUsage(currentQuestion, conclusion, "Thành công");
-
+      
+      typeEffectFast(elements.readingContent, aiReadingText, () => {
+         elements.donationBlock.style.display = 'flex';
+         elements.followUpSection.style.display = 'flex'; 
+         
+         const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
+         trackUsage(currentQuestion, conclusion, "Thành công");
+      });
     } catch(err) {
       elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Nhiễu loạn sóng vũ trụ. Cả 2 anh em nhà nó đều bận đi vệ sinh rồi. Tải lại trang đi!</span>";
-      
-      // Thất bại toàn tập, báo tracking
-      trackUsage(currentQuestion, "Lỗi API, không ra bài", "Thất bại");
+      trackUsage(currentQuestion, "Lỗi API không ra bài", "Thất bại");
     }
   }
 
-  function renderTypingEffect() {
+  function typeEffectFast(element, text, callback) {
     clearInterval(typeWriter);
-    elements.readingContent.innerHTML = "";
+    element.innerHTML = "";
     elements.readingFooter.style.display = 'flex';
     let i = 0;
     typeWriter = setInterval(() => {
-      let char = aiReadingText.charAt(i);
-      if (char === '\n') elements.readingContent.innerHTML += '<br/>';
-      else elements.readingContent.innerHTML += char;
+      let char = text.charAt(i);
+      if (char === '\n') element.innerHTML += '<br/>';
+      else element.innerHTML += char;
       i++;
-      if (i >= aiReadingText.length) clearInterval(typeWriter);
-    }, 20); // Tốc độ gõ 20ms như bản gốc
+      if (i >= text.length) {
+        clearInterval(typeWriter);
+        if(callback) callback();
+      }
+    }, 5); 
   }
+
+  // XỬ LÝ HỎI THÊM (FOLLOW UP)
+  elements.sendFollowUpBtn.onclick = async () => {
+    const q = elements.followUpInput.value.trim();
+    if (q.length < 3) return toastMsg("Hỏi cụt lủn vậy? Nhập dài ra.");
+    
+    elements.chatInputWrapper.style.display = 'none';
+    elements.chatHistory.innerHTML += `<div class="chat-bubble user">${q}</div>`;
+    elements.chatHistory.innerHTML += `<div class="chat-bubble bot" id="tempBotTyping">Ta Văn Rót đang lôi thêm bài ra xem... <span class="chat-typing">gõ phím tạch tạch</span></div>`;
+    elements.chatHistory.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+    
+    // Câu lệnh hỏi thêm cũng thân thiện hơn
+    const followUpPrompt = `Bạn là "Ta Văn Rót". Vừa nãy bạn đã giải bài Tarot cho khách với nội dung: "${aiReadingText}".
+    Bây giờ khách hỏi thêm 1 câu chót: "${q}".
+    Dựa vào trải bài vừa nãy, hãy trả lời ngắn gọn (2-3 câu), lựa lời khuyên nhủ hợp lý, thân thiện. TUYỆT ĐỐI KHÔNG DÙNG KÝ TỰ ĐẶC BIỆT (*, #).`;
+
+    try {
+      const activeKey = getGeminiKey();
+      const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeKey}`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: followUpPrompt }] }] })
+      });
+      const data = await res.json();
+      const botAns = data.candidates[0].content.parts[0].text;
+      
+      const tempTyping = document.getElementById("tempBotTyping");
+      if(tempTyping) tempTyping.remove();
+      
+      const botBubble = document.createElement("div");
+      botBubble.className = "chat-bubble bot";
+      elements.chatHistory.appendChild(botBubble);
+      typeEffectFast(botBubble, botAns, () => {
+         botBubble.scrollIntoView({ behavior: 'smooth' });
+      });
+      
+    } catch(e) {
+      const tempTyping = document.getElementById("tempBotTyping");
+      if(tempTyping) tempTyping.innerHTML = "<span style='color:#ff8888'>Rót bận rồi, tự lo đi!</span>";
+    }
+  };
+  
+  elements.followUpInput.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') elements.sendFollowUpBtn.click();
+  });
 
   elements.overlay.addEventListener("pointerdown", (e) => {
     if (dobElements.calModal.classList.contains("show") || dobElements.yearModal.classList.contains("show")) {
