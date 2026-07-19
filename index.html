@@ -23,7 +23,7 @@
     overflow: hidden;
     position: relative;
     z-index: 10;
-    display: none; /* Sẽ hiện lên khi load được data */
+    display: none; 
     align-items: center;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   }
@@ -52,7 +52,7 @@
     display: flex;
     gap: 50px;
     white-space: nowrap;
-    padding-left: 150px; /* Nhường chỗ cho chữ Bảng Vàng */
+    padding-left: 150px; 
     animation: marquee 25s linear infinite;
   }
   .donate-marquee-container:hover .donate-marquee-content {
@@ -69,6 +69,7 @@
     font-size: 15px;
   }
   .donate-item strong { color: var(--cyan); font-weight: 600;}
+
   /* =========================================
      CORE VARIABLES & THEMES
      ========================================= */
@@ -84,7 +85,6 @@
     --purple-glow: rgba(142, 68, 173, 0.5);
     --cyan: #48cae4;
     
-    /* Aura Colors for Dark Mode */
     --aura-1: rgba(142, 68, 173, 0.7); 
     --aura-2: rgba(72, 202, 228, 0.8);
     --aura-core: rgba(20, 10, 40, 0.95);
@@ -108,7 +108,6 @@
     --purple: #6a1b9a;
     --cyan: #0277bd;
     
-    /* Aura Colors for Light Mode */
     --aura-1: rgba(226, 194, 117, 0.9);
     --aura-2: rgba(106, 27, 154, 0.8);
     --aura-core: rgba(255, 255, 255, 0.95);
@@ -1014,7 +1013,8 @@
     { file: "20-Judgement.png", name: "Judgement" }, { file: "21-TheWorld.png", name: "The World" },
     { file: "Cups01.png", name: "Ace of Cups" }, { file: "Cups02.png", name: "Two of Cups" }, { file: "Cups03.png", name: "Three of Cups" },
   ];
-// Lấy dữ liệu Top Donate
+
+  // Lấy dữ liệu Top Donate
   const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyzTBIHdW3nO8Ze5BCvhDfnELSuw_ulE6toNJn29VzkQCxYmNVK8gtNmUUKXFlolmiw/exec';
 
   async function fetchTopDonates() {
@@ -1046,17 +1046,8 @@
   // Gọi hàm load Top Donate ngay khi web vừa tải xong
   window.addEventListener('load', () => {
     fetchTopDonates(); 
-    
-    // Cái cụm tắt intro cũ của mày giữ nguyên
-    setTimeout(() => {
-      document.getElementById('intro-screen').style.opacity = '0';
-      setTimeout(() => {
-        document.getElementById('intro-screen').style.display = 'none';
-        document.body.classList.remove('intro-active');
-        document.querySelector('.wrap').classList.add('loaded');
-      }, 1500);
-    }, 2500);
   });
+
   const suits = ["Cups", "Pentacles", "Swords", "Wands"];
   const ranks = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Page", "Knight", "Queen", "King"];
   const minorCards = suits.flatMap(suit => Array.from({ length: 14 }, (_, i) => ({ file: `${suit}${String(i + 1).padStart(2, "0")}.png`, name: `${ranks[i]} of ${suit}` })));
@@ -1337,7 +1328,7 @@
   elements.readyBtn.onclick = () => {
     currentQuestion = elements.questionInput.value.trim();
     if (currentQuestion.length < 5) return toastMsg("Viết câu hỏi rõ ràng có tâm xíu đi.");
-    
+
     elements.resultsSection.classList.remove("show"); elements.revealAiBtn.style.display = "none";
     aiReadingFetched = false; aiReadingText = ""; elements.readingFooter.style.display = 'none';
     resetChatState();
