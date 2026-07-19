@@ -59,7 +59,7 @@
     animation-play-state: paused;
   }
   @keyframes marquee {
-    0% { transform: translateX(100%); }
+    0% { transform: translateX(20px); } /* Ép nó xuất hiện ngay sát chữ Bảng vàng */
     100% { transform: translateX(-100%); }
   }
   .donate-item {
@@ -537,12 +537,12 @@
   body.light-mode .chat-bubble.bot { color: var(--purple); border-color: rgba(142, 68, 173, 0.2); background: rgba(142, 68, 173, 0.05); }
   body.light-mode .chat-bubble.user { color: #0277bd; border-color: rgba(2, 119, 189, 0.3); background: rgba(2, 119, 189, 0.05); }
   
-  .chat-input-wrapper { display: flex; gap: 12px; margin-top: 10px; }
-  .chat-input-wrapper input { flex: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 24px; padding: 0 20px; color: var(--text-main); font-size: 16px; font-family: 'Montserrat', sans-serif; }
+  .chat-input-wrapper { display: flex; gap: 8px; margin-top: 10px; width: 100%; box-sizing: border-box; }
+  .chat-input-wrapper input { flex: 1; min-width: 0; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 24px; padding: 0 16px; color: var(--text-main); font-size: 15px; font-family: 'Montserrat', sans-serif; }
   body.light-mode .chat-input-wrapper input { background: #f0f0f0; border-color: #ddd; color: #333; }
   .chat-input-wrapper input:focus { border-color: var(--purple); background: rgba(0,0,0,0.5); }
   body.light-mode .chat-input-wrapper input:focus { background: #fff; border-color: var(--purple); }
-  .chat-input-wrapper button { height: 50px; padding: 0 24px; border-radius: 24px; white-space: nowrap; }
+  .chat-input-wrapper button { height: 50px; padding: 0 16px; border-radius: 24px; white-space: nowrap; flex-shrink: 0; }
 
   /* DONATION & QR CSS */
   .donation-wrapper {
