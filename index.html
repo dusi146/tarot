@@ -965,8 +965,8 @@
     }
   }
 
-  // TÍCH HỢP TRACKING VỀ GOOGLE SHEETS
-  async function trackUsage(question) {
+  // TÍCH HỢP TRACKING VỀ GOOGLE SHEETS MỚI NHẤT
+  async function trackUsage(question, conclusion, status) {
     try {
       const ipRes = await fetch('https://api.ipify.org?format=json');
       const ipData = await ipRes.json();
@@ -979,10 +979,12 @@
         ip: ipData.ip,
         question: question,
         dob: dobStr,
-        gender: rawGender
+        gender: rawGender,
+        conclusion: conclusion,
+        status: status
       };
       
-      fetch('https://script.google.com/macros/s/AKfycbyykHOgOk1jY5FbWdV2dvz8Rh0YXANG0hNMqDI4fqqhzbRsgbE1IyLYD0pIxfG0pq4d/exec', {
+      fetch('https://script.google.com/macros/s/AKfycbwO0gU92MEA8CI_2Yr3tVi3WMlCIR1hcm6Nd5RRymfDlWUXakM50p5HoE521hziViJc/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
@@ -1186,8 +1188,6 @@
     currentQuestion = elements.questionInput.value.trim();
     if (currentQuestion.length < 5) return toastMsg("Viết câu hỏi rõ ràng có tâm xíu đi.");
     
-    trackUsage(currentQuestion); // BẮN DỮ LIỆU LÊN GOOGLE SHEETS
-
     elements.resultsSection.classList.remove("show"); elements.revealAiBtn.style.display = "none";
     aiReadingFetched = false; aiReadingText = ""; elements.readingFooter.style.display = 'none';
     elements.overlay.classList.add("show"); elements.holdArea.style.setProperty("--energy", "0");
@@ -1420,6 +1420,10 @@ Cấu trúc bài giải:
       aiReadingText = data.candidates[0].content.parts[0].text;
       renderTypingEffect();
       
+      // Thành công, lấy câu chốt hạ gửi tracking
+      const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
+      trackUsage(currentQuestion, conclusion, "Thành công");
+      
     } catch(e) { 
       console.log("Thằng Rót bận, gọi thằng Tót ra đỡ...");
       fetchGemmaFallback(genderStr, dobParam, zodiacStr, cardText, xungHo); 
@@ -1466,8 +1470,15 @@ Cấu trúc:
       aiReadingText = data.choices[0].message.content;
       renderTypingEffect();
 
+      // Thành công, lấy câu chốt hạ gửi tracking
+      const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
+      trackUsage(currentQuestion, conclusion, "Thành công");
+
     } catch(err) {
       elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Nhiễu loạn sóng vũ trụ. Cả 2 anh em nhà nó đều bận đi vệ sinh rồi. Tải lại trang đi!</span>";
+      
+      // Thất bại toàn tập, báo tracking
+      trackUsage(currentQuestion, "Lỗi API, không ra bài", "Thất bại");
     }
   }
 
@@ -1482,7 +1493,7 @@ Cấu trúc:
       else elements.readingContent.innerHTML += char;
       i++;
       if (i >= aiReadingText.length) clearInterval(typeWriter);
-    }, 20);
+    }, 20); // Tốc độ gõ 20ms như bản gốc
   }
 
   elements.overlay.addEventListener("pointerdown", (e) => {
