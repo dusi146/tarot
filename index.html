@@ -10,6 +10,66 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* =========================================
+     TOP DONATE MARQUEE
+     ========================================= */
+  .donate-marquee-container {
+    width: min(100% - 40px, var(--max-w));
+    margin: 0 auto 30px auto;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(226, 194, 117, 0.2);
+    border-radius: 12px;
+    color: var(--gold);
+    padding: 12px 0;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+    display: none; /* Sẽ hiện lên khi load được data */
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  body.light-mode .donate-marquee-container {
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  }
+  .donate-label {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: linear-gradient(90deg, #0a0b16 80%, transparent);
+    padding: 0 30px 0 20px;
+    z-index: 2;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+  body.light-mode .donate-label {
+    background: linear-gradient(90deg, #e6e3f0 80%, transparent);
+    color: var(--text-main);
+  }
+  .donate-marquee-content {
+    display: flex;
+    gap: 50px;
+    white-space: nowrap;
+    padding-left: 150px; /* Nhường chỗ cho chữ Bảng Vàng */
+    animation: marquee 25s linear infinite;
+  }
+  .donate-marquee-container:hover .donate-marquee-content {
+    animation-play-state: paused;
+  }
+  @keyframes marquee {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+  .donate-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+  }
+  .donate-item strong { color: var(--cyan); font-weight: 600;}
+  /* =========================================
      CORE VARIABLES & THEMES
      ========================================= */
   :root {
@@ -1036,7 +1096,7 @@
         status: status
       };
       
-      fetch('https://script.google.com/macros/s/AKfycbygTDVo0rcO5hQ1SMdYn3TlH7Rn5Ft1xdkFv-xcqGLFawB8-kcKFmbpnGL7GEa1SIMh/exec', {
+      fetch('https://script.google.com/macros/s/AKfycbyzTBIHdW3nO8Ze5BCvhDfnELSuw_ulE6toNJn29VzkQCxYmNVK8gtNmUUKXFlolmiw/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
