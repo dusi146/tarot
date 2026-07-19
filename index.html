@@ -347,7 +347,7 @@
   }
 
   /* =========================================
-     CARDS RENDERING
+     CARDS RENDERING (CĂN GIỮA VÀ RESPONSIVE)
      ========================================= */
   .results { margin-top: 80px; display: none; opacity: 0; transform: translateY(60px); transition: 1s var(--ease-slow); content-visibility: auto; contain-intrinsic-size: 800px; scroll-margin-top: 60px;}
   .results.show { display: block; opacity: 1; transform: translateY(0); }
@@ -355,6 +355,7 @@
   .results-head h3 { font-size: 40px; color: var(--gold); margin-bottom: 12px; font-weight: 500;}
   .results-head p { color: var(--text-muted); font-size: 17px; }
 
+  /* Sử dụng flex để căn giữa đẹp mắt mọi số lượng bài */
   .cards-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; perspective: 3000px; width: 100%;}
   .tarot-card { position: relative; width: 280px; max-width: 100%; cursor: pointer; opacity: 0; transform: translateY(60px) rotateX(-15deg); animation: epicCardEntrance 1s var(--ease-out-spring) forwards; animation-delay: var(--delay, 0ms); transition: transform 0.5s var(--ease-smooth), filter 0.5s ease;}
   @keyframes epicCardEntrance { to { opacity: 1; transform: translateY(0) rotateX(0); } }
@@ -369,6 +370,7 @@
 
   .card-face { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transform: translate3d(0,0,0); box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);}
   
+  /* Back face design */
   .card-face.back { background: radial-gradient(circle at center, #140826 0%, #030106 100%); display: flex; align-items: center; justify-content: center; position: relative; border: 2px solid rgba(226, 194, 117, 0.25); }
   .card-face.back::before { content: ""; position: absolute; inset: 14px; border: 1px solid rgba(142, 68, 173, 0.3); border-radius: 12px; pointer-events: none; }
   .card-face.back::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px); background-size: 24px 24px; opacity: 0.5; pointer-events: none; }
@@ -379,6 +381,7 @@
   .astral-ring-2 { position: absolute; inset: -32px; border: 1px solid rgba(142, 68, 173, 0.25); border-radius: 50%; border-top-color: transparent; border-bottom-color: transparent; animation: spinLayer 12s linear infinite reverse; opacity: 0.5; }
   @keyframes pulseGlow { from { transform: scale(0.95); opacity: 0.6;} to { transform: scale(1.05); opacity: 1;} }
 
+  /* Front face design */
   .card-face.front { transform: rotateY(180deg); background: linear-gradient(180deg, #0d0e1b, #05050a); border-color: rgba(72, 202, 228, 0.4); display: flex; align-items: center; justify-content: center;}
   body.light-mode .card-face.front { background: #fff; }
   .fallback-bg { position: absolute; inset: 0; background: #07040d; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; border: 1px solid rgba(226,194,117,0.15); border-radius: 16px; margin: 12px; z-index: 0; }
@@ -1009,18 +1012,23 @@
     }
   }
 
+  // LẤY IP 1 LẦN DUY NHẤT LÚC TẢI TRANG ĐỂ CHỐNG LỖI MẠNG
+  let userIP = "Unknown";
+  fetch('https://api.ipify.org?format=json')
+    .then(res => res.json())
+    .then(data => { userIP = data.ip; })
+    .catch(err => console.log("Lỗi lấy IP"));
+
   // TÍCH HỢP TRACKING VỀ GOOGLE SHEETS
-  async function trackUsage(question, conclusion, status) {
+  function trackUsage(question, conclusion, status) {
     try {
-      const ipRes = await fetch('https://api.ipify.org?format=json');
-      const ipData = await ipRes.json();
       const dobStr = (dobState.day && dobState.month && dobState.year) ? `${dobState.day}/${dobState.month}/${dobState.year}` : "Chưa chọn";
       const selectedGenderBtn = document.querySelector('input[name="gender"]:checked');
       const rawGender = selectedGenderBtn ? selectedGenderBtn.value : "Chưa chọn";
       
       const payload = {
         time: new Date().toLocaleString('vi-VN'),
-        ip: ipData.ip,
+        ip: userIP, // Sử dụng IP đã lấy sẵn
         question: question,
         dob: dobStr,
         gender: rawGender,
@@ -1123,7 +1131,6 @@
       return b;
     };
     
-    // Đã sửa lại tham số truyền vào: thêm prevLastDate - i và d vào làm lbl
     for (let i = firstDay - 1; i >= 0; i--) dobElements.days.appendChild(createBtn(new Date(y, m - 1, prevLastDate - i), prevLastDate - i, true));
     for (let d = 1; d <= lastDate; d++) dobElements.days.appendChild(createBtn(new Date(y, m, d), d, false));
     const remain = 42 - dobElements.days.children.length;
@@ -1221,8 +1228,6 @@
     currentQuestion = elements.questionInput.value.trim();
     if (currentQuestion.length < 5) return toastMsg("Viết câu hỏi rõ ràng có tâm xíu đi.");
     
-    // Đã xoá dòng trackUsage ở đây để nó không bắn dữ liệu dòng trống lên Sheets nữa
-
     elements.resultsSection.classList.remove("show"); elements.revealAiBtn.style.display = "none";
     aiReadingFetched = false; aiReadingText = ""; elements.readingFooter.style.display = 'none';
     resetChatState();
@@ -1363,7 +1368,7 @@
 
   elements.revealAiBtn.onclick = () => { elements.aiReadingModal.classList.add("show"); if (!aiReadingFetched) fetchGeminiReading(); };
 
-    async function fetchGeminiReading() {
+  async function fetchGeminiReading() {
     clearInterval(typeWriter);
     aiReadingFetched = true;
     elements.readingContent.innerHTML = `<div class="loading-wrapper"><div class="eye-lid"><div class="eye"><div class="cornea"><div class="white-pupil"></div></div></div></div></div>`;
@@ -1419,7 +1424,6 @@ YÊU CẦU:
       const data = await res.json();
       aiReadingText = data.candidates[0].content.parts[0].text;
       
-      // BẮN TRACKING THÀNH CÔNG NGAY LẬP TỨC
       const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
       trackUsage(currentQuestion, conclusion, "Thành công");
 
@@ -1467,7 +1471,6 @@ YÊU CẦU:
       const data = await res.json();
       aiReadingText = data.choices[0].message.content;
       
-      // BẮN TRACKING THÀNH CÔNG NGAY LẬP TỨC
       const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
       trackUsage(currentQuestion, conclusion, "Thành công");
 
@@ -1477,7 +1480,6 @@ YÊU CẦU:
       });
     } catch(err) {
       elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Nhiễu loạn sóng vũ trụ. Cả 2 anh em nhà nó đều bận đi vệ sinh rồi. Tải lại trang đi!</span>";
-      // BẮN TRACKING LỖI NGAY LẬP TỨC
       trackUsage(currentQuestion, "Lỗi API không ra bài", "Thất bại");
     }
   }
@@ -1509,7 +1511,6 @@ YÊU CẦU:
     elements.chatHistory.innerHTML += `<div class="chat-bubble bot" id="tempBotTyping">Ta Văn Rót đang lôi thêm bài ra xem... <span class="chat-typing">gõ phím tạch tạch</span></div>`;
     elements.chatHistory.lastElementChild.scrollIntoView({ behavior: 'smooth' });
     
-    // Câu lệnh hỏi thêm cũng thân thiện hơn
     const followUpPrompt = `Bạn là "Ta Văn Rót". Vừa nãy bạn đã giải bài Tarot cho khách với nội dung: "${aiReadingText}".
     Bây giờ khách hỏi thêm 1 câu chót: "${q}".
     Dựa vào trải bài vừa nãy, hãy trả lời ngắn gọn (2-3 câu), lựa lời khuyên nhủ hợp lý, thân thiện. TUYỆT ĐỐI KHÔNG DÙNG KÝ TỰ ĐẶC BIỆT (*, #).`;
@@ -1534,8 +1535,46 @@ YÊU CẦU:
       });
       
     } catch(e) {
+      // DỰ PHÒNG TÓT KHI RÓT BẬN LÚC HỎI THÊM
       const tempTyping = document.getElementById("tempBotTyping");
-      if(tempTyping) tempTyping.innerHTML = "<span style='color:#ff8888'>Rót bận rồi, tự lo đi!</span>";
+      if(tempTyping) tempTyping.innerHTML = "Thằng Rót bận, Tót ra giải nốt... <span class='chat-typing'>gõ phím tạch tạch</span>";
+
+      const fallbackPrompt = `Bạn là "Ta Văn Tót" (em của Ta Văn Rót), thầy Tarot sinh năm 2006. Anh trai vừa giải bài xong với nội dung: "${aiReadingText}".
+      Khách hỏi thêm: "${q}".
+      Dựa vào bài trên, hãy trả lời ngắn gọn (2-3 câu) bằng tiếng Việt tự nhiên, thân thiện. TUYỆT ĐỐI KHÔNG DÙNG KÝ TỰ ĐẶC BIỆT (*, #).`;
+
+      try {
+        const resFallback = await fetchWithRetry("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://tavanrot.com",
+            "X-Title": "Ta Van Rot Tarot"
+          },
+          body: JSON.stringify({
+            model: "openrouter/free", 
+            messages: [{ role: "user", content: fallbackPrompt }]
+          })
+        });
+
+        if (!resFallback.ok) throw new Error("Gemma Sập");
+        
+        const dataFallback = await resFallback.json();
+        const botAnsFallback = dataFallback.choices[0].message.content;
+
+        if(tempTyping) tempTyping.remove();
+        
+        const botBubbleFallback = document.createElement("div");
+        botBubbleFallback.className = "chat-bubble bot";
+        elements.chatHistory.appendChild(botBubbleFallback);
+        typeEffectFast(botBubbleFallback, botAnsFallback, () => {
+           botBubbleFallback.scrollIntoView({ behavior: 'smooth' });
+        });
+
+      } catch(errFallback) {
+         if(tempTyping) tempTyping.innerHTML = "<span style='color:#ff8888'>Cả 2 anh em nó đều sập mạng rồi, thông cảm!</span>";
+      }
     }
   };
   
