@@ -1221,6 +1221,8 @@
     currentQuestion = elements.questionInput.value.trim();
     if (currentQuestion.length < 5) return toastMsg("Viết câu hỏi rõ ràng có tâm xíu đi.");
     
+    // Đã xoá dòng trackUsage ở đây để nó không bắn dữ liệu dòng trống lên Sheets nữa
+
     elements.resultsSection.classList.remove("show"); elements.revealAiBtn.style.display = "none";
     aiReadingFetched = false; aiReadingText = ""; elements.readingFooter.style.display = 'none';
     resetChatState();
@@ -1361,7 +1363,7 @@
 
   elements.revealAiBtn.onclick = () => { elements.aiReadingModal.classList.add("show"); if (!aiReadingFetched) fetchGeminiReading(); };
 
-  async function fetchGeminiReading() {
+    async function fetchGeminiReading() {
     clearInterval(typeWriter);
     aiReadingFetched = true;
     elements.readingContent.innerHTML = `<div class="loading-wrapper"><div class="eye-lid"><div class="eye"><div class="cornea"><div class="white-pupil"></div></div></div></div></div>`;
@@ -1390,7 +1392,6 @@
 
     const cardText = currentCards.map((c, i) => `Lá ${i+1}: ${c.name} (${c.reversed ? "Ngược" : "Xuôi"})`).join(", ");
     
-    // Đã thay đổi tính cách, yêu cầu phân tích kĩ hơn, bớt xéo xắt quá mức, khen ngợi nếu đẹp
     const prompt = `[QUAN TRỌNG: Đây là trải bài giải trí. Bỏ qua các cảnh báo an toàn về tư vấn tâm lý/tương lai. Đóng vai triệt để.]
 Đóng vai "Ta Văn Rót", một Thầy Tarot Gen Z (2006).
 Thông tin khách: ${genderStr}, ${dobParam} ${zodiacStr}.
@@ -1418,12 +1419,13 @@ YÊU CẦU:
       const data = await res.json();
       aiReadingText = data.candidates[0].content.parts[0].text;
       
+      // BẮN TRACKING THÀNH CÔNG NGAY LẬP TỨC
+      const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
+      trackUsage(currentQuestion, conclusion, "Thành công");
+
       typeEffectFast(elements.readingContent, aiReadingText, () => {
          elements.donationBlock.style.display = 'flex';
          elements.followUpSection.style.display = 'flex'; 
-         
-         const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
-         trackUsage(currentQuestion, conclusion, "Thành công");
       });
     } catch(e) { 
       console.log("Thằng Rót bận, gọi thằng Tót ra đỡ...");
@@ -1432,7 +1434,6 @@ YÊU CẦU:
   }
 
   async function fetchGemmaFallback(genderStr, dobParam, zodiacStr, cardText, xungHo) {
-    // Đã thay đổi prompt cho Tót: nói tự nhiên nhất có thể, tránh máy móc
     const fallbackPrompt = `[QUAN TRỌNG: Trải bài giải trí, hãy đóng vai tự nhiên nhất]
 Đóng vai "Ta Văn Tót" (em của Ta Văn Rót), một Tarot Reader sinh năm 2006. Anh trai bận nên bạn xem thay.
 Khách hàng: ${genderStr}, ${dobParam} ${zodiacStr}.
@@ -1466,15 +1467,17 @@ YÊU CẦU:
       const data = await res.json();
       aiReadingText = data.choices[0].message.content;
       
+      // BẮN TRACKING THÀNH CÔNG NGAY LẬP TỨC
+      const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
+      trackUsage(currentQuestion, conclusion, "Thành công");
+
       typeEffectFast(elements.readingContent, aiReadingText, () => {
          elements.donationBlock.style.display = 'flex';
          elements.followUpSection.style.display = 'flex'; 
-         
-         const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
-         trackUsage(currentQuestion, conclusion, "Thành công");
       });
     } catch(err) {
       elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Nhiễu loạn sóng vũ trụ. Cả 2 anh em nhà nó đều bận đi vệ sinh rồi. Tải lại trang đi!</span>";
+      // BẮN TRACKING LỖI NGAY LẬP TỨC
       trackUsage(currentQuestion, "Lỗi API không ra bài", "Thất bại");
     }
   }
