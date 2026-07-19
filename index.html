@@ -745,6 +745,14 @@
       <p>"Vũ trụ sẽ thấu hiểu qua từng lá bài."</p>
     </section>
 
+    <!-- THANH CHẠY TOP DONATE MỚI -->
+    <div class="donate-marquee-container" id="donateMarquee">
+      <div class="donate-label">💎 Tốp đô nết : </div>
+      <div class="donate-marquee-content" id="donateContent">
+        <!-- AI sẽ nhúng data vào đây -->
+      </div>
+    </div>
+
     <section class="glass-panel">
       <div class="panel-inner">
         <div class="section-title">
@@ -1006,7 +1014,49 @@
     { file: "20-Judgement.png", name: "Judgement" }, { file: "21-TheWorld.png", name: "The World" },
     { file: "Cups01.png", name: "Ace of Cups" }, { file: "Cups02.png", name: "Two of Cups" }, { file: "Cups03.png", name: "Three of Cups" },
   ];
+// Lấy dữ liệu Top Donate
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyzTBIHdW3nO8Ze5BCvhDfnELSuw_ulE6toNJn29VzkQCxYmNVK8gtNmUUKXFlolmiw/exec';
 
+  async function fetchTopDonates() {
+    try {
+      const res = await fetch(WEBHOOK_URL); // Tự động dùng GET request để kéo data
+      const json = await res.json();
+      
+      if (json.status === 'success' && json.data.length > 0) {
+        const contentDiv = document.getElementById('donateContent');
+        let html = '';
+        
+        json.data.forEach((item, index) => {
+          let medal = '🏅';
+          if (index === 0) medal = '🥇';
+          if (index === 1) medal = '🥈';
+          if (index === 2) medal = '🥉';
+          
+          html += `<div class="donate-item">${medal} <strong>${item.name}</strong>: ${item.amount}</div>`;
+        });
+        
+        contentDiv.innerHTML = html;
+        document.getElementById('donateMarquee').style.display = 'flex';
+      }
+    } catch (e) {
+      console.log("Không tải được Top Donate");
+    }
+  }
+
+  // Gọi hàm load Top Donate ngay khi web vừa tải xong
+  window.addEventListener('load', () => {
+    fetchTopDonates(); 
+    
+    // Cái cụm tắt intro cũ của mày giữ nguyên
+    setTimeout(() => {
+      document.getElementById('intro-screen').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('intro-screen').style.display = 'none';
+        document.body.classList.remove('intro-active');
+        document.querySelector('.wrap').classList.add('loaded');
+      }, 1500);
+    }, 2500);
+  });
   const suits = ["Cups", "Pentacles", "Swords", "Wands"];
   const ranks = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Page", "Knight", "Queen", "King"];
   const minorCards = suits.flatMap(suit => Array.from({ length: 14 }, (_, i) => ({ file: `${suit}${String(i + 1).padStart(2, "0")}.png`, name: `${ranks[i]} of ${suit}` })));
