@@ -12,15 +12,68 @@
   /* =========================================
      TOP DONATE MARQUEE
      ========================================= */
-    }
+  .donate-marquee-container {
+    width: min(100% - 40px, var(--max-w));
+    margin: 0 auto 30px auto;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(226, 194, 117, 0.2);
+    border-radius: 12px;
+    color: var(--gold);
+    padding: 12px 0 12px 150px; /* Chừa 150px bên trái cho cái nhãn */
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+    display: none; 
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  body.light-mode .donate-marquee-container {
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  }
+  .donate-label {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 150px;
+    background: linear-gradient(90deg, #0a0b16 80%, transparent);
+    padding: 0 10px 0 20px;
+    z-index: 2;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+  body.light-mode .donate-label {
+    background: linear-gradient(90deg, #e6e3f0 80%, transparent);
+    color: var(--text-main);
+  }
+  .donate-marquee-content {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important; /* Lệnh thép: Cấm tuyệt đối rớt dòng */
+    align-items: center;
+    gap: 50px;
+    width: max-content; 
+    animation: marquee 25s linear infinite;
+  }
+  .donate-marquee-container:hover .donate-marquee-content {
+    animation-play-state: paused;
+  }
+  @keyframes marquee {
+    0% { transform: translateX(0); } 
+    100% { transform: translateX(calc(-50% - 25px)); }
+  }
   .donate-item {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 8px;
     font-size: 15px;
+    white-space: nowrap !important; /* Ép chữ cứng trên 1 dòng */
+    flex-shrink: 0 !important; /* Lệnh thép: Không cho phép tự động bóp nhỏ thẻ */
   }
   .donate-item strong { color: var(--cyan); font-weight: 600;}
-
   /* =========================================
      CORE VARIABLES & THEMES
      ========================================= */
