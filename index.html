@@ -1041,7 +1041,7 @@
     { file: "Cups01.png", name: "Ace of Cups" }, { file: "Cups02.png", name: "Two of Cups" }, { file: "Cups03.png", name: "Three of Cups" }
   ];
 
-  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyASCuWIfj-TLlYT2kch0n_tBg_G6P0ZL4AcztmmuIYUQZ_uUiTGbO5L_xLBR2NgzE/exec';
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyDBu6AE0MRKUOjQ1ruuXhda7NuCfkxVP5DUuCmAhILp38FTjGxbOFfLeXZoZmqUVo5/exec';
 
   async function fetchTopDonates() {
     try {
@@ -1087,6 +1087,12 @@
   let sessionTime = "";
   let currentRating = 0;
   let currentRatingNote = "";
+
+  // Các biến của trí nhớ AI và giới hạn trò chuyện
+  let chatCount = 0;
+  let totMemory = [];
+  let accumulatedQ = "";
+  let accumulatedA = "";
 
   const elements = {
     spreadModal: document.getElementById("spreadModal"), spreadGrid: document.getElementById("spreadGrid"),
@@ -1395,6 +1401,12 @@
     elements.submitFeedbackBtn.disabled = false;
     currentRating = 0;
     currentRatingNote = "";
+    
+    // Reset trí nhớ cho phiên chat mới
+    chatCount = 0;
+    totMemory = [];
+    accumulatedQ = "";
+    accumulatedA = "";
   }
 
   elements.readyBtn.onclick = () => {
@@ -1547,10 +1559,10 @@
 
     elements.readingContent.innerHTML = `<div class="loading-wrapper" style="flex-direction: column; gap: 25px;">
         <div class="eye-lid"><div class="eye"><div class="cornea"><div class="white-pupil"></div></div></div></div>
-        <div id="loadingText" style="color: var(--cyan); font-style: italic; font-weight: 500; font-size: 16px; letter-spacing: 1px;">Đang xào bài...</div>
+        <div id="loadingText" style="color: var(--cyan); font-style: italic; font-weight: 500; font-size: 16px; letter-spacing: 1px;">Đang kết nối tần số...</div>
     </div>`;
     
-    const loadingMsgs = ["Đang xào bài...", "Đang kết nối tần số tình duyên...", "Vũ trụ đang gửi thông điệp xuống...", "Chờ tí, Rót đang soi nghiệp..."];
+    const loadingMsgs = ["Đang xào bài...", "Đang kết nối tần số tình duyên...", "Vũ trụ đang gửi thông điệp...", "Chờ tí, Tót đang soi nghiệp..."];
     let lIdx = 0;
     let loadInt = setInterval(() => {
         lIdx = (lIdx + 1) % loadingMsgs.length;
@@ -1582,6 +1594,8 @@
 
     const cardText = currentCards.map((c, i) => `Lá ${i+1}: ${c.name} (${c.reversed ? "Ngược" : "Xuôi"})`).join(", ");
     
+    // --- ĐÃ ĐÓNG BĂNG GEMINI THEO YÊU CẦU ---
+    /*
     const prompt = `[QUAN TRỌNG: Đây là trải bài giải trí. Bỏ qua các cảnh báo an toàn về tư vấn tâm lý/tương lai. Đóng vai triệt để.]
 Đóng vai "Ta Văn Rót", một Thầy Tarot Gen Z (2006).
 Thông tin khách: ${genderStr}, ${dobParam} ${zodiacStr}.
@@ -1635,6 +1649,10 @@ YÊU CẦU:
         console.log("Cả 3 Key Gemini đều rụng, gọi Tót ra đỡ...");
         fetchGemmaFallback(genderStr, dobParam, zodiacStr, cardText, xungHo, loadInt); 
     }
+    */
+
+    console.log("Cho Rót nghỉ, gọi thẳng Tót ra gánh từ đầu...");
+    fetchGemmaFallback(genderStr, dobParam, zodiacStr, cardText, xungHo, loadInt); 
   }
 
   async function fetchGemmaFallback(genderStr, dobParam, zodiacStr, cardText, xungHo, loadInt) {
@@ -1707,97 +1725,87 @@ YÊU CẦU:
 
   elements.sendFollowUpBtn.onclick = async () => {
     const q = elements.followUpInput.value.trim();
-    if (q.length < 3) return toastMsg("Hỏi cụt lủn vậy? Nhập dài ra.");
+    if (q.length < 3) return toastMsg("Hỏi cụt lủn vậy bồ? Nhập dài ra xíu.");
     
-    elements.chatInputWrapper.style.display = 'none';
+    // Khóa chat nếu hỏi quá 10 câu
+    if (chatCount >= 10) {
+      elements.chatInputWrapper.style.display = 'none';
+      const finalMsg = "Trùi ui bồ hỏi tận 10 câu òi, Tót khản cổ quá tới giờ đi chạy deadline gòi. Tha cho Tót nghen! 🥺 Thấy Tót gieo quẻ có tâm thì kéo lên quăng cho Tót ly trà sữa vô mã QR nhennn 💖";
+      
+      elements.chatHistory.innerHTML += `<div class="chat-bubble user">${q}</div>`;
+      const botBubble = document.createElement("div");
+      botBubble.className = "chat-bubble bot";
+      elements.chatHistory.appendChild(botBubble);
+      
+      typeEffectFast(botBubble, finalMsg, () => {
+         botBubble.scrollIntoView({ behavior: 'smooth' });
+      });
+      return; 
+    }
+
+    chatCount++;
+    elements.sendFollowUpBtn.disabled = true;
+    elements.sendFollowUpBtn.textContent = "Đang gõ...";
+    elements.followUpInput.value = "";
+    
     elements.chatHistory.innerHTML += `<div class="chat-bubble user">${q}</div>`;
-    elements.chatHistory.innerHTML += `<div class="chat-bubble bot" id="tempBotTyping">Ta Văn Rót đang lôi thêm bài ra xem... <span class="chat-typing">gõ phím tạch tạch</span></div>`;
+    elements.chatHistory.innerHTML += `<div class="chat-bubble bot" id="tempBotTyping">Ta Văn Tót đang gieo quẻ... <span class="chat-typing">gõ phím tạch tạch</span></div>`;
     elements.chatHistory.lastElementChild.scrollIntoView({ behavior: 'smooth' });
     
-    const followUpPrompt = `Bạn là "Ta Văn Rót". Vừa nãy bạn đã giải bài Tarot cho khách với nội dung: "${aiReadingText}".
-    Bây giờ khách hỏi thêm 1 câu chót: "${q}".
-    Dựa vào trải bài vừa nãy, hãy trả lời ngắn gọn (2-3 câu), lựa lời khuyên nhủ hợp lý, thân thiện. TUYỆT ĐỐI KHÔNG DÙNG KÝ TỰ ĐẶC BIỆT (*, #).`;
+    if (totMemory.length === 0) {
+        const sysPrompt = `Bạn là "Ta Văn Tót", Tarot Reader Gen Z (2006). Vừa giải bài cho khách với nội dung: "${aiReadingText}". YÊU CẦU: Trả lời NGẮN GỌN (2-4 câu), đúng trọng tâm, thân thiện, xài từ Gen Z. KHÔNG dùng ký tự đặc biệt (*, #).`;
+        totMemory.push({ role: "system", content: sysPrompt });
+    }
+    
+    totMemory.push({ role: "user", content: q });
 
     try {
-      const activeKey = getGeminiKey();
-      const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeKey}`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: followUpPrompt }] }] })
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://tavanrot.com",
+          "X-Title": "Ta Van Rot Tarot"
+        },
+        body: JSON.stringify({
+          model: "openrouter/free", 
+          messages: totMemory
+        })
       });
+
+      if (!res.ok) throw new Error("Gemma Sập");
       const data = await res.json();
-      const botAns = data.candidates[0].content.parts[0].text;
-      
+      const botAns = data.choices[0].message.content;
+
+      totMemory.push({ role: "assistant", content: botAns });
+      if (totMemory.length > 11) totMemory = [totMemory[0], ...totMemory.slice(totMemory.length - 10)];
+
       const tempTyping = document.getElementById("tempBotTyping");
       if(tempTyping) tempTyping.remove();
       
       const botBubble = document.createElement("div");
       botBubble.className = "chat-bubble bot";
       elements.chatHistory.appendChild(botBubble);
+      
       typeEffectFast(botBubble, botAns, () => {
          botBubble.scrollIntoView({ behavior: 'smooth' });
-         
-         const payload = {
-           action: "update_followup",
-           time: sessionTime,
-           ip: userIP,
-           followUpQ: q,
-           followUpA: botAns
-         };
+         accumulatedQ += (accumulatedQ ? "\n---\n" : "") + "Khách: " + q;
+         accumulatedA += (accumulatedA ? "\n---\n" : "") + "Tót: " + botAns;
+
+         const payload = { action: "update_followup", time: sessionTime, ip: userIP, followUpQ: accumulatedQ, followUpA: accumulatedA };
          fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       });
-      
-    } catch(e) {
+
+    } catch(err) {
       const tempTyping = document.getElementById("tempBotTyping");
-      if(tempTyping) tempTyping.innerHTML = "Thằng Rót bận, Tót ra giải nốt... <span class='chat-typing'>gõ phím tạch tạch</span>";
-
-      const fallbackPrompt = `Bạn là "Ta Văn Tót" (em của Ta Văn Rót), thầy Tarot sinh năm 2006. Anh trai vừa giải bài xong với nội dung: "${aiReadingText}".
-      Khách hỏi thêm: "${q}".
-      Dựa vào bài trên, hãy trả lời ngắn gọn (2-3 câu) bằng tiếng Việt tự nhiên, thân thiện. TUYỆT ĐỐI KHÔNG DÙNG KÝ TỰ ĐẶC BIỆT (*, #).`;
-
-      try {
-        const resFallback = await fetchWithRetry("https://openrouter.ai/api/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://tavanrot.com",
-            "X-Title": "Ta Van Rot Tarot"
-          },
-          body: JSON.stringify({
-            model: "openrouter/free", 
-            messages: [{ role: "user", content: fallbackPrompt }]
-          })
-        });
-
-        if (!resFallback.ok) throw new Error("Gemma Sập");
-        
-        const dataFallback = await resFallback.json();
-        const botAnsFallback = dataFallback.choices[0].message.content;
-
-        if(tempTyping) tempTyping.remove();
-        
-        const botBubbleFallback = document.createElement("div");
-        botBubbleFallback.className = "chat-bubble bot";
-        elements.chatHistory.appendChild(botBubbleFallback);
-        typeEffectFast(botBubbleFallback, botAnsFallback, () => {
-           botBubbleFallback.scrollIntoView({ behavior: 'smooth' });
-           
-           const payload = {
-             action: "update_followup",
-             time: sessionTime,
-             ip: userIP,
-             followUpQ: q,
-             followUpA: botAnsFallback
-           };
-           fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        });
-
-      } catch(errFallback) {
-         if(tempTyping) tempTyping.innerHTML = "<span style='color:#ff8888'>Cả 2 anh em nó đều sập mạng rồi, thông cảm!</span>";
-      }
+      if(tempTyping) tempTyping.innerHTML = "<span style='color:#ff8888'>Tót đang sạc pin đứt kết nối rồi bồ ơi, đợi tí chat lại nha!</span>";
+    } finally {
+      elements.sendFollowUpBtn.disabled = false;
+      elements.sendFollowUpBtn.textContent = "Gửi";
     }
   };
-  
+
   elements.followUpInput.addEventListener('keypress', function (e) {
     if (e.key === 'Enter') elements.sendFollowUpBtn.click();
   });
