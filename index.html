@@ -12,56 +12,7 @@
   /* =========================================
      TOP DONATE MARQUEE
      ========================================= */
-  .donate-marquee-container {
-    width: min(100% - 40px, var(--max-w));
-    margin: 0 auto 30px auto;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(226, 194, 117, 0.2);
-    border-radius: 12px;
-    color: var(--gold);
-    padding: 12px 0;
-    overflow: hidden;
-    position: relative;
-    z-index: 10;
-    display: none; 
-    align-items: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  }
-  body.light-mode .donate-marquee-container {
-    background: rgba(255, 255, 255, 0.6);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-  }
-  .donate-label {
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    background: linear-gradient(90deg, #0a0b16 80%, transparent);
-    padding: 0 30px 0 20px;
-    z-index: 2;
-    font-weight: 700;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    letter-spacing: 1px;
-  }
-  body.light-mode .donate-label {
-    background: linear-gradient(90deg, #e6e3f0 80%, transparent);
-    color: var(--text-main);
-  }
-  .donate-marquee-content {
-    display: flex;
-    gap: 50px;
-    white-space: nowrap;
-    padding-left: 150px; 
-    animation: marquee 25s linear infinite;
-  }
-  .donate-marquee-container:hover .donate-marquee-content {
-    animation-play-state: paused;
-  }
-  @keyframes marquee {
-    0% { transform: translateX(20px); } 
-    100% { transform: translateX(-100%); }
-  }
+    }
   .donate-item {
     display: inline-flex;
     align-items: center;
@@ -1039,7 +990,7 @@
     { file: "Cups01.png", name: "Ace of Cups" }, { file: "Cups02.png", name: "Two of Cups" }, { file: "Cups03.png", name: "Three of Cups" }
   ];
 
-  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwqWWlD6zVFYujggreVnXAHho4YQjakY4HkxUhSabSypz12yGuVyTbmJWSTOqu0eMFa/exec';
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzr45frUGxJqUVwaLH3cLVNTS6WcDIa7LxlOh_CVDFS7oIUfrVSRW_ZbfAAMkBSjnk-/exec';
 
   async function fetchTopDonates() {
     try {
@@ -1055,7 +1006,8 @@
           if (index === 2) medal = '🥉';
           html += `<div class="donate-item">${medal} <strong>${item.name}</strong>: ${item.amount}</div>`;
         });
-        contentDiv.innerHTML = html;
+        // Nhân bản HTML 4 lần để chạy nối đuôi nhau không bao giờ bị đứt đoạn trống
+        contentDiv.innerHTML = html + html + html + html;
         document.getElementById('donateMarquee').style.display = 'flex';
       }
     } catch (e) { console.log("Không tải được Top Donate"); }
@@ -1714,6 +1666,16 @@ YÊU CẦU:
       elements.chatHistory.appendChild(botBubble);
       typeEffectFast(botBubble, botAns, () => {
          botBubble.scrollIntoView({ behavior: 'smooth' });
+         
+         // LỆNH MỚI: Bắn data hỏi thêm về Sheets
+         const payload = {
+           action: "update_followup",
+           time: sessionTime,
+           ip: userIP,
+           followUpQ: q,
+           followUpA: botAns
+         };
+         fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       });
       
     } catch(e) {
