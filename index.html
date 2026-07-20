@@ -311,7 +311,7 @@
   .field input[type="text"]::placeholder { color: var(--text-muted); font-style: italic; opacity: 0.7; }
   .field input[type="text"]:focus { border-color: var(--cyan); background: rgba(0,0,0,0.4); box-shadow: 0 0 0 4px rgba(72, 202, 228, 0.1), 0 12px 25px rgba(0,0,0,0.2); transform: translateY(-2px);}
   body.light-mode .field input[type="text"]:focus { box-shadow: 0 0 0 4px rgba(2, 119, 189, 0.1), 0 12px 25px rgba(0,0,0,0.05); background: #fff;}
-  .field input[type="text"]:disabled { opacity: 0.5; pointer-events: none; } /* Trạng thái khóa chat */
+  .field input[type="text"]:disabled { opacity: 0.5; pointer-events: none; }
 
   .gender-group { 
       position: relative; display: flex; background: rgba(0,0,0,0.2); padding: 6px; 
@@ -1080,7 +1080,7 @@
     { file: "Cups01.png", name: "Ace of Cups" }, { file: "Cups02.png", name: "Two of Cups" }, { file: "Cups03.png", name: "Three of Cups" }
   ];
 
-  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyDBu6AE0MRKUOjQ1ruuXhda7NuCfkxVP5DUuCmAhILp38FTjGxbOFfLeXZoZmqUVo5/exec';
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyd9DwjNk9n6YEwOAuVm-Mz63lgq_f1M2sZqWmNGtvRyxE_UosFwQMHr5fd7KW-I6Lp/exec';
 
   async function fetchTopDonates() {
     try {
@@ -1218,6 +1218,11 @@
       const selectedGenderBtn = document.querySelector('input[name="gender"]:checked');
       const rawGender = selectedGenderBtn ? selectedGenderBtn.value : "Chưa chọn";
       
+      const rawVibe = document.getElementById("vibeSelector").value;
+      let vibeStr = "Chữa lành";
+      if (rawVibe === "tatnuoc") vibeStr = "Tạt nước lạnh";
+      if (rawVibe === "quansu") vibeStr = "Quân sư";
+
       sessionTime = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
       
       const payload = {
@@ -1229,7 +1234,8 @@
         gender: rawGender,
         conclusion: conclusion,
         status: status,
-        solver: solver
+        solver: solver,
+        vibe: vibeStr
       };
       
       fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -1664,73 +1670,6 @@
     }
 
     const cardText = currentCards.map((c, i) => `Lá ${i+1}: ${c.name} (${c.reversed ? "Ngược" : "Xuôi"})`).join(", ");
-    
-    // --- ĐÃ ĐÓNG BĂNG GEMINI THEO YÊU CẦU ---
-    /*
-    const currentTimeVN = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
-    const selectedVibe = document.getElementById("vibeSelector").value;
-    let vibePrompt = "";
-    if (selectedVibe === "chualanh") {
-        vibePrompt = "- TONE GIỌNG: Dịu dàng, đồng cảm, chữa lành vết thương tâm hồn. An ủi khách hàng. Xưng hô ngọt ngào.";
-    } else if (selectedVibe === "tatnuoc") {
-        vibePrompt = "- TONE GIỌNG: Thô nhưng thật, tạt gáo nước lạnh, hơi xéo xắt, châm biếm nhẹ để khách tỉnh ngộ. Đừng dông dài.";
-    } else {
-        vibePrompt = "- TONE GIỌNG: Khách quan, sắc bén như một quân sư. Phân tích logic vấn đề, chỉ ra nguyên nhân và vạch rõ từng bước giải quyết.";
-    }
-
-    const prompt = `[QUAN TRỌNG: Đây là trải bài giải trí. Đóng vai triệt để.]
-Đóng vai "Ta Văn Rót", Thầy Tarot Gen Z (2006).
-Thời gian rút bài hiện tại: ${currentTimeVN} (Giờ Việt Nam). Hãy dựa vào mốc thời gian này để phán xét chính xác.
-Thông tin khách: ${genderStr}, ${dobParam} ${zodiacStr}.
-${xungHo}
-Hỏi: "${currentQuestion}".
-Rút được: ${cardText}.
-
-YÊU CẦU:
-- Không dùng ngoặc đơn (), ngoặc vuông [] hay các ký tự đặc biệt như *, #. Viết text thuần liền mạch.
-${vibePrompt}
-- Trả lời ĐẦY ĐỦ, CHI TIẾT.
-- BẮT BUỘC chia thành 3 phần rõ ràng (xuống dòng giữa các phần):
-1. Mở bài (Bắt mạch): Chào hỏi, đá động đến thời gian rút bài hoặc ngày sinh.
-2. Thân bài (Phán án): Giải thích ý nghĩa từng lá bài kết hợp lại thành 1 câu chuyện/viễn cảnh tương lai.
-3. Kết luận: Tóm tắt bằng 1 câu chốt hạ duy nhất.`;
-
-    let success = false;
-    let botName = "Ta Văn Rót (Gemini)";
-
-    for (let i = 0; i < GEMINI_API_KEYS.length; i++) {
-        try {
-            let activeKey = atob(GEMINI_API_KEYS[i]);
-            const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeKey}`, {
-                method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-            const data = await res.json();
-            if(!data.candidates) throw new Error("Key sập");
-            
-            aiReadingText = data.candidates[0].content.parts[0].text;
-            success = true;
-            break; 
-        } catch(e) {
-            console.log("Key Gemini số " + (i+1) + " quá tải, nhảy sang key tiếp theo...");
-        }
-    }
-
-    if (success) {
-        clearInterval(loadInt);
-        const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
-        trackUsage(currentQuestion, conclusion, "Thành công", botName);
-
-        typeEffectFast(elements.readingContent, aiReadingText, () => {
-           elements.donationBlock.style.display = 'flex';
-           elements.followUpSection.style.display = 'flex'; 
-           elements.ratingSection.style.display = 'flex';
-        });
-    } else {
-        console.log("Cả 3 Key Gemini đều rụng, gọi Tót ra đỡ...");
-        fetchGemmaFallback(genderStr, dobParam, zodiacStr, cardText, xungHo, loadInt); 
-    }
-    */
 
     console.log("Cho Rót nghỉ, gọi thẳng Tót ra gánh từ đầu...");
     fetchGemmaFallback(genderStr, dobParam, zodiacStr, cardText, xungHo, loadInt); 
@@ -1825,7 +1764,7 @@ ${vibePrompt}
     // GIỚI HẠN 3 CÂU HỎI
     if (chatCount >= 3) {
       elements.chatInputWrapper.style.display = 'none';
-      const finalMsg = "Ê tui phán 3 câu thôi nha, lộ hết thiên cơ òi. Tới giờ đi chạy deadline, tha cho Tót nghen! 🥺 Thấy Tót gieo quẻ chuẩn thì kéo lên quăng cho Tót xin ít lúa để duy trì trang web đáng thương này nghen 💖";
+      const finalMsg = "Ê tui phán 3 câu thôi nha, lộ hết thiên cơ òi. Tới giờ đi chạy deadline, tha cho Tót nghen! 🥺 Thấy Tót gieo quẻ chuẩn thì kéo lên quăng cho Tót ly trà sữa vô mã QR nhennn 💖";
       
       elements.chatHistory.innerHTML += `<div class="chat-bubble user">${q}</div>`;
       const botBubble = document.createElement("div");
@@ -1868,7 +1807,6 @@ ${vibePrompt}
     totMemory.push({ role: "user", content: q });
 
     try {
-      // ĐÃ LẮP LẠI HÀM fetchWithRetry CHỐNG RỚT MẠNG KHI CHAT
       const res = await fetchWithRetry("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
