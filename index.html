@@ -1748,6 +1748,10 @@ YÊU CẦU:
     elements.sendFollowUpBtn.textContent = "Đang gõ...";
     elements.followUpInput.value = "";
     
+    // Dọn rác: Xóa các bong bóng "Đang gõ" bị kẹt từ lỗi trước đó (nếu có)
+    const oldTypings = document.querySelectorAll("#tempBotTyping");
+    oldTypings.forEach(el => el.remove());
+
     elements.chatHistory.innerHTML += `<div class="chat-bubble user">${q}</div>`;
     elements.chatHistory.innerHTML += `<div class="chat-bubble bot" id="tempBotTyping">Ta Văn Tót đang gieo quẻ... <span class="chat-typing">gõ phím tạch tạch</span></div>`;
     elements.chatHistory.lastElementChild.scrollIntoView({ behavior: 'smooth' });
@@ -1790,16 +1794,29 @@ YÊU CẦU:
       
       typeEffectFast(botBubble, botAns, () => {
          botBubble.scrollIntoView({ behavior: 'smooth' });
-         accumulatedQ += (accumulatedQ ? "\n---\n" : "") + "Khách: " + q;
-         accumulatedA += (accumulatedA ? "\n---\n" : "") + "Tót: " + botAns;
-
-         const payload = { action: "update_followup", time: sessionTime, ip: userIP, followUpQ: accumulatedQ, followUpA: accumulatedA };
-         fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+         
+         // CHỈ GỬI LÊN SHEETS KHI LÀ CÂU HỎI ĐẦU TIÊN
+         if (chatCount === 1) {
+             const payload = { 
+                 action: "update_followup", 
+                 time: sessionTime, 
+                 ip: userIP, 
+                 followUpQ: q, 
+                 followUpA: botAns 
+             };
+             fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+         }
       });
 
     } catch(err) {
       const tempTyping = document.getElementById("tempBotTyping");
-      if(tempTyping) tempTyping.innerHTML = "<span style='color:#ff8888'>Tót đang sạc pin đứt kết nối rồi bồ ơi, đợi tí chat lại nha!</span>";
+      if(tempTyping) {
+          tempTyping.innerHTML = "<span style='color:#ff8888'>Tót đang sạc pin đứt kết nối rồi bồ ơi, đợi tí chat lại nha!</span>";
+          tempTyping.removeAttribute("id"); // Xóa ID để tránh kẹt cho câu hỏi sau
+      }
+      // Giảm chatCount đi 1 để khách có thể thử lại mà không bị mất lượt
+      chatCount--;
+      totMemory.pop(); // Rút câu hỏi vừa lỗi ra khỏi bộ não
     } finally {
       elements.sendFollowUpBtn.disabled = false;
       elements.sendFollowUpBtn.textContent = "Gửi";
