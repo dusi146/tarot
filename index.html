@@ -19,7 +19,7 @@
     border: 1px solid rgba(226, 194, 117, 0.2);
     border-radius: 12px;
     color: var(--gold);
-    padding: 12px 0 12px 150px; /* Chừa 150px bên trái cho cái nhãn */
+    padding: 12px 0 12px 150px;
     overflow: hidden;
     position: relative;
     z-index: 10;
@@ -52,7 +52,7 @@
   .donate-marquee-content {
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: nowrap !important; /* Lệnh thép: Cấm tuyệt đối rớt dòng */
+    flex-wrap: nowrap !important;
     align-items: center;
     gap: 50px;
     width: max-content; 
@@ -70,8 +70,8 @@
     align-items: center;
     gap: 8px;
     font-size: 15px;
-    white-space: nowrap !important; /* Ép chữ cứng trên 1 dòng */
-    flex-shrink: 0 !important; /* Lệnh thép: Không cho phép tự động bóp nhỏ thẻ */
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
   .donate-item strong { color: var(--cyan); font-weight: 600;}
   /* =========================================
@@ -758,11 +758,9 @@
       <p>"Vũ trụ sẽ thấu hiểu qua từng lá bài."</p>
     </section>
 
-    <!-- THANH CHẠY TOP DONATE MỚI -->
     <div class="donate-marquee-container" id="donateMarquee">
       <div class="donate-label">TOP DONATE : </div>
       <div class="donate-marquee-content" id="donateContent">
-        <!-- AI sẽ nhúng data vào đây -->
       </div>
     </div>
 
@@ -1059,7 +1057,6 @@
           if (index === 2) medal = '🥉';
           html += `<div class="donate-item">${medal} <strong>${item.name}</strong>: ${item.amount}</div>`;
         });
-        // Nhân bản HTML 4 lần để chạy nối đuôi nhau không bao giờ bị đứt đoạn trống
         contentDiv.innerHTML = html + html + html + html;
         document.getElementById('donateMarquee').style.display = 'flex';
       }
@@ -1087,7 +1084,6 @@
   let aiReadingText = "";
   let userZodiac = "";
 
-  // Thêm biến lưu time của phiên hiện tại để gửi Đánh giá đúng dòng
   let sessionTime = "";
   let currentRating = 0;
   let currentRatingNote = "";
@@ -1111,7 +1107,6 @@
     chatHistory: document.getElementById("chatHistory"), followUpInput: document.getElementById("followUpInput"), 
     sendFollowUpBtn: document.getElementById("sendFollowUpBtn"), chatInputWrapper: document.getElementById("chatInputWrapper"), 
     donationBlock: document.getElementById("donationBlock"),
-    // Rating Elements
     ratingSection: document.getElementById("ratingSection"), ratingCircles: document.getElementById("ratingCircles"),
     ratingNote: document.getElementById("ratingNote"), feedbackBox: document.getElementById("feedbackBox"),
     feedbackInput: document.getElementById("feedbackInput"), submitFeedbackBtn: document.getElementById("submitFeedbackBtn")
@@ -1139,31 +1134,30 @@
   let userIP = "Unknown";
   fetch('https://api.ipify.org?format=json').then(res => res.json()).then(data => { userIP = data.ip; }).catch(e => console.log("Lỗi IP"));
 
-  function trackUsage(question, conclusion, status) {
+  function trackUsage(question, conclusion, status, solver) {
     try {
       const dobStr = (dobState.day && dobState.month && dobState.year) ? `${dobState.day}/${dobState.month}/${dobState.year}` : "Chưa chọn";
       const selectedGenderBtn = document.querySelector('input[name="gender"]:checked');
       const rawGender = selectedGenderBtn ? selectedGenderBtn.value : "Chưa chọn";
       
-      // Chốt mốc thời gian để làm "ID" định vị lúc gửi Đánh giá
       sessionTime = new Date().toLocaleString('vi-VN');
       
       const payload = {
-        action: "log_reading", // Thêm action báo cho code mới biết
+        action: "log_reading",
         time: sessionTime,
         ip: userIP,
         question: question,
         dob: dobStr,
         gender: rawGender,
         conclusion: conclusion,
-        status: status
+        status: status,
+        solver: solver
       };
       
       fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     } catch (e) { console.log("Không tracking được"); }
   }
 
-  // --- LOGIC ĐÁNH GIÁ (RATING) ---
   const ratingNotes = {
     1: ["Chê mạnh, bói như điêu", "Đọc xong cười khẩy", "Hông hiểu gì luôn", "Ảo ma Canada", "Rót điêu toa"],
     2: ["Cũng tàm tạm", "Trúng được một chút", "Hơi chung chung", "Nghe cho vui tai", "Cần cố gắng thêm"],
@@ -1175,18 +1169,14 @@
   const ratingBtns = document.querySelectorAll('.rating-btn');
   ratingBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
-      // Gỡ active cũ
       ratingBtns.forEach(b => b.classList.remove('active'));
-      // Bật active mới
       e.target.classList.add('active');
       currentRating = parseInt(e.target.dataset.val);
       
-      // Lấy note random theo điểm
       const noteArr = ratingNotes[currentRating];
       currentRatingNote = noteArr[Math.floor(Math.random() * noteArr.length)];
       elements.ratingNote.textContent = `"${currentRatingNote}"`;
       
-      // Hiện hộp góp ý
       elements.feedbackBox.style.display = 'flex';
       setTimeout(() => elements.feedbackBox.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
     });
@@ -1220,7 +1210,6 @@
       elements.ratingSection.style.display = 'none';
     });
   };
-  // -------------------------------
 
   elements.themeCheckbox.addEventListener('change', (e) => {
     if(e.target.checked) document.body.classList.add('light-mode');
@@ -1397,7 +1386,6 @@
     elements.chatHistory.innerHTML = '';
     elements.followUpInput.value = '';
     elements.chatInputWrapper.style.display = 'flex';
-    // Reset form Rating
     elements.ratingSection.style.display = 'none';
     elements.feedbackBox.style.display = 'none';
     elements.feedbackInput.value = '';
@@ -1556,7 +1544,19 @@
   async function fetchGeminiReading() {
     clearInterval(typeWriter);
     aiReadingFetched = true;
-    elements.readingContent.innerHTML = `<div class="loading-wrapper"><div class="eye-lid"><div class="eye"><div class="cornea"><div class="white-pupil"></div></div></div></div></div>`;
+
+    elements.readingContent.innerHTML = `<div class="loading-wrapper" style="flex-direction: column; gap: 25px;">
+        <div class="eye-lid"><div class="eye"><div class="cornea"><div class="white-pupil"></div></div></div></div>
+        <div id="loadingText" style="color: var(--cyan); font-style: italic; font-weight: 500; font-size: 16px; letter-spacing: 1px;">Đang xào bài...</div>
+    </div>`;
+    
+    const loadingMsgs = ["Đang xào bài...", "Đang kết nối tần số tình duyên...", "Vũ trụ đang gửi thông điệp xuống...", "Chờ tí, Rót đang soi nghiệp..."];
+    let lIdx = 0;
+    let loadInt = setInterval(() => {
+        lIdx = (lIdx + 1) % loadingMsgs.length;
+        let txtEl = document.getElementById("loadingText");
+        if (txtEl) txtEl.innerText = loadingMsgs[lIdx];
+    }, 2500);
     
     const dobStr = (dobState.day && dobState.month && dobState.year) ? `${dobState.day}/${dobState.month}/${dobState.year}` : "Không rõ ngày sinh";
     const dobParam = dobStr !== "Không rõ ngày sinh" ? `Ngày sinh: ${dobStr}` : dobStr;
@@ -1600,30 +1600,44 @@ YÊU CẦU:
 2. Thân bài (Phán án): Giải thích ý nghĩa từng lá bài kết hợp lại thành 1 câu chuyện/viễn cảnh tương lai.
 3. Kết luận: Tóm tắt lại bằng 1 câu chốt hạ duy nhất (quan trọng để lưu hệ thống).`;
 
-    try {
-      const activeKey = getGeminiKey();
-      const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeKey}`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-      });
-      const data = await res.json();
-      aiReadingText = data.candidates[0].content.parts[0].text;
-      
-      const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
-      trackUsage(currentQuestion, conclusion, "Thành công");
+    let success = false;
+    let botName = "Ta Văn Rót (Gemini)";
 
-      typeEffectFast(elements.readingContent, aiReadingText, () => {
-         elements.donationBlock.style.display = 'flex';
-         elements.followUpSection.style.display = 'flex'; 
-         elements.ratingSection.style.display = 'flex'; // Hiện đánh giá
-      });
-    } catch(e) { 
-      console.log("Thằng Rót bận, gọi thằng Tót ra đỡ...");
-      fetchGemmaFallback(genderStr, dobParam, zodiacStr, cardText, xungHo); 
+    for (let i = 0; i < GEMINI_API_KEYS.length; i++) {
+        try {
+            let activeKey = atob(GEMINI_API_KEYS[i]);
+            const res = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeKey}`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const data = await res.json();
+            if(!data.candidates) throw new Error("Key sập");
+            
+            aiReadingText = data.candidates[0].content.parts[0].text;
+            success = true;
+            break; 
+        } catch(e) {
+            console.log("Key Gemini số " + (i+1) + " quá tải, nhảy sang key tiếp theo...");
+        }
+    }
+
+    if (success) {
+        clearInterval(loadInt);
+        const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
+        trackUsage(currentQuestion, conclusion, "Thành công", botName);
+
+        typeEffectFast(elements.readingContent, aiReadingText, () => {
+           elements.donationBlock.style.display = 'flex';
+           elements.followUpSection.style.display = 'flex'; 
+           elements.ratingSection.style.display = 'flex';
+        });
+    } else {
+        console.log("Cả 3 Key Gemini đều rụng, gọi Tót ra đỡ...");
+        fetchGemmaFallback(genderStr, dobParam, zodiacStr, cardText, xungHo, loadInt); 
     }
   }
 
-  async function fetchGemmaFallback(genderStr, dobParam, zodiacStr, cardText, xungHo) {
+  async function fetchGemmaFallback(genderStr, dobParam, zodiacStr, cardText, xungHo, loadInt) {
     const fallbackPrompt = `[QUAN TRỌNG: Trải bài giải trí, hãy đóng vai tự nhiên nhất]
 Đóng vai "Ta Văn Tót" (em của Ta Văn Rót), một Tarot Reader sinh năm 2006. Anh trai bận nên bạn xem thay.
 Khách hàng: ${genderStr}, ${dobParam} ${zodiacStr}.
@@ -1639,6 +1653,7 @@ YÊU CẦU:
 2. Thân bài: Phân tích bài chi tiết, thấu đáo.
 3. Kết luận: 1 câu chốt hạ duy nhất ngắn gọn.`;
 
+    let botName = "Ta Văn Tót (Gemma)";
     try {
       const res = await fetchWithRetry("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
@@ -1657,17 +1672,19 @@ YÊU CẦU:
       const data = await res.json();
       aiReadingText = data.choices[0].message.content;
       
+      clearInterval(loadInt);
       const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
-      trackUsage(currentQuestion, conclusion, "Thành công");
+      trackUsage(currentQuestion, conclusion, "Thành công", botName);
 
       typeEffectFast(elements.readingContent, aiReadingText, () => {
          elements.donationBlock.style.display = 'flex';
          elements.followUpSection.style.display = 'flex'; 
-         elements.ratingSection.style.display = 'flex'; // Hiện đánh giá
+         elements.ratingSection.style.display = 'flex'; 
       });
     } catch(err) {
+      clearInterval(loadInt);
       elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Nhiễu loạn sóng vũ trụ. Cả 2 anh em nhà nó đều bận đi vệ sinh rồi. Tải lại trang đi!</span>";
-      trackUsage(currentQuestion, "Lỗi API không ra bài", "Thất bại");
+      trackUsage(currentQuestion, "Lỗi API không ra bài", "Thất bại", "None");
     }
   }
 
@@ -1688,7 +1705,6 @@ YÊU CẦU:
     }, 5); 
   }
 
-  // XỬ LÝ HỎI THÊM (FOLLOW UP)
   elements.sendFollowUpBtn.onclick = async () => {
     const q = elements.followUpInput.value.trim();
     if (q.length < 3) return toastMsg("Hỏi cụt lủn vậy? Nhập dài ra.");
@@ -1720,7 +1736,6 @@ YÊU CẦU:
       typeEffectFast(botBubble, botAns, () => {
          botBubble.scrollIntoView({ behavior: 'smooth' });
          
-         // LỆNH MỚI: Bắn data hỏi thêm về Sheets
          const payload = {
            action: "update_followup",
            time: sessionTime,
@@ -1766,6 +1781,15 @@ YÊU CẦU:
         elements.chatHistory.appendChild(botBubbleFallback);
         typeEffectFast(botBubbleFallback, botAnsFallback, () => {
            botBubbleFallback.scrollIntoView({ behavior: 'smooth' });
+           
+           const payload = {
+             action: "update_followup",
+             time: sessionTime,
+             ip: userIP,
+             followUpQ: q,
+             followUpA: botAnsFallback
+           };
+           fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         });
 
       } catch(errFallback) {
