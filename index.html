@@ -59,7 +59,7 @@
     animation-play-state: paused;
   }
   @keyframes marquee {
-    0% { transform: translateX(20px); } /* Ép nó xuất hiện ngay sát chữ Bảng vàng */
+    0% { transform: translateX(20px); } 
     100% { transform: translateX(-100%); }
   }
   .donate-item {
@@ -346,7 +346,7 @@
   .warn { font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 16px; font-style: italic; line-height: 1.6; opacity: 0.7; letter-spacing: 0.5px;}
 
   /* =========================================
-     RITUAL OVERLAY & HOLD (NĂNG LƯỢNG TỤ KHÍ CAO CẤP)
+     RITUAL OVERLAY & HOLD
      ========================================= */
   .overlay { position: fixed; inset: 0; z-index: 100; background: radial-gradient(circle at center, rgba(5, 2, 15, 0.95), rgba(0, 0, 5, 0.98)); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.8s var(--ease-slow); }
   .overlay.show { opacity: 1; pointer-events: auto; }
@@ -357,13 +357,11 @@
   .ritual-head p { color: var(--text-muted); font-size: 17px; margin-bottom: 70px; line-height: 1.7;}
 
   .hold-area { position: relative; width: 340px; height: 340px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; cursor: pointer; transition: transform 0.4s var(--ease-smooth); }
-  .hold-area:active { transform: scale(0.95); } /* Cảm giác vật lý khi ấn */
+  .hold-area:active { transform: scale(0.95); }
   
-  /* Các vòng năng lượng */
   .hold-aura { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, var(--aura-1) 0%, transparent 70%); filter: blur(20px); transition: opacity 0.3s, transform 0.1s linear; pointer-events: none; transform: scale(calc(1 + (var(--energy, 0) / 100) * 0.5)); opacity: calc(0.1 + (var(--energy, 0) / 100) * 0.7); }
   .hold-aura-2 { position: absolute; inset: 20px; border-radius: 50%; background: radial-gradient(circle, var(--aura-2) 0%, transparent 70%); filter: blur(15px); transition: opacity 0.3s, transform 0.1s linear; pointer-events: none; transform: scale(calc(1 + (var(--energy, 0) / 100) * 0.8)); opacity: calc(0.05 + (var(--energy, 0) / 100) * 0.8); mix-blend-mode: screen; }
 
-  /* Magic Rings Xoay lồng nhau */
   .magic-ring {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%;
     opacity: calc(0.05 + (var(--energy, 0) / 100) * 0.95);
@@ -382,11 +380,9 @@
   .hold-core span { font-size: 13px; color: var(--gold); letter-spacing: 4px; text-transform: uppercase; z-index: 2; transition: color 0.3s;}
   body.light-mode .hold-core strong { text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
-  /* Trạng thái khi dí vào (Tụ Khí) */
   .hold-core.active { border-color: var(--aura-2); box-shadow: 0 0 calc(var(--energy, 0) * 1px) var(--aura-1), inset 0 0 calc(var(--energy, 0) * 0.5px) var(--aura-2); transform: scale(1.1); }
   .hold-core.active::before { opacity: 1; animation-duration: 1.5s; }
 
-  /* Trạng thái Full Power - Sẵn Sàng Nhả Khí */
   .hold-core.full-power { 
     animation: pulseCore 0.6s ease-in-out infinite alternate;
     border-color: var(--gold); 
@@ -406,7 +402,7 @@
   }
 
   /* =========================================
-     CARDS RENDERING (CĂN GIỮA VÀ RESPONSIVE)
+     CARDS RENDERING 
      ========================================= */
   .results { margin-top: 80px; display: none; opacity: 0; transform: translateY(60px); transition: 1s var(--ease-slow); content-visibility: auto; contain-intrinsic-size: 800px; scroll-margin-top: 60px;}
   .results.show { display: block; opacity: 1; transform: translateY(0); }
@@ -414,7 +410,6 @@
   .results-head h3 { font-size: 40px; color: var(--gold); margin-bottom: 12px; font-weight: 500;}
   .results-head p { color: var(--text-muted); font-size: 17px; }
 
-  /* Sử dụng flex để căn giữa đẹp mắt mọi số lượng bài */
   .cards-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; perspective: 3000px; width: 100%;}
   .tarot-card { position: relative; width: 280px; max-width: 100%; cursor: pointer; opacity: 0; transform: translateY(60px) rotateX(-15deg); animation: epicCardEntrance 1s var(--ease-out-spring) forwards; animation-delay: var(--delay, 0ms); transition: transform 0.5s var(--ease-smooth), filter 0.5s ease;}
   @keyframes epicCardEntrance { to { opacity: 1; transform: translateY(0) rotateX(0); } }
@@ -429,7 +424,6 @@
 
   .card-face { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); transform: translate3d(0,0,0); box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);}
   
-  /* Back face design */
   .card-face.back { background: radial-gradient(circle at center, #140826 0%, #030106 100%); display: flex; align-items: center; justify-content: center; position: relative; border: 2px solid rgba(226, 194, 117, 0.25); }
   .card-face.back::before { content: ""; position: absolute; inset: 14px; border: 1px solid rgba(142, 68, 173, 0.3); border-radius: 12px; pointer-events: none; }
   .card-face.back::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px); background-size: 24px 24px; opacity: 0.5; pointer-events: none; }
@@ -440,7 +434,6 @@
   .astral-ring-2 { position: absolute; inset: -32px; border: 1px solid rgba(142, 68, 173, 0.25); border-radius: 50%; border-top-color: transparent; border-bottom-color: transparent; animation: spinLayer 12s linear infinite reverse; opacity: 0.5; }
   @keyframes pulseGlow { from { transform: scale(0.95); opacity: 0.6;} to { transform: scale(1.05); opacity: 1;} }
 
-  /* Front face design */
   .card-face.front { transform: rotateY(180deg); background: linear-gradient(180deg, #0d0e1b, #05050a); border-color: rgba(72, 202, 228, 0.4); display: flex; align-items: center; justify-content: center;}
   body.light-mode .card-face.front { background: #fff; }
   .fallback-bg { position: absolute; inset: 0; background: #07040d; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; border: 1px solid rgba(226,194,117,0.15); border-radius: 16px; margin: 12px; z-index: 0; }
@@ -543,6 +536,23 @@
   .chat-input-wrapper input:focus { border-color: var(--purple); background: rgba(0,0,0,0.5); }
   body.light-mode .chat-input-wrapper input:focus { background: #fff; border-color: var(--purple); }
   .chat-input-wrapper button { height: 50px; padding: 0 16px; border-radius: 24px; white-space: nowrap; flex-shrink: 0; }
+
+  /* ĐÁNH GIÁ & GÓP Ý (RATING SYSTEM) */
+  .rating-section { margin-top: 40px; padding-top: 30px; border-top: 1px dashed rgba(255,255,255,0.1); text-align: center; animation: slideUpFade 0.8s var(--ease-out-spring) forwards; display: none; flex-direction: column; align-items: center;}
+  body.light-mode .rating-section { border-top-color: rgba(0,0,0,0.1); }
+  .rating-title { color: var(--gold); font-size: 18px; margin-bottom: 20px; font-weight: 500; font-family: 'Montserrat', sans-serif;}
+  .rating-circles { display: flex; justify-content: center; gap: 15px; margin-bottom: 12px; }
+  .rating-btn { width: 45px; height: 45px; border-radius: 50%; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.2); color: var(--text-main); font-weight: bold; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: grid; place-items: center; font-size: 16px; outline: none; }
+  body.light-mode .rating-btn { background: #fff; border-color: #ccc; color: #333; }
+  .rating-btn:hover { border-color: var(--cyan); transform: scale(1.1); }
+  .rating-btn.active { transform: scale(1.15); box-shadow: 0 0 20px rgba(142, 68, 173, 0.6); border-color: transparent; background: linear-gradient(135deg, var(--cyan), var(--purple)); color: #fff;}
+  .rating-note { font-style: italic; color: var(--cyan); font-size: 14.5px; min-height: 22px; margin-bottom: 20px; font-weight: 500;}
+  
+  .feedback-box { display: none; flex-direction: column; gap: 15px; width: 100%; max-width: 500px; animation: slideUpFade 0.5s forwards;}
+  .feedback-box textarea { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 16px; padding: 16px; color: var(--text-main); font-family: 'Montserrat', sans-serif; resize: none; min-height: 80px; box-sizing: border-box;}
+  body.light-mode .feedback-box textarea { background: #f0f0f0; border-color: #ddd; color: #333; }
+  .feedback-box textarea:focus { border-color: var(--purple); outline: none; background: rgba(0,0,0,0.5);}
+  body.light-mode .feedback-box textarea:focus { background: #fff; border-color: var(--purple); }
 
   /* DONATION & QR CSS */
   .donation-wrapper {
@@ -927,6 +937,23 @@
       
       <div class="reading-content" id="readingContent"></div>
       
+      <!-- ĐÁNH GIÁ & GÓP Ý (RATING SYSTEM) -->
+      <div class="rating-section" id="ratingSection">
+        <div class="rating-title">Mày thấy quẻ này ntn?</div>
+        <div class="rating-circles" id="ratingCircles">
+          <button class="rating-btn" data-val="1">1</button>
+          <button class="rating-btn" data-val="2">2</button>
+          <button class="rating-btn" data-val="3">3</button>
+          <button class="rating-btn" data-val="4">4</button>
+          <button class="rating-btn" data-val="5">5</button>
+        </div>
+        <div class="rating-note" id="ratingNote"></div>
+        <div class="feedback-box" id="feedbackBox">
+          <textarea id="feedbackInput" placeholder="Cho Rót xin tí góp ý để tu luyện thêm nha (hoặc chửi cũng được)..."></textarea>
+          <button class="btn btn-primary" id="submitFeedbackBtn">Gửi Đánh Giá</button>
+        </div>
+      </div>
+
       <!-- DONATION & ADVICE SECTION -->
       <div id="donationBlock" class="donation-wrapper" style="display: none;">
         <img src="images/bank.png" alt="QR Donate" class="qr-img" />
@@ -982,7 +1009,6 @@
     }, 2500);
   });
 
-  // MẢNG 3 API KEYS ĐÃ ĐƯỢC MÃ HÓA BASE64 ĐỂ XOAY TUA
   const GEMINI_API_KEYS = [
     "QVEuQWI4Uk42S1NDd3JhbVZuYlY0a21Rd2xxS3ZQYnlBMGZBSFNBc2ZjUS16b0JxbnRNTlE=",
     "QVEuQWI4Uk42Sno2a1lHYzlKWndFZ3F5TFNqdWRaY3BseU5SbFpaX2IxV2Ywc0YyTi1JdGc=",
@@ -990,8 +1016,7 @@
   ];
 
   function getGeminiKey() {
-    const randomKey = GEMINI_API_KEYS[Math.floor(Math.random() * GEMINI_API_KEYS.length)];
-    return atob(randomKey);
+    return atob(GEMINI_API_KEYS[Math.floor(Math.random() * GEMINI_API_KEYS.length)]);
   }
 
   const OPENROUTER_API_KEY = atob("c2stb3ItdjEtNTNmNWJhMzUwZDIxZDQwNTE3YWY2MDk5Mjc0M2MxNjc3OThiYTA0NWJhMGQ5OTI5NWQ1NmI1MjA5ODg4MWNhNQ==");
@@ -1011,42 +1036,32 @@
     { file: "16-TheTower.png", name: "The Tower" }, { file: "17-TheStar.png", name: "The Star" },
     { file: "18-TheMoon.png", name: "The Moon" }, { file: "19-TheSun.png", name: "The Sun" },
     { file: "20-Judgement.png", name: "Judgement" }, { file: "21-TheWorld.png", name: "The World" },
-    { file: "Cups01.png", name: "Ace of Cups" }, { file: "Cups02.png", name: "Two of Cups" }, { file: "Cups03.png", name: "Three of Cups" },
+    { file: "Cups01.png", name: "Ace of Cups" }, { file: "Cups02.png", name: "Two of Cups" }, { file: "Cups03.png", name: "Three of Cups" }
   ];
 
-  // Lấy dữ liệu Top Donate
-  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyZPQw4h2GTJN0hVGtl4SHfPDh9llbbPLFuxM6zLMpNOmoreQzz3NwYvWb606IVVrbK/exec';
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwqWWlD6zVFYujggreVnXAHho4YQjakY4HkxUhSabSypz12yGuVyTbmJWSTOqu0eMFa/exec';
 
   async function fetchTopDonates() {
     try {
-      const res = await fetch(WEBHOOK_URL); // Tự động dùng GET request để kéo data
+      const res = await fetch(WEBHOOK_URL); 
       const json = await res.json();
-      
       if (json.status === 'success' && json.data.length > 0) {
         const contentDiv = document.getElementById('donateContent');
         let html = '';
-        
         json.data.forEach((item, index) => {
           let medal = '🏅';
           if (index === 0) medal = '🥇';
           if (index === 1) medal = '🥈';
           if (index === 2) medal = '🥉';
-          
           html += `<div class="donate-item">${medal} <strong>${item.name}</strong>: ${item.amount}</div>`;
         });
-        
         contentDiv.innerHTML = html;
         document.getElementById('donateMarquee').style.display = 'flex';
       }
-    } catch (e) {
-      console.log("Không tải được Top Donate");
-    }
+    } catch (e) { console.log("Không tải được Top Donate"); }
   }
 
-  // Gọi hàm load Top Donate ngay khi web vừa tải xong
-  window.addEventListener('load', () => {
-    fetchTopDonates(); 
-  });
+  window.addEventListener('load', () => fetchTopDonates());
 
   const suits = ["Cups", "Pentacles", "Swords", "Wands"];
   const ranks = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Page", "Knight", "Queen", "King"];
@@ -1067,6 +1082,11 @@
   let aiReadingText = "";
   let userZodiac = "";
 
+  // Thêm biến lưu time của phiên hiện tại để gửi Đánh giá đúng dòng
+  let sessionTime = "";
+  let currentRating = 0;
+  let currentRatingNote = "";
+
   const elements = {
     spreadModal: document.getElementById("spreadModal"), spreadGrid: document.getElementById("spreadGrid"),
     openSpreadModal: document.getElementById("openSpreadModal"), closeSpreadModal: document.getElementById("closeSpreadModal"),
@@ -1079,14 +1099,17 @@
     rerollBtn: document.getElementById("rerollBtn"), overlay: document.getElementById("overlay"), 
     holdArea: document.getElementById("holdArea"), holdCore: document.getElementById("holdCore"),
     holdTitle: document.getElementById("holdTitle"), holdSubtitle: document.getElementById("holdSubtitle"), 
-    toast: document.getElementById("toast"), 
-    themeCheckbox: document.getElementById("theme-checkbox"),
-    ttsPlayToggle: document.getElementById("ttsPlayToggle"),
-    guideToggleBtn: document.getElementById("guideToggleBtn"), guideTooltip: document.getElementById("guideTooltip"),
-    readingFooter: document.getElementById("readingFooter"), ttsProgressBar: document.getElementById("ttsProgressBar"),
-    followUpSection: document.getElementById("followUpSection"), chatHistory: document.getElementById("chatHistory"),
-    followUpInput: document.getElementById("followUpInput"), sendFollowUpBtn: document.getElementById("sendFollowUpBtn"),
-    chatInputWrapper: document.getElementById("chatInputWrapper"), donationBlock: document.getElementById("donationBlock")
+    toast: document.getElementById("toast"), themeCheckbox: document.getElementById("theme-checkbox"),
+    ttsPlayToggle: document.getElementById("ttsPlayToggle"), guideToggleBtn: document.getElementById("guideToggleBtn"), 
+    guideTooltip: document.getElementById("guideTooltip"), readingFooter: document.getElementById("readingFooter"), 
+    ttsProgressBar: document.getElementById("ttsProgressBar"), followUpSection: document.getElementById("followUpSection"), 
+    chatHistory: document.getElementById("chatHistory"), followUpInput: document.getElementById("followUpInput"), 
+    sendFollowUpBtn: document.getElementById("sendFollowUpBtn"), chatInputWrapper: document.getElementById("chatInputWrapper"), 
+    donationBlock: document.getElementById("donationBlock"),
+    // Rating Elements
+    ratingSection: document.getElementById("ratingSection"), ratingCircles: document.getElementById("ratingCircles"),
+    ratingNote: document.getElementById("ratingNote"), feedbackBox: document.getElementById("feedbackBox"),
+    feedbackInput: document.getElementById("feedbackInput"), submitFeedbackBtn: document.getElementById("submitFeedbackBtn")
   };
 
   const randInt = (max) => crypto.getRandomValues(new Uint32Array(1))[0] % max;
@@ -1097,39 +1120,33 @@
       try {
         const res = await fetch(url, options);
         if (!res.ok) {
-          if (res.status === 429 && i < retries - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay));
-            delay *= 2;
-            continue;
-          }
+          if (res.status === 429 && i < retries - 1) { await new Promise(r => setTimeout(r, delay)); delay *= 2; continue; }
           throw new Error(`HTTP error! status: ${res.status}`);
         }
         return res;
       } catch (error) {
         if (i === retries - 1) throw error;
-        await new Promise(resolve => setTimeout(resolve, delay));
-        delay *= 2;
+        await new Promise(r => setTimeout(r, delay)); delay *= 2;
       }
     }
   }
 
-  // LẤY IP 1 LẦN DUY NHẤT LÚC TẢI TRANG ĐỂ CHỐNG LỖI MẠNG
   let userIP = "Unknown";
-  fetch('https://api.ipify.org?format=json')
-    .then(res => res.json())
-    .then(data => { userIP = data.ip; })
-    .catch(err => console.log("Lỗi lấy IP"));
+  fetch('https://api.ipify.org?format=json').then(res => res.json()).then(data => { userIP = data.ip; }).catch(e => console.log("Lỗi IP"));
 
-  // TÍCH HỢP TRACKING VỀ GOOGLE SHEETS
   function trackUsage(question, conclusion, status) {
     try {
       const dobStr = (dobState.day && dobState.month && dobState.year) ? `${dobState.day}/${dobState.month}/${dobState.year}` : "Chưa chọn";
       const selectedGenderBtn = document.querySelector('input[name="gender"]:checked');
       const rawGender = selectedGenderBtn ? selectedGenderBtn.value : "Chưa chọn";
       
+      // Chốt mốc thời gian để làm "ID" định vị lúc gửi Đánh giá
+      sessionTime = new Date().toLocaleString('vi-VN');
+      
       const payload = {
-        time: new Date().toLocaleString('vi-VN'),
-        ip: userIP, // Sử dụng IP đã lấy sẵn
+        action: "log_reading", // Thêm action báo cho code mới biết
+        time: sessionTime,
+        ip: userIP,
         question: question,
         dob: dobStr,
         gender: rawGender,
@@ -1137,16 +1154,68 @@
         status: status
       };
       
-      fetch('https://script.google.com/macros/s/AKfycbyZPQw4h2GTJN0hVGtl4SHfPDh9llbbPLFuxM6zLMpNOmoreQzz3NwYvWb606IVVrbK/exec', {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-    } catch (e) {
-      console.log("Không tracking được");
-    }
+      fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    } catch (e) { console.log("Không tracking được"); }
   }
+
+  // --- LOGIC ĐÁNH GIÁ (RATING) ---
+  const ratingNotes = {
+    1: ["Chê mạnh, bói như điêu", "Đọc xong cười khẩy", "Hông hiểu gì luôn", "Ảo ma Canada", "Rót điêu toa"],
+    2: ["Cũng tàm tạm", "Trúng được một chút", "Hơi chung chung", "Nghe cho vui tai", "Cần cố gắng thêm"],
+    3: ["Khá ổn áp", "Phân tích có lý", "Đúng trọng tâm phết", "Cũng có tí năng lượng", "Tạm tin Rót lần này"],
+    4: ["Hay nha, rất cuốn", "Sâu sắc đấy", "Gãi đúng chỗ ngứa", "Quá là hợp vibe", "Nghe xong thấy nhẹ lòng"],
+    5: ["Tôi vừa có trải nghiệm rùng mình", "Nổi da gà vì quá chuẩn", "Sợ hãi sự chính xác này", "Như đi guốc trong bụng", "Chuẩn không cần chỉnh"]
+  };
+
+  const ratingBtns = document.querySelectorAll('.rating-btn');
+  ratingBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      // Gỡ active cũ
+      ratingBtns.forEach(b => b.classList.remove('active'));
+      // Bật active mới
+      e.target.classList.add('active');
+      currentRating = parseInt(e.target.dataset.val);
+      
+      // Lấy note random theo điểm
+      const noteArr = ratingNotes[currentRating];
+      currentRatingNote = noteArr[Math.floor(Math.random() * noteArr.length)];
+      elements.ratingNote.textContent = `"${currentRatingNote}"`;
+      
+      // Hiện hộp góp ý
+      elements.feedbackBox.style.display = 'flex';
+      setTimeout(() => elements.feedbackBox.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+    });
+  });
+
+  elements.submitFeedbackBtn.onclick = () => {
+    const feedbackText = elements.feedbackInput.value.trim();
+    if (!currentRating) return toastMsg("Mày chưa chọn mấy sao kìa!");
+    
+    elements.submitFeedbackBtn.textContent = "Đang gửi...";
+    elements.submitFeedbackBtn.disabled = true;
+
+    const payload = {
+      action: "update_feedback",
+      time: sessionTime,
+      ip: userIP,
+      rating: currentRating,
+      ratingNote: currentRatingNote,
+      feedback: feedbackText
+    };
+
+    fetch(WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(() => {
+      elements.ratingSection.innerHTML = `<h4 class="serif-font" style="color: var(--cyan); margin-bottom:10px;">Cảm ơn mày đã đánh giá!</h4><p style="color: var(--text-muted); font-size:14px;">Vũ trụ ghi nhận công đức này.</p>`;
+    }).catch(e => {
+      toastMsg("Gửi lỗi cmnr, nhưng kệ đi.");
+      elements.ratingSection.style.display = 'none';
+    });
+  };
+  // -------------------------------
 
   elements.themeCheckbox.addEventListener('change', (e) => {
     if(e.target.checked) document.body.classList.add('light-mode');
@@ -1323,6 +1392,16 @@
     elements.chatHistory.innerHTML = '';
     elements.followUpInput.value = '';
     elements.chatInputWrapper.style.display = 'flex';
+    // Reset form Rating
+    elements.ratingSection.style.display = 'none';
+    elements.feedbackBox.style.display = 'none';
+    elements.feedbackInput.value = '';
+    elements.ratingNote.textContent = '';
+    ratingBtns.forEach(b => b.classList.remove('active'));
+    elements.submitFeedbackBtn.textContent = "Gửi Đánh Giá";
+    elements.submitFeedbackBtn.disabled = false;
+    currentRating = 0;
+    currentRatingNote = "";
   }
 
   elements.readyBtn.onclick = () => {
@@ -1531,6 +1610,7 @@ YÊU CẦU:
       typeEffectFast(elements.readingContent, aiReadingText, () => {
          elements.donationBlock.style.display = 'flex';
          elements.followUpSection.style.display = 'flex'; 
+         elements.ratingSection.style.display = 'flex'; // Hiện đánh giá
       });
     } catch(e) { 
       console.log("Thằng Rót bận, gọi thằng Tót ra đỡ...");
@@ -1578,6 +1658,7 @@ YÊU CẦU:
       typeEffectFast(elements.readingContent, aiReadingText, () => {
          elements.donationBlock.style.display = 'flex';
          elements.followUpSection.style.display = 'flex'; 
+         elements.ratingSection.style.display = 'flex'; // Hiện đánh giá
       });
     } catch(err) {
       elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Nhiễu loạn sóng vũ trụ. Cả 2 anh em nhà nó đều bận đi vệ sinh rồi. Tải lại trang đi!</span>";
@@ -1636,7 +1717,6 @@ YÊU CẦU:
       });
       
     } catch(e) {
-      // DỰ PHÒNG TÓT KHI RÓT BẬN LÚC HỎI THÊM
       const tempTyping = document.getElementById("tempBotTyping");
       if(tempTyping) tempTyping.innerHTML = "Thằng Rót bận, Tót ra giải nốt... <span class='chat-typing'>gõ phím tạch tạch</span>";
 
