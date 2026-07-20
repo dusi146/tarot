@@ -1080,7 +1080,7 @@
     { file: "Cups01.png", name: "Ace of Cups" }, { file: "Cups02.png", name: "Two of Cups" }, { file: "Cups03.png", name: "Three of Cups" }
   ];
 
-  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyDBu6AE0MRKUOjQ1ruuXhda7NuCfkxVP5DUuCmAhILp38FTjGxbOFfLeXZoZmqUVo5/exec';
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwUymDCpq3Burzd8cz2NHLoXzMNHWfdJb1wNETzo1hjF7PmjWX_QXz4x1MeR_YYsGtk/exec';
 
   async function fetchTopDonates() {
     try {
@@ -1212,12 +1212,18 @@
   let userIP = "Unknown";
   fetch('https://api.ipify.org?format=json').then(res => res.json()).then(data => { userIP = data.ip; }).catch(e => console.log("Lỗi IP"));
 
-  function trackUsage(question, conclusion, status, solver) {
+  ffunction trackUsage(question, conclusion, status, solver) {
     try {
       const dobStr = (dobState.day && dobState.month && dobState.year) ? `${dobState.day}/${dobState.month}/${dobState.year}` : "Chưa chọn";
       const selectedGenderBtn = document.querySelector('input[name="gender"]:checked');
       const rawGender = selectedGenderBtn ? selectedGenderBtn.value : "Chưa chọn";
       
+      // Lấy tên chế độ đang chọn
+      const rawVibe = document.getElementById("vibeSelector").value;
+      let vibeStr = "Chữa lành";
+      if (rawVibe === "tatnuoc") vibeStr = "Tạt nước lạnh";
+      if (rawVibe === "quansu") vibeStr = "Quân sư";
+
       sessionTime = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
       
       const payload = {
@@ -1229,7 +1235,8 @@
         gender: rawGender,
         conclusion: conclusion,
         status: status,
-        solver: solver
+        solver: solver,
+        vibe: vibeStr // Bắn thêm biến này lên
       };
       
       fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
