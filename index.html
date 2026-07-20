@@ -939,7 +939,7 @@
       
       <!-- ĐÁNH GIÁ & GÓP Ý (RATING SYSTEM) -->
       <div class="rating-section" id="ratingSection">
-        <div class="rating-title">Mày thấy quẻ này ntn?</div>
+        <div class="rating-title">bồ thấy tui phán như lào ?</div>
         <div class="rating-circles" id="ratingCircles">
           <button class="rating-btn" data-val="1">1</button>
           <button class="rating-btn" data-val="2">2</button>
@@ -1189,7 +1189,7 @@
 
   elements.submitFeedbackBtn.onclick = () => {
     const feedbackText = elements.feedbackInput.value.trim();
-    if (!currentRating) return toastMsg("Mày chưa chọn mấy sao kìa!");
+    if (!currentRating) return toastMsg("bồ chưa chọn mấy sao kìa!");
     
     elements.submitFeedbackBtn.textContent = "Đang gửi...";
     elements.submitFeedbackBtn.disabled = true;
@@ -1209,7 +1209,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     }).then(() => {
-      elements.ratingSection.innerHTML = `<h4 class="serif-font" style="color: var(--cyan); margin-bottom:10px;">Cảm ơn mày đã đánh giá!</h4><p style="color: var(--text-muted); font-size:14px;">Vũ trụ ghi nhận công đức này.</p>`;
+      elements.ratingSection.innerHTML = `<h4 class="serif-font" style="color: var(--cyan); margin-bottom:10px;">Cảm ơn bồ đã đánh giá nghen lớp du!</h4><p style="color: var(--text-muted); font-size:14px;">Vũ trụ ghi nhận công đức này.</p>`;
     }).catch(e => {
       toastMsg("Gửi lỗi cmnr, nhưng kệ đi.");
       elements.ratingSection.style.display = 'none';
