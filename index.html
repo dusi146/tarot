@@ -1668,8 +1668,11 @@ CẤU TRÚC 3 ĐOẠN CHUẨN:
           "Authorization": `Bearer ${OPENROUTER_API_KEY}`, "Content-Type": "application/json",
           "HTTP-Referer": "https://tavanrot.com", "X-Title": "Ta Van Rot Tarot"
         },
-        body: JSON.stringify({ model: "openrouter/auto", messages: messages })
-      }, 3, 1000);
+       body: JSON.stringify({
+  model: "openrouter/auto", 
+  messages: totMemory,
+  max_tokens: 800
+})
       if (!res.ok) throw new Error("OpenRouter Sập");
       const data = await res.json();
       return data.choices[0].message.content;
