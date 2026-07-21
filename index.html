@@ -804,17 +804,17 @@
           <div class="field custom-dropdown" id="vibeDropdown">
             <button class="select-btn" id="vibeBtn" type="button">
               <div class="label">Tone Giọng</div>
-              <div class="value" id="vibeVal" style="font-size: 17px; font-family: 'Montserrat', sans-serif; display: flex; align-items: center; gap: 8px; color: var(--text-main); font-weight: 600;">
-                Chữa lành <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              <div class="value" id="vibeVal" style="font-size: 17px; font-family: 'Montserrat', sans-serif; display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 500;">
+                Chọn chế độ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
               </div>
             </button>
             <div class="dropdown-list" id="vibeList">
-              <div class="dropdown-item active" data-value="chualanh">Chữa lành (Nhẹ nhàng, an ủi)</div>
+              <div class="dropdown-item" data-value="chualanh">Chữa lành (Nhẹ nhàng, an ủi)</div>
               <div class="dropdown-item" data-value="tatnuoc">Tạt nước lạnh (Thô nhưng thật)</div>
               <div class="dropdown-item" data-value="quansu">Quân sư (Logic, phân tích)</div>
             </div>
             <!-- Thẻ input ẩn để code JS đọc dữ liệu -->
-            <input type="hidden" id="vibeSelector" value="chualanh">
+            <input type="hidden" id="vibeSelector" value="">
           </div>
 
           <div class="field-row">
@@ -999,7 +999,7 @@
       <div id="donationBlock" class="donation-wrapper" style="display: none;">
         <img src="images/bank.png" alt="QR Donate" class="qr-img" />
         <div class="donation-text">
-          <p><strong>Lưu ý:</strong> Trải bài chỉ mang tính chất tham khảo sự chuẩn xác cần dựa vào năng lượng của bạn với tarot. Tương lai nằm trong tay bạn, đừng quá tin tưởng mà hãy luôn tự quyết định cuộc đời mình nhé!</p>
+          <p><strong>Lưu ý:</strong> Trải bài chỉ mang tính chất tham khảo sự chuẩn xác cần dựa vào năng lượng của bạn với tarot. Tương lai nằm trong tay bạn, đừng quá tin tưởng vào bất cứ thứ gì trên đời ngoài chính bản thân của mình mà hãy luôn tự quyết định cuộc đời mình nhé!</p>
           <p style="margin-top: 8px;">💖 Nếu thấy thông điệp ý nghĩa, bạn có thể ủng hộ Rót 1 ít lúa nghen 💖</p>
         </div>
       </div>
@@ -1050,7 +1050,10 @@
     }, 2500);
   });
 
-  const OPENROUTER_API_KEY = atob("c2stb3ItdjEtZDE1ODM0OGEyMDBkODllNmYwZTQ2MmI5NzFkNzM4NTliZTYxZTJhOGI3NGIzNzJjYjAzNmUzMTEyYmEzOTQyZA==");
+  // ========================================================
+  // HỆ THỐNG API DUY NHẤT LÀ TA VĂN RÓT (OPENROUTER) ĐÃ MÃ HÓA
+  // ========================================================
+  const OPENROUTER_API_KEY = atob("c2stb3ItdjEtZGZjOTA3NDY1ZTIyNWVkZWMzYjg2NTFmY2FjNjFjNjg2MjAwZjEzM2EzNjBlNjU0NzBiYjQzMmE1MmE1ZDdmOQ==");
   
   let typeWriter; 
   
@@ -1112,6 +1115,7 @@
           vibeSelector.value = item.dataset.value;
           const text = item.textContent.split('(')[0].trim(); 
           vibeVal.innerHTML = `${text} <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+          vibeVal.style.color = "var(--text-main)";
           
           document.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
           item.classList.add('active');
@@ -1183,7 +1187,7 @@
   const randInt = (max) => crypto.getRandomValues(new Uint32Array(1))[0] % max;
   const toastMsg = (msg) => { elements.toast.textContent = msg; elements.toast.classList.add("show"); setTimeout(() => elements.toast.classList.remove("show"), 2500); };
 
-  async function fetchWithRetry(url, options, retries = 5, delay = 1000) {
+  async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
     for (let i = 0; i < retries; i++) {
       try {
         const res = await fetch(url, options);
@@ -1202,6 +1206,9 @@
   let userIP = "Unknown";
   fetch('https://api.ipify.org?format=json').then(res => res.json()).then(data => { userIP = data.ip; }).catch(e => console.log("Lỗi IP"));
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const trafficSource = urlParams.get('ref') || 'Trực tiếp / Không rõ';
+
   function trackUsage(question, conclusion, status, solver) {
     try {
       const dobStr = (dobState.day && dobState.month && dobState.year) ? `${dobState.day}/${dobState.month}/${dobState.year}` : "Chưa chọn";
@@ -1209,7 +1216,8 @@
       const rawGender = selectedGenderBtn ? selectedGenderBtn.value : "Chưa chọn";
       
       const rawVibe = document.getElementById("vibeSelector").value;
-      let vibeStr = "Chữa lành";
+      let vibeStr = "Chưa chọn";
+      if (rawVibe === "chualanh") vibeStr = "Chữa lành";
       if (rawVibe === "tatnuoc") vibeStr = "Tạt nước lạnh";
       if (rawVibe === "quansu") vibeStr = "Quân sư";
 
@@ -1225,7 +1233,8 @@
         conclusion: conclusion,
         status: status,
         solver: solver,
-        vibe: vibeStr
+        vibe: vibeStr,
+        source: trafficSource
       };
       
       fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -1233,9 +1242,9 @@
   }
 
   const ratingNotes = {
-    1: ["Chê mạnh, bói như điêu", "Đọc xong cười khẩy", "Hông hiểu gì luôn", "Ảo ma Canada", "Rót điêu toa"],
+    1: ["Chê mạnh, bói như điêu", "Đọc xong cười khẩy", "Hông hiểu gì luôn", "Ảo ma Canada", "Thầy điêu toa"],
     2: ["Cũng tàm tạm", "Trúng được một chút", "Hơi chung chung", "Nghe cho vui tai", "Cần cố gắng thêm"],
-    3: ["Khá ổn áp", "Phân tích có lý", "Đúng trọng tâm phết", "Cũng có tí năng lượng", "Tạm tin Rót lần này"],
+    3: ["Khá ổn áp", "Phân tích có lý", "Đúng trọng tâm phết", "Cũng có tí năng lượng", "Tạm tin Thầy lần này"],
     4: ["Hay nha, rất cuốn", "Sâu sắc đấy", "Gãi đúng chỗ ngứa", "Quá là hợp vibe", "Nghe xong thấy nhẹ lòng"],
     5: ["Tôi vừa có trải nghiệm rùng mình", "Nổi da gà vì quá chuẩn", "Sợ hãi sự chính xác này", "Như đi guốc trong bụng", "Chuẩn không cần chỉnh"]
   };
@@ -1477,6 +1486,9 @@
   }
 
   elements.readyBtn.onclick = () => {
+    const selectedVibe = document.getElementById("vibeSelector").value;
+    if (!selectedVibe) return toastMsg("Bồ quên chọn Tone Giọng kìa!");
+
     currentQuestion = elements.questionInput.value.trim();
     if (currentQuestion.length < 5) return toastMsg("Viết câu hỏi rõ ràng có tâm xíu đi.");
 
@@ -1618,9 +1630,69 @@
     elements.ttsProgressBar.style.width = "0%";
   };
 
-  elements.revealAiBtn.onclick = () => { elements.aiReadingModal.classList.add("show"); if (!aiReadingFetched) fetchReading(); };
+  // ==========================================
+  // HỆ THỐNG AI (CHỈ SỬ DỤNG DUY NHẤT OPENROUTER)
+  // ==========================================
+  elements.revealAiBtn.onclick = () => { 
+    elements.aiReadingModal.classList.add("show"); 
+    if (!aiReadingFetched) startUltimateReading(); 
+  };
 
-  async function fetchReading() {
+  function getDynamicPrompt(botName, vibeStr, genderStr, dobParam, zodiacStr, xungHo, cardText) {
+      const currentTimeVN = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+      return `[QUAN TRỌNG: Trải bài Tarot giải trí, thao túng tâm lý, tự nhiên 100%]
+Đóng vai "${botName}", Tarot Reader Gen Z sinh năm 2006.
+Thời gian hiện tại: ${currentTimeVN}.
+Khách hàng: ${genderStr}, ${dobParam} ${zodiacStr}.
+${xungHo}
+Hỏi: "${currentQuestion}". 
+Rút được: ${cardText}.
+
+YÊU CẦU ĐẶC BIỆT:
+1. THỜI GIAN: Nếu khách hỏi "bao giờ, khi nào, bao lâu", BẮT BUỘC chốt đại 1 mốc thời gian cụ thể (vd: 3 tuần nữa, cuối tháng 10, sang năm). KHÔNG nói vòng vo "Tarot không xem được thời gian".
+2. KHÔNG ký tự đặc biệt (*, #). KHÔNG gạch đầu dòng. Viết đoạn văn mượt.
+3. ${vibeStr}
+
+CẤU TRÚC 3 ĐOẠN CHUẨN:
+- Đoạn 1 (Phá băng): Trêu đùa, cợt nhả hoặc khịa nhẹ khách cho tự nhiên. CẤM chào hỏi kiểu văn mẫu robot.
+- Đoạn 2 (Đâm trúng tim đen): Lật mặt nghiêm túc. Phân tích thực tế, phán những câu sắc bén, đọc vị tâm lý làm khách "xanh rờn", nổi da gà. Xâu chuỗi bài thành 1 câu chuyện.
+- Đoạn 3 (Chốt): 1 câu chốt hạ mang tính phán quyết, ám ảnh.`;
+  }
+
+  // Tiện ích gọi API OpenRouter
+  async function callOpenRouter(systemPrompt, isChat = false, chatMemory = []) {
+      const messages = isChat ? chatMemory : [{ role: "user", content: systemPrompt }];
+      const res = await fetchWithRetry("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`, "Content-Type": "application/json",
+          "HTTP-Referer": "https://tavanrot.com", "X-Title": "Ta Van Rot Tarot"
+        },
+        body: JSON.stringify({ model: "openrouter/auto", messages: messages })
+      }, 3, 1000);
+      if (!res.ok) throw new Error("OpenRouter Sập");
+      const data = await res.json();
+      return data.choices[0].message.content;
+  }
+
+  function typeEffectFast(element, text, callback) {
+    clearInterval(typeWriter);
+    element.innerHTML = "";
+    elements.readingFooter.style.display = 'flex';
+    let i = 0;
+    typeWriter = setInterval(() => {
+      let char = text.charAt(i);
+      if (char === '\n') element.innerHTML += '<br/>';
+      else element.innerHTML += char;
+      i++;
+      if (i >= text.length) {
+        clearInterval(typeWriter);
+        if(callback) callback();
+      }
+    }, 5); 
+  }
+
+  async function startUltimateReading() {
     clearInterval(typeWriter);
     aiReadingFetched = true;
 
@@ -1629,14 +1701,14 @@
         <div id="loadingText" style="color: var(--cyan); font-style: italic; font-weight: 500; font-size: 16px; letter-spacing: 1px;">Đang kết nối tần số...</div>
     </div>`;
     
-    const loadingMsgs = ["Đang xào bài...", "Đang kết nối tần số tình duyên...", "Vũ trụ đang gửi thông điệp...", "Chờ tí, Rót đang soi nghiệp..."];
+    const loadingMsgs = ["Đang xào bài...", "Đang kết nối tần số tình duyên...", "Vũ trụ đang gửi thông điệp...", "Thầy Rót đang soi nghiệp..."];
     let lIdx = 0;
     let loadInt = setInterval(() => {
         lIdx = (lIdx + 1) % loadingMsgs.length;
         let txtEl = document.getElementById("loadingText");
         if (txtEl) txtEl.innerText = loadingMsgs[lIdx];
     }, 2500);
-    
+
     const dobStr = (dobState.day && dobState.month && dobState.year) ? `${dobState.day}/${dobState.month}/${dobState.year}` : "Không rõ ngày sinh";
     const dobParam = dobStr !== "Không rõ ngày sinh" ? `Ngày sinh: ${dobStr}` : dobStr;
     const selectedGenderBtn = document.querySelector('input[name="gender"]:checked');
@@ -1661,99 +1733,42 @@
 
     const cardText = currentCards.map((c, i) => `Lá ${i+1}: ${c.name} (${c.reversed ? "Ngược" : "Xuôi"})`).join(", ");
 
-    fetchOpenRouterReading(genderStr, dobParam, zodiacStr, cardText, xungHo, loadInt); 
-  }
-
-  async function fetchOpenRouterReading(genderStr, dobParam, zodiacStr, cardText, xungHo, loadInt) {
-    const currentTimeVN = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
     const selectedVibe = document.getElementById("vibeSelector").value;
-    
-    let vibePrompt = "";
-    if (selectedVibe === "chualanh") {
-        vibePrompt = "- TONE GIỌNG: Dịu dàng, đồng cảm, chữa lành vết thương tâm hồn. An ủi khách hàng. Xưng hô ngọt ngào.";
-    } else if (selectedVibe === "tatnuoc") {
-        vibePrompt = "- TONE GIỌNG: Thô nhưng thật, tạt gáo nước lạnh, hơi xéo xắt, châm biếm nhẹ để khách tỉnh ngộ. Đừng dông dài.";
-    } else {
-        vibePrompt = "- TONE GIỌNG: Khách quan, sắc bén như một quân sư. Phân tích logic vấn đề, chỉ ra nguyên nhân và vạch rõ từng bước giải quyết.";
-    }
+    let vibeStr = "- TONE GIỌNG: Dịu dàng, đồng cảm, chữa lành vết thương tâm hồn. An ủi khách hàng. Xưng hô ngọt ngào.";
+    if (selectedVibe === "tatnuoc") vibeStr = "- TONE GIỌNG: Thô nhưng thật, tạt gáo nước lạnh, hơi xéo xắt, châm biếm nhẹ để khách tỉnh ngộ. Đừng dông dài.";
+    if (selectedVibe === "quansu") vibeStr = "- TONE GIỌNG: Khách quan, sắc bén như một quân sư. Phân tích logic vấn đề, chỉ ra nguyên nhân và vạch rõ từng bước giải quyết.";
 
-    const fallbackPrompt = `[QUAN TRỌNG: Trải bài giải trí, đóng vai tự nhiên nhất]
-Đóng vai "Ta Văn Rót", một Tarot Reader sinh năm 2006.
-Thời gian rút bài hiện tại: ${currentTimeVN} (Giờ Việt Nam).
-Khách hàng: ${genderStr}, ${dobParam} ${zodiacStr}.
-${xungHo}
-Hỏi: "${currentQuestion}". 
-Rút được: ${cardText}.
-
-YÊU CẦU:
-- KHÔNG dùng ký tự đặc biệt (*, #, ngoặc đơn). Trả lời text thuần, tiếng Việt chuẩn, mượt mà.
-${vibePrompt}
-- Trả lời dài dặn, phân tích chi tiết.
-- BẮT BUỘC chia 3 phần rõ ràng:
-1. Mở bài: Chào hỏi, nhận xét câu hỏi.
-2. Thân bài: Phân tích bài chi tiết, thấu đáo.
-3. Kết luận: 1 câu chốt hạ duy nhất ngắn gọn.`;
-
-    let botName = "Ta Văn Rót";
+    let botName = "Ta Văn Rót (OpenRouter)";
     try {
-      const res = await fetchWithRetry("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": "https://tavanrot.com",
-          "X-Title": "Ta Van Rot Tarot"
-        },
-        body: JSON.stringify({
-          model: "auto", 
-          messages: [{ role: "user", content: fallbackPrompt }]
-        })
-      });
-      if (!res.ok) throw new Error("OpenRouter Sập");
-      const data = await res.json();
-      aiReadingText = data.choices[0].message.content;
-      
-      clearInterval(loadInt);
-      const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
-      trackUsage(currentQuestion, conclusion, "Thành công", botName);
-
-      typeEffectFast(elements.readingContent, aiReadingText, () => {
-         elements.donationBlock.style.display = 'flex';
-         elements.followUpSection.style.display = 'flex'; 
-         elements.ratingSection.style.display = 'flex'; 
-      });
-    } catch(err) {
-      clearInterval(loadInt);
-      elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Nhiễu loạn sóng vũ trụ. Rót đi vệ sinh rồi. Tải lại trang đi!</span>";
-      trackUsage(currentQuestion, "Lỗi API không ra bài", "Thất bại", "None");
+        console.log("Đang gọi Thầy Rót (OpenRouter auto)...");
+        aiReadingText = await callOpenRouter(getDynamicPrompt("Ta Văn Rót", vibeStr, genderStr, dobParam, zodiacStr, xungHo, cardText));
+    } catch (e) {
+        console.log("Thầy Rót sập mạng!");
+        clearInterval(loadInt);
+        elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Nhiễu loạn sóng vũ trụ. Ta Văn Rót đang bận đi vệ sinh rồi. Tải lại trang đi bồ!</span>";
+        trackUsage(currentQuestion, "Lỗi API không ra bài", "Thất bại", "None");
+        return;
     }
+
+    clearInterval(loadInt);
+    const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
+    trackUsage(currentQuestion, conclusion, "Thành công", botName);
+
+    typeEffectFast(elements.readingContent, aiReadingText, () => {
+        elements.donationBlock.style.display = 'flex';
+        elements.followUpSection.style.display = 'flex'; 
+        elements.ratingSection.style.display = 'flex'; 
+    });
   }
 
-  function typeEffectFast(element, text, callback) {
-    clearInterval(typeWriter);
-    element.innerHTML = "";
-    elements.readingFooter.style.display = 'flex';
-    let i = 0;
-    typeWriter = setInterval(() => {
-      let char = text.charAt(i);
-      if (char === '\n') element.innerHTML += '<br/>';
-      else element.innerHTML += char;
-      i++;
-      if (i >= text.length) {
-        clearInterval(typeWriter);
-        if(callback) callback();
-      }
-    }, 5); 
-  }
-
+  // LOGIC FOLLOW UP CHAT (Dùng duy nhất OpenRouter auto)
   elements.sendFollowUpBtn.onclick = async () => {
     const q = elements.followUpInput.value.trim();
     if (q.length < 3) return toastMsg("Hỏi cụt lủn vậy bồ? Nhập dài ra xíu.");
     
-    // GIỚI HẠN 3 CÂU HỎI
     if (chatCount >= 3) {
       elements.chatInputWrapper.style.display = 'none';
-      const finalMsg = "Ê tao phán 3 câu thôi nha, lộ hết thiên cơ òi. Tới giờ đi chạy deadline, tha cho Rót nghen! 🥺 Thấy Rót gieo quẻ chuẩn thì kéo lên quăng cho Rót ly trà sữa vô mã QR nhennn 💖";
+      const finalMsg = "Ê tui phán 3 câu thôi nha, lộ hết thiên cơ òi. Tới giờ đi chạy deadline, tha cho tui nghen! 🥺 Thấy Thầy gieo quẻ chuẩn thì kéo lên quăng cho Thầy ly trà sữa vô mã QR nhennn 💖";
       
       elements.chatHistory.innerHTML += `<div class="chat-bubble user">${q}</div>`;
       const botBubble = document.createElement("div");
@@ -1767,20 +1782,17 @@ ${vibePrompt}
     }
 
     chatCount++;
-    
-    // KHÓA MÕM INPUT LÚC AI ĐANG XỬ LÝ (CHỐNG SPAM)
     elements.sendFollowUpBtn.disabled = true;
     elements.followUpInput.disabled = true; 
     elements.sendFollowUpBtn.textContent = "Đang gõ...";
-    elements.followUpInput.placeholder = "Rót đang nhẩm quẻ, đợi xíu...";
+    elements.followUpInput.placeholder = "Đang nhẩm quẻ, đợi xíu...";
     elements.followUpInput.value = "";
     
-    // DỌN RÁC BONG BÓNG LỖI CŨ
     const oldTypings = document.querySelectorAll("#tempBotTyping");
     oldTypings.forEach(el => el.remove());
 
     elements.chatHistory.innerHTML += `<div class="chat-bubble user">${q}</div>`;
-    elements.chatHistory.innerHTML += `<div class="chat-bubble bot" id="tempBotTyping">Ta Văn Rót đang gieo quẻ... <span class="chat-typing">gõ phím tạch tạch</span></div>`;
+    elements.chatHistory.innerHTML += `<div class="chat-bubble bot" id="tempBotTyping">Thầy đang gieo quẻ... <span class="chat-typing">gõ phím tạch tạch</span></div>`;
     elements.chatHistory.lastElementChild.scrollIntoView({ behavior: 'smooth' });
     
     if (totMemory.length === 0) {
@@ -1789,76 +1801,62 @@ ${vibePrompt}
         if(selectedVibe === 'tatnuoc') tVibe = "thô thật, tạt nước lạnh";
         if(selectedVibe === 'quansu') tVibe = "phân tích logic, nghiêm túc";
 
-        const sysPrompt = `Bạn là "Ta Văn Rót", Tarot Reader Gen Z (2006). Vừa giải bài cho khách với nội dung: "${aiReadingText}". YÊU CẦU: Trả lời NGẮN GỌN (2-4 câu), đúng trọng tâm. Tone giọng: ${tVibe}. KHÔNG dùng ký tự đặc biệt (*, #).`;
+        const sysPrompt = `Bạn là "Ta Văn Rót", một Thầy Tarot Gen Z (2006). Vừa giải bài cho khách với nội dung: "${aiReadingText}". 
+YÊU CẦU: Trả lời NGẮN GỌN (2-4 câu). Tone giọng: ${tVibe}. Nếu khách hỏi thời gian phải chốt mốc cụ thể. KHÔNG dùng ký tự đặc biệt (*, #). Nửa đùa nửa thật nhưng phán phải sắc bén, xanh rờn.`;
         totMemory.push({ role: "system", content: sysPrompt });
     }
     
     totMemory.push({ role: "user", content: q });
 
+    let botAns = "";
+    let chatBotName = "Ta Văn Rót (OpenRouter)";
+
     try {
-      const res = await fetchWithRetry("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": "https://tavanrot.com",
-          "X-Title": "Ta Van Rot Tarot"
-        },
-        body: JSON.stringify({
-          model: "auto", 
-          messages: totMemory
-        })
-      });
-
-      if (!res.ok) throw new Error("OpenRouter Sập");
-      const data = await res.json();
-      const botAns = data.choices[0].message.content;
-
-      totMemory.push({ role: "assistant", content: botAns });
-      if (totMemory.length > 11) totMemory = [totMemory[0], ...totMemory.slice(totMemory.length - 10)];
-
-      const tempTyping = document.getElementById("tempBotTyping");
-      if(tempTyping) tempTyping.remove();
-      
-      const botBubble = document.createElement("div");
-      botBubble.className = "chat-bubble bot";
-      elements.chatHistory.appendChild(botBubble);
-      
-      typeEffectFast(botBubble, botAns, () => {
-         botBubble.scrollIntoView({ behavior: 'smooth' });
+        console.log("Chat Thầy Rót (OpenRouter auto)...");
+        botAns = await callOpenRouter("", true, totMemory);
+    } catch(ec) {
+         const tempTyping = document.getElementById("tempBotTyping");
+         if(tempTyping) {
+             tempTyping.innerHTML = "<span style='color:#ff8888'>Sập mạng diện rộng rồi bồ ơi, đợi tí chat lại nha!</span>";
+             tempTyping.removeAttribute("id"); 
+         }
+         chatCount--;
+         totMemory.pop(); 
          
-         // LƯU CỘNG DỒN FULL LỊCH SỬ CHAT VÀ ĐẨY LÊN SHEETS
-         accumulatedQ += (accumulatedQ ? "\n---\n" : "") + "Khách: " + q;
-         accumulatedA += (accumulatedA ? "\n---\n" : "") + "Rót: " + botAns;
-
-         const payload = { action: "update_followup", time: sessionTime, ip: userIP, followUpQ: accumulatedQ, followUpA: accumulatedA };
-         fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-
-         // COOLDOWN 1.5 GIÂY XONG MỚI MỞ KHÓA
-         setTimeout(() => {
-            elements.sendFollowUpBtn.disabled = false;
-            elements.followUpInput.disabled = false;
-            elements.sendFollowUpBtn.textContent = "Gửi";
-            elements.followUpInput.placeholder = "Bồ iu còn thắc mắc ? (Rót trả lời nốt)...";
-            elements.followUpInput.focus();
-         }, 1500);
-      });
-
-    } catch(err) {
-      const tempTyping = document.getElementById("tempBotTyping");
-      if(tempTyping) {
-          tempTyping.innerHTML = "<span style='color:#ff8888'>Rót đang sạc pin đứt kết nối rồi bồ ơi, đợi tí chat lại nha!</span>";
-          tempTyping.removeAttribute("id"); 
-      }
-      chatCount--;
-      totMemory.pop(); 
-      
-      // Lỗi thì mở khóa luôn để khách thử lại
-      elements.sendFollowUpBtn.disabled = false;
-      elements.followUpInput.disabled = false;
-      elements.sendFollowUpBtn.textContent = "Gửi";
-      elements.followUpInput.placeholder = "Nhập lại câu hỏi đi bồ...";
+         elements.sendFollowUpBtn.disabled = false;
+         elements.followUpInput.disabled = false;
+         elements.sendFollowUpBtn.textContent = "Gửi";
+         elements.followUpInput.placeholder = "Nhập lại câu hỏi đi bồ...";
+         return;
     }
+
+    totMemory.push({ role: "assistant", content: botAns });
+    if (totMemory.length > 11) totMemory = [totMemory[0], ...totMemory.slice(totMemory.length - 10)];
+
+    const tempTyping = document.getElementById("tempBotTyping");
+    if(tempTyping) tempTyping.remove();
+    
+    const botBubble = document.createElement("div");
+    botBubble.className = "chat-bubble bot";
+    elements.chatHistory.appendChild(botBubble);
+    
+    typeEffectFast(botBubble, botAns, () => {
+       botBubble.scrollIntoView({ behavior: 'smooth' });
+       
+       accumulatedQ += (accumulatedQ ? "\n---\n" : "") + "Khách: " + q;
+       accumulatedA += (accumulatedA ? "\n---\n" : "") + "Thầy: " + botAns;
+
+       const payload = { action: "update_followup", time: sessionTime, ip: userIP, followUpQ: accumulatedQ, followUpA: accumulatedA };
+       fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+
+       setTimeout(() => {
+          elements.sendFollowUpBtn.disabled = false;
+          elements.followUpInput.disabled = false;
+          elements.sendFollowUpBtn.textContent = "Gửi";
+          elements.followUpInput.placeholder = "Bồ iu còn thắc mắc ? (Thầy trả lời nốt)...";
+          elements.followUpInput.focus();
+       }, 1500);
+    });
   };
 
   elements.followUpInput.addEventListener('keypress', function (e) {
