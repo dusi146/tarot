@@ -1,12 +1,10 @@
 name: Deploy Tarot Web to GitHub Pages
 
 on:
-  # Chạy khi có code mới push lên nhánh main (nếu nhánh của mày là master thì đổi lại chữ master)
   push:
     branches: ["main"]
   workflow_dispatch:
 
-# Cấp quyền cho GitHub Actions
 permissions:
   contents: read
   pages: write
@@ -26,10 +24,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      # BƯỚC QUAN TRỌNG NHẤT: Bơm Key từ Secrets vào file HTML
       - name: Inject Gemini API Key
+        env:
+          GEMINI_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          sed -i "s/{{GEMINI_API_KEY_SECRET}}/${{ secrets.GEMINI_API_KEY }}/g" index.html
+          sed -i "s/{{GEMINI_API_KEY_SECRET}}/$GEMINI_KEY/g" index.html
           
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -37,7 +36,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Thư mục gốc chứa file index.html
           path: '.'
           
       - name: Deploy to GitHub Pages
