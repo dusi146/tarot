@@ -72,6 +72,15 @@
   body.intro-active { overflow: hidden; height: 100vh; }
   h1, h2, h3, h4, .serif-font, .spread-option .big, .card-info .name, .hold-core strong, .value, .guide-title, .intro-title { font-family: 'Cormorant Garamond', serif; }
 
+  /* CSS CHO CON MẮT LOAD */
+  .loading-wrapper { display: flex; align-items: center; justify-content: center; padding: 40px 0; width: 100%; }
+  .eye-lid { position: relative; width: 80px; height: 40px; background: rgba(142, 68, 173, 0.2); border: 2px solid var(--purple); border-radius: 0 0 40px 40px; overflow: hidden; display: flex; align-items: center; justify-content: center; animation: blinkEye 3s infinite ease-in-out; box-shadow: 0 0 20px rgba(142,68,173,0.4); }
+  .eye { width: 30px; height: 30px; background: radial-gradient(circle, var(--cyan) 0%, var(--purple) 70%); border-radius: 50%; display: flex; align-items: center; justify-content: center; animation: movePupil 3s infinite alternate ease-in-out; }
+  .cornea { width: 14px; height: 14px; background: #000; border-radius: 50%; position: relative; display: flex; align-items: center; justify-content: center; }
+  .white-pupil { width: 4px; height: 4px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; }
+  @keyframes blinkEye { 0%, 45%, 55%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.1); } }
+  @keyframes movePupil { 0% { transform: translateX(-6px); } 100% { transform: translateX(6px); } }
+
   .donate-marquee-container { width: min(100% - 40px, var(--max-w)); margin: 0 auto 30px auto; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(226, 194, 117, 0.2); border-radius: 12px; color: var(--gold); padding: 12px 0 12px 150px; overflow: hidden; position: relative; z-index: 10; display: none; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
   body.light-mode .donate-marquee-container { background: rgba(255, 255, 255, 0.6); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
   .donate-label { position: absolute; left: 0; top: 0; bottom: 0; width: 150px; background: linear-gradient(90deg, var(--bg-base) 80%, transparent); padding: 0 10px 0 20px; z-index: 2; font-weight: 700; color: #fff; display: flex; align-items: center; font-size: 14px; letter-spacing: 1px; }
@@ -1020,7 +1029,7 @@
   }
 
   // ==========================================
-  // HỆ THỐNG GỌI API (GEMINI 3.5 FLASH CHÍNH CHỦ)
+  // HỆ THỐNG GỌI API (GEMINI 3.5 FLASH CHÍNH CHỦ - TĂNG TOKEN CHỐNG CỤT)
   // ==========================================
   async function callGemini(systemPrompt, isChat = false, chatMemory = []) {
       let sysInst = null;
@@ -1043,7 +1052,7 @@
 
       const payload = {
           contents: contents,
-          generationConfig: { maxOutputTokens: 1500 }
+          generationConfig: { maxOutputTokens: 3000 } // Tăng lên 3000 để không bị cụt chữ giữa chừng
       };
       if (sysInst) payload.systemInstruction = sysInst;
 
@@ -1210,13 +1219,26 @@ CẤU TRÚC 3 ĐOẠN CHUẨN:
   }
 
   function typeEffectFast(element, text, callback) {
-    clearInterval(typeWriter); element.innerHTML = ""; elements.readingFooter.style.display = 'flex'; let i = 0;
-    typeWriter = setInterval(() => { let char = text.charAt(i); if (char === '\n') element.innerHTML += '<br/>'; else element.innerHTML += char; i++; if (i >= text.length) { clearInterval(typeWriter); if(callback) callback(); } }, 5); 
+    clearInterval(typeWriter); elements.readingFooter.style.display = 'flex'; let i = 0;
+    // Bổ sung xử lý an toàn nếu text bị undefined hoặc null
+    const safeText = text || "";
+    typeWriter = setInterval(() => { 
+      let char = safeText.charAt(i); 
+      if (char === '\n') element.innerHTML += '<br/>'; 
+      else element.innerHTML += char; 
+      i++; 
+      if (i >= safeText.length) { 
+        clearInterval(typeWriter); 
+        if(callback) callback(); 
+      } 
+    }, 5); 
   }
 
   async function startUltimateReading() {
     clearInterval(typeWriter); aiReadingFetched = true;
-    elements.readingContent.innerHTML = `<div class="loading-wrapper" style="flex-direction: column; gap: 25px;"><div class="eye-lid"><div class="eye"><div class="cornea"><div class="white-pupil"></div></div></div></div><div id="loadingText" style="color: var(--cyan); font-style: italic; font-weight: 500; font-size: 16px; letter-spacing: 1px;">Đang cảm nhận năng lượng...</div></div>`;
+    
+    // Khôi phục lại đúng cấu trúc HTML con mắt load chớp nháy
+    elements.readingContent.innerHTML = `<div class="loading-wrapper" style="flex-direction: column; gap: 20px;"><div class="eye-lid"><div class="eye"><div class="cornea"><div class="white-pupil"></div></div></div></div><div id="loadingText" style="color: var(--cyan); font-style: italic; font-weight: 500; font-size: 16px; letter-spacing: 1px;">Đang cảm nhận năng lượng...</div></div>`;
     
     const loadingMsgs = ["Đang liên kết các lá bài...", "Vũ trụ đang gửi thông điệp...", "Rót đang luận giải...", "Đang kết nối trực giác..."];
     let lIdx = 0; let loadInt = setInterval(() => { lIdx = (lIdx + 1) % loadingMsgs.length; let txtEl = document.getElementById("loadingText"); if (txtEl) txtEl.innerText = loadingMsgs[lIdx]; }, 2500);
@@ -1259,6 +1281,10 @@ CẤU TRÚC 3 ĐOẠN CHUẨN:
     }
 
     clearInterval(loadInt);
+    
+    // Xóa sạch khung chứa loading trước khi gõ chữ
+    elements.readingContent.innerHTML = "";
+    
     const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
     trackUsage(conclusion, "Thành công", botName);
 
