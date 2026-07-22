@@ -1,0 +1,3 @@
+- name: Bơm Gemini API Key vào HTML
+        run: |
+          sed -i "s/{{GEMINI_API_KEY_SECRET}}/${{ secrets.GEMINI_API_KEY }}/g" index.html
