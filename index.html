@@ -1620,32 +1620,27 @@ CẤU TRÚC BÀI LUẬN GIẢI:
     if (totMemory.length === 0) {
         const selectedVibe = document.getElementById("vibeSelector").value;
         let tVibe = "thân thiện";
-        if(selectedVibe === 'tatnuoc') tVibe = "thô thật, tạt nước lạnh";
+        if(selectedVibe === 'tatnuoc') tVibe = "thẳng thắn, thô nhưng thật, xéo xắt nhẹ";
         if(selectedVibe === 'quansu') tVibe = "phân tích logic, nghiêm túc";
         if(selectedVibe === 'phansau') tVibe = "thấu hiểu, sắc bén, đọc vị tâm lý";
 
         const nameVal = document.getElementById("nameInput").value.trim() || "Khách";
         const deepContextPrompt = preChatContext ? `\nLƯU Ý: ${nameVal} từng khai báo: ${preChatContext}` : "";
-        const sysPrompt = `Bạn là "Ta Văn Rót", một Tarot Reader Gen Z (2006). Vừa giải bài cho ${nameVal} với nội dung: "${aiReadingText}". ${deepContextPrompt}
-YÊU CẦU: Trả lời NGẮN GỌN (2-4 câu). Tone giọng: ${tVibe}. Nếu khách hỏi thời gian phải chốt mốc cụ thể. KHÔNG dùng ký tự đặc biệt (*, #). Nửa đùa nửa thật nhưng sắc bén.`;
+        const currentTimeVN = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+        
+        const sysPrompt = `Bạn là "Ta Văn Rót", một Tarot Reader Gen Z (sinh năm 2006). 
+Thời gian hiện tại: ${currentTimeVN}.
+Vừa giải bài cho ${nameVal} với nội dung: "${aiReadingText}". ${deepContextPrompt}
+
+YÊU CẦU ĐẶC BIỆT:
+1. Trả lời NGẮN GỌN (2-4 câu). Tone giọng: ${tVibe}. Nửa đùa nửa thật nhưng thâm thúy.
+2. TUYỆT ĐỐI KHÔNG dùng từ ngữ thô tục, chửi thề (như éo, đéo, vcl...) hay lăng mạ khách. Thô nhưng phải văn minh.
+3. NẾU khách nhắc đến việc "donate", "cho tiền", "ủng hộ": Phải tỏ ra vui vẻ, khịa nhẹ nhưng VẪN KHUYẾN KHÍCH khách quét mã QR để ủng hộ Rót uống trà sữa. Tuyệt đối không được từ chối tiền hay chê bai.
+4. Nếu khách hỏi thời gian phải chốt mốc cụ thể dựa trên thời gian hiện tại.
+5. KHÔNG dùng ký tự đặc biệt (*, #).`;
+        
         totMemory.push({ role: "system", content: sysPrompt });
     }
-    
-    totMemory.push({ role: "user", content: q });
-
-    let botAns = "";
-    try {
-        console.log("Chat với Rót...");
-        botAns = await callOpenRouter("", true, totMemory);
-    } catch(ec) {
-         const tempTyping = document.getElementById("tempBotTyping");
-         if(tempTyping) { tempTyping.innerHTML = "<span style='color:#ff8888'>Sập mạng diện rộng rồi bồ ơi, đợi tí chat lại nha!</span>"; tempTyping.removeAttribute("id"); }
-         chatCount--; totMemory.pop(); 
-         elements.sendFollowUpBtn.disabled = false; elements.followUpInput.disabled = false; elements.sendFollowUpBtn.textContent = "Gửi"; elements.followUpInput.placeholder = "Nhập lại câu hỏi đi bồ...";
-         return;
-    }
-
-    totMemory.push({ role: "assistant", content: botAns });
     if (totMemory.length > 11) totMemory = [totMemory[0], ...totMemory.slice(totMemory.length - 10)];
 
     const tempTyping = document.getElementById("tempBotTyping"); if(tempTyping) tempTyping.remove();
