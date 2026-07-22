@@ -28,7 +28,12 @@ jobs:
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          sed -i "s/{{GEMINI_API_KEY_SECRET}}/$GEMINI_KEY/g" index.html
+          node -e '
+            const fs = require("fs");
+            let content = fs.readFileSync("index.html", "utf8");
+            content = content.split("{{GEMINI_API_KEY_SECRET}}").join(process.env.GEMINI_KEY);
+            fs.writeFileSync("index.html", content, "utf8");
+          '
           
       - name: Setup Pages
         uses: actions/configure-pages@v5
