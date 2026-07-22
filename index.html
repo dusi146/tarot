@@ -1516,16 +1516,17 @@ Hỏi: "${currentQuestion}".
 Rút được: ${cardText}.
 
 YÊU CẦU ĐẶC BIỆT:
-1. LUẬN GIẢI CHUẨN FORM: Phân tích Ý NGHĨA CỦA TỪNG LÁ BÀI khớp đúng với vị trí của nó trong "Quy mô trải bài" ở trên.
-2. THỜI GIAN: Nếu khách hỏi "bao giờ, khi nào, bao lâu", BẮT BUỘC chốt đại 1 mốc thời gian cụ thể (vd: 3 tuần nữa, cuối tháng 10, sang năm).
-3. KHÔNG ký tự đặc biệt (*, #). KHÔNG gạch đầu dòng. Viết đoạn văn mượt. Nhớ gọi tên khách ("${clientName}").
-4. ${vibeStr}
-5. CẤM TUYỆT ĐỐI in ra quá trình suy nghĩ hoặc tự kiểm tra điều kiện (kiểu "Checked"). CHỈ in ra lời thoại luận giải. Vào thẳng vấn đề ngay.
+1. LUẬN GIẢI XÂU CHUỖI: Tuyệt đối KHÔNG liệt kê máy móc kiểu "Lá 1 là..., Lá 2 là...". Phải xâu chuỗi ý nghĩa các lá bài thành một mạch truyện nhân quả logic, dựa đúng vào vị trí của nó. Dùng chính hình ảnh/năng lượng lá bài để giải thích hoàn cảnh thực tế của ${clientName}.
+2. THỜI GIAN: CHỈ đưa ra mốc thời gian cụ thể (vd: 3 tuần nữa, cuối năm) NẾU trong câu hỏi gốc khách có từ khóa hỏi về thời gian (khi nào, bao lâu, bao giờ...). Nếu khách KHÔNG hỏi, TUYỆT ĐỐI KHÔNG tự bùa phép mốc thời gian.
+3. ĐỌC VỊ TÂM LÝ SÂU: Khai thác tối đa [THÔNG TIN BÍ MẬT] khách khai báo. Từ đó chỉ trúng tim đen điểm mâu thuẫn, sự tự lừa dối bản thân hoặc nỗi sợ ẩn giấu mà khách đang không dám đối mặt.
+4. KHÔNG ký tự đặc biệt (*, #). KHÔNG gạch đầu dòng. Viết đoạn văn mượt.
+5. ${vibeStr}
+6. CẤM TUYỆT ĐỐI in ra quá trình suy nghĩ hoặc tự phân tích lệnh (kiểu "Checked", "Đã hiểu"). CHỈ in ra lời thoại luận giải. Vào thẳng vấn đề ngay.
 
 CẤU TRÚC 3 ĐOẠN CHUẨN:
-- Đoạn 1 (Phá băng): Nhắc tên khách, trêu đùa, cợt nhả hoặc khịa nhẹ khách. CẤM chào kiểu văn mẫu.
-- Đoạn 2 (Đâm trúng tim đen): Lật mặt nghiêm túc. Phân tích thực tế, đọc vị tâm lý từng lá bài theo đúng vị trí.
-- Đoạn 3 (Chốt): 1 câu chốt hạ mang tính phán quyết.`;
+- Đoạn 1 (Phá băng): Nhắc tên khách, trêu đùa, cợt nhả hoặc khịa nhẹ khách dựa trên hoàn cảnh của họ. CẤM chào hỏi kiểu văn mẫu AI.
+- Đoạn 2 (Đâm trúng tim đen): Lật mặt nghiêm túc. Xâu chuỗi năng lượng các lá bài thành mạch truyện, bóc trần sự thật phũ phàng hoặc mâu thuẫn trong tâm lý mà khách giấu diếm.
+- Đoạn 3 (Chốt): 1 câu chốt hạ mang tính phán quyết hoặc lời khuyên cuối cùng.`;
   }
 
   function typeEffectFast(element, text, callback) {
