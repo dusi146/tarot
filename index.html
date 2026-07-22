@@ -963,7 +963,7 @@
 
   const spreadOptions = [1, 2, 3, 4, 5, 7, 10, 12];
   const spreadMeanings = {
-    1: "1 lá (Trả lời thẳng vấn đề, kết luận nhanh).",
+    1: "1 lá (Trả lời thẳng vấn đề, kết luận nhanh, với câu hỏi có hoặc không thì dựa vào bài phán luôn rồi giải thích).",
     2: "2 lá (Lá 1: Hiện tại/Vấn đề, Lá 2: Hướng giải quyết/Kết quả).",
     3: "3 lá (Lá 1: Quá khứ, Lá 2: Hiện tại, Lá 3: Tương lai).",
     4: "4 lá (Lá 1: Vấn đề, Lá 2: Rào cản, Lá 3: Lời khuyên, Lá 4: Kết quả).",
@@ -1507,33 +1507,38 @@
   elements.revealAiBtn.onclick = () => { elements.aiReadingModal.classList.add("show"); if (!aiReadingFetched) startUltimateReading(); };
 
   function getDynamicPrompt(botName, vibeStr, genderStr, dobParam, zodiacStr, xungHo, cardText, clientName) {
-      const currentTimeVN = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
-      const spreadContext = spreadMeanings[selectedSpread] || "Quy mô tùy chỉnh.";
-      const deepContextPrompt = preChatContext ? `\n[THÔNG TIN BÍ MẬT KHÁCH VỪA KHAI BÁO]:\n${preChatContext}\n` : "";
-      
-      return `[QUAN TRỌNG: Trải bài Tarot giải trí tâm lý, bám sát thực tế]
-Đóng vai "${botName}", Tarot Reader Gen Z sinh năm 2006.
-Thời gian hiện tại: ${currentTimeVN}.
-Khách hàng tên là: "${clientName}". ${genderStr}, ${dobParam} ${zodiacStr}.
+  const currentTimeVN = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+  const spreadContext = spreadMeanings[selectedSpread] || "Quy mô tùy chỉnh.";
+  const deepContextPrompt = preChatContext ? `\n[THÔNG TIN KHÁCH ĐÃ CHIA SẺ]:\n${preChatContext}\n` : "";
+
+  return `[HỆ THỐNG]
+Đây là phiên luận giải Tarot tâm lý và biểu tượng. Bạn KHÔNG phải nhà tiên tri dự đoán tương lai tuyệt đối. 
+Nhiệm vụ: Diễn giải ý nghĩa bài dựa trên biểu tượng, năng lượng, và thông tin khách cung cấp. Nếu chưa đủ cơ sở, chỉ nói theo hướng "khả năng/xu hướng". Tuyệt đối không tự bịa sự kiện (như có người thứ 3, bùa ngải...) nếu bài không thể hiện.
+
+Đóng vai "${botName}", Tarot Reader Gen Z (sinh 2006).
+Thời gian: ${currentTimeVN}
+Khách: ${clientName}, ${genderStr}, ${dobParam} ${zodiacStr}.
 ${xungHo}${deepContextPrompt}
-Quy mô trải bài: ${spreadContext}
-Hỏi: "${currentQuestion}". 
-Rút được: ${cardText}.
+Trải bài: ${spreadContext}
+Câu hỏi: "${currentQuestion}"
+Lá bài rút được: ${cardText}
 
-YÊU CẦU ĐẶC BIỆT:
-1. BÁM SÁT CÂU HỎI & PHÂN TÍCH SÂU: Trả lời TRỰC TIẾP vào trọng tâm câu hỏi gốc của ${clientName}. Không nói lan man. Phải phân tích thật chi tiết, cặn kẽ, đào sâu vào hoàn cảnh. Bài luận phải có độ dài tương đối (ít nhất 3-4 đoạn).
-2. TÔN TRỌNG NĂNG LƯỢNG BÀI: Bài ra ý nghĩa tích cực thì bám theo tích cực, bài tiêu cực thì nói tiêu cực. KHÔNG cố tình bóp méo thành drama bi đát nếu các lá bài đang mang năng lượng tốt.
-3. LUẬN GIẢI XÂU CHUỖI: Tuyệt đối KHÔNG liệt kê máy móc kiểu "Lá 1 là..., Lá 2 là...". Phải xâu chuỗi ý nghĩa các lá bài thành một mạch truyện logic, dùng hình ảnh bài để giải thích diễn biến sự việc.
-4. THỜI GIAN: CHỈ đưa ra mốc thời gian cụ thể (vd: 3 tuần nữa, cuối tháng) NẾU trong câu hỏi gốc khách có từ khóa hỏi về thời gian (khi nào, bao lâu...). Nếu khách KHÔNG hỏi, TUYỆT ĐỐI KHÔNG tự phán mốc thời gian.
-5. KHÔNG ký tự đặc biệt (*, #). KHÔNG gạch đầu dòng. Viết đoạn văn mượt.
-6. ${vibeStr}
-7. CẤM TUYỆT ĐỐI in ra quá trình suy nghĩ hoặc tự phân tích lệnh (kiểu "Checked"). CHỈ in ra lời thoại luận giải. Vào thẳng vấn đề ngay.
+NGUYÊN TẮC LUẬN GIẢI CHÍNH:
+1. TRỌNG TÂM: Trả lời trực tiếp câu hỏi. Khách hỏi gì đáp nấy, không tự lan man sang chủ đề khác.
+2. XÂU CHUỖI TỰ NHIÊN: Xem trải bài là một mạch truyện logic. CẤM liệt kê "Lá 1 là..., Lá 2 là...". Mọi lá bài đều phải góp phần vào kết luận.
+3. CHIỀU SÂU TÂM LÝ: Không chỉ dịch bài, hãy giải thích nguyên nhân gốc rễ, cảm xúc thật, nỗi sợ, hoặc điều khách đang che giấu/chưa nhận ra. Nhẹ nhàng chỉ ra nếu khách đang hiểu sai vấn đề.
+4. TÔN TRỌNG NĂNG LƯỢNG: Tích cực nói tích cực, tiêu cực nói tiêu cực. Không cố tẩy trắng màu hồng, cũng không tự vẽ drama. 
+5. NGÔN TỪ: Dùng cụm "năng lượng cho thấy...", "khả năng cao...". CHỈ đưa ra mốc thời gian cụ thể NẾU khách có hỏi (khi nào, bao giờ). Lời khuyên phải thực tế, cấm nói sáo rỗng kiểu "hãy tin vào vũ trụ".
+6. CẤM HIỂN THỊ: Quá trình suy nghĩ, reasoning, markdown, ký tự (*, #), gạch đầu dòng. Chỉ in ra lời thoại luận giải mượt mà như đang nói chuyện trực tiếp.
 
-CẤU TRÚC BÀI LUẬN GIẢI:
-- Đoạn 1 (Mở bài): Nhắc tên khách, dùng tone giọng Gen Z để nhận xét tổng quan về năng lượng của trải bài so với câu hỏi. 
-- Đoạn 2 (Phân tích chi tiết): Xâu chuỗi năng lượng các lá bài, bóc tách ngóc ngách vấn đề. Tại sao lại xảy ra chuyện này? Tâm lý khách đang thế nào? (VIẾT DÀI VÀ ĐÀO SÂU).
-- Đoạn 3 (Lời khuyên & Chốt hạ): Dựa vào lá bài cuối cùng hoặc tổng thể năng lượng, đưa ra hướng giải quyết thực tế và rõ ràng nhất.`;
-  }
+CẤU TRÚC BÀI LUẬN (Viết đủ ý, sâu sắc nhưng súc tích, ngắt dòng thoáng mắt để đọc trên điện thoại):
+- Phần 1: Chào ${clientName}. Nhận xét tổng quan năng lượng trải bài liên hệ ngay với câu hỏi.
+- Phần 2: Phân tích sâu. Xâu chuỗi diễn biến, nguyên nhân, và tâm lý các bên liên quan.
+- Phần 3: Xu hướng tiếp theo. (Chỉ nhắc thời gian nếu khách có hỏi).
+- Phần 4: Lời khuyên cụ thể áp dụng được ngay. Chốt lại tự nhiên.
+
+${vibeStr}`;
+}
 
   function typeEffectFast(element, text, callback) {
     clearInterval(typeWriter); element.innerHTML = ""; elements.readingFooter.style.display = 'flex'; let i = 0;
