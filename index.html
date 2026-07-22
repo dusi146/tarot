@@ -521,10 +521,15 @@
     .theme-toggle-container { transform: scale(0.65); top: 20px; right: 20px; }
     .guide-tooltip { width: 100%; max-height: 350px; padding: 24px;}
     .modal-card { padding: 40px 24px; border-radius: 28px;}
+    
+    /* Chỉnh sửa hiển thị Donate QR trên Mobile */
     .donation-wrapper { flex-direction: column; align-items: center; text-align: center; }
+    .qr-img { width: 180px !important; height: 180px !important; margin-bottom: 16px; }
   }
+
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
-/* SHOPEE AFFILIATE BUTTON */
+
+  /* SHOPEE AFFILIATE BUTTON */
   .shopee-glow-link {
     display: inline-block;
     background: linear-gradient(135deg, #ff6600, #ff8c00);
@@ -538,7 +543,6 @@
     transition: all 0.4s var(--ease-out-spring);
     white-space: nowrap;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    .qr-img { width: 180px; height: 180px; margin-bottom: 16px; }
   }
   .shopee-glow-link:hover {
     transform: translateY(-3px) scale(1.05);
@@ -1642,6 +1646,23 @@ YÊU CẦU ĐẶC BIỆT:
         
         totMemory.push({ role: "system", content: sysPrompt });
     }
+    
+    totMemory.push({ role: "user", content: q });
+
+    let botAns = "";
+    try {
+        console.log("Chat với Rót...");
+        botAns = await callOpenRouter("", true, totMemory);
+    } catch(ec) {
+         const tempTyping = document.getElementById("tempBotTyping");
+         if(tempTyping) { tempTyping.innerHTML = "<span style='color:#ff8888'>Sập mạng diện rộng rồi bồ ơi, đợi tí chat lại nha!</span>"; tempTyping.removeAttribute("id"); }
+         chatCount--; totMemory.pop(); 
+         elements.sendFollowUpBtn.disabled = false; elements.followUpInput.disabled = false; elements.sendFollowUpBtn.textContent = "Gửi"; elements.followUpInput.placeholder = "Nhập lại câu hỏi đi bồ...";
+         return;
+    }
+
+    totMemory.push({ role: "assistant", content: botAns });
+
     if (totMemory.length > 11) totMemory = [totMemory[0], ...totMemory.slice(totMemory.length - 10)];
 
     const tempTyping = document.getElementById("tempBotTyping"); if(tempTyping) tempTyping.remove();
