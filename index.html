@@ -1565,10 +1565,10 @@ CẤU TRÚC 3 ĐOẠN CHUẨN:
     const cardText = currentCards.map((c, i) => `Lá ${i+1}: ${c.name} (${c.reversed ? "Ngược" : "Xuôi"})`).join(", ");
 
     const selectedVibe = document.getElementById("vibeSelector").value;
-    let vibeStr = "- TONE GIỌNG: Dịu dàng, đồng cảm, chữa lành vết thương tâm hồn. An ủi khách hàng. Xưng hô ngọt ngào.";
-    if (selectedVibe === "tatnuoc") vibeStr = "- TONE GIỌNG: Thô nhưng thật, tạt gáo nước lạnh, hơi xéo xắt, châm biếm nhẹ để khách tỉnh ngộ. Đừng dông dài.";
-    if (selectedVibe === "quansu") vibeStr = "- TONE GIỌNG: Khách quan, sắc bén như một quân sư. Phân tích logic vấn đề, chỉ ra nguyên nhân và vạch rõ từng bước giải quyết.";
-    if (selectedVibe === "phansau") vibeStr = "- TONE GIỌNG: Sâu sắc, tâm lý. Phân tích cực kỳ chi tiết, xoáy mạnh vào những bí mật khách vừa kể. Làm cho khách cảm thấy rùng mình vì sự chuẩn xác.";
+    let vibeStr = "- TONE GIỌNG: Dịu dàng, đồng cảm, an ủi nhưng vẫn đưa ra lời khuyên thiết thực. Phân tích chi tiết, sâu sắc, xưng hô ngọt ngào.";
+    if (selectedVibe === "tatnuoc") vibeStr = "- TONE GIỌNG: Thẳng thắn, thô nhưng thật. NẾU bài xấu thì tạt gáo nước lạnh cho tỉnh, NẾU bài tốt thì công nhận thực tế, không dìm hàng vô cớ. Tuyệt đối không tiêu cực hóa vấn đề nếu bài đang mang năng lượng đẹp.";
+    if (selectedVibe === "quansu") vibeStr = "- TONE GIỌNG: Khách quan, sắc bén, logic như một quân sư. Phân tích rõ ngọn ngành và vạch ra từng bước hành động cụ thể.";
+    if (selectedVibe === "phansau") vibeStr = "- TONE GIỌNG: Sâu sắc, đậm chất tâm lý học. Phân tích cặn kẽ nguyên nhân gốc rễ, xoáy sâu vào ẩn khuất trong lòng khách.";
 
     let botName = "Ta Văn Rót (OpenRouter)";
     try {
