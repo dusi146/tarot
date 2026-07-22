@@ -39,50 +39,27 @@
 
   /* COLOR THEMES FOR VIBES */
   body.theme-chualanh {
-    --bg-base: #1c0e15;
-    --gold: #ffb6c1;
-    --cyan: #ff9ebd;
-    --purple: #e07a93;
-    --aura-1: rgba(224, 122, 147, 0.7);
-    --aura-2: rgba(255, 158, 189, 0.8);
+    --bg-base: #1c0e15; --gold: #ffb6c1; --cyan: #ff9ebd; --purple: #e07a93;
+    --aura-1: rgba(224, 122, 147, 0.7); --aura-2: rgba(255, 158, 189, 0.8);
   }
   body.theme-tatnuoc {
-    --bg-base: #060a12;
-    --gold: #a9c2f0;
-    --cyan: #8ab4f8;
-    --purple: #4a6fa5;
-    --aura-1: rgba(74, 111, 165, 0.7);
-    --aura-2: rgba(138, 180, 248, 0.8);
+    --bg-base: #060a12; --gold: #a9c2f0; --cyan: #8ab4f8; --purple: #4a6fa5;
+    --aura-1: rgba(74, 111, 165, 0.7); --aura-2: rgba(138, 180, 248, 0.8);
   }
   body.theme-quansu {
-    --bg-base: #08100b;
-    --gold: #d4af37;
-    --cyan: #a5d6a7;
-    --purple: #558b2f;
-    --aura-1: rgba(85, 139, 47, 0.7);
-    --aura-2: rgba(165, 214, 167, 0.8);
+    --bg-base: #08100b; --gold: #d4af37; --cyan: #a5d6a7; --purple: #558b2f;
+    --aura-1: rgba(85, 139, 47, 0.7); --aura-2: rgba(165, 214, 167, 0.8);
   }
   body.theme-phansau {
-    --bg-base: #05020a;
-    --gold: #cfa8ff;
-    --cyan: #b388eb;
-    --purple: #6a1b9a;
-    --aura-1: rgba(106, 27, 154, 0.7);
-    --aura-2: rgba(179, 136, 235, 0.8);
+    --bg-base: #05020a; --gold: #cfa8ff; --cyan: #b388eb; --purple: #6a1b9a;
+    --aura-1: rgba(106, 27, 154, 0.7); --aura-2: rgba(179, 136, 235, 0.8);
   }
 
   body.light-mode {
-    --bg-base: #e6e3f0;
-    --glass-bg: rgba(255, 255, 255, 0.55);
-    --glass-border: rgba(0, 0, 0, 0.06);
-    --text-main: #2d2654;
-    --text-muted: rgba(60, 55, 80, 0.7);
-    --gold: #b07d10;
-    --purple: #6a1b9a;
-    --cyan: #0277bd;
-    --aura-1: rgba(226, 194, 117, 0.9);
-    --aura-2: rgba(106, 27, 154, 0.8);
-    --aura-core: rgba(255, 255, 255, 0.95);
+    --bg-base: #e6e3f0; --glass-bg: rgba(255, 255, 255, 0.55); --glass-border: rgba(0, 0, 0, 0.06);
+    --text-main: #2d2654; --text-muted: rgba(60, 55, 80, 0.7); --gold: #b07d10;
+    --purple: #6a1b9a; --cyan: #0277bd; --aura-1: rgba(226, 194, 117, 0.9);
+    --aura-2: rgba(106, 27, 154, 0.8); --aura-core: rgba(255, 255, 255, 0.95);
   }
 
   /* RESET & BASE */
@@ -90,45 +67,26 @@
   ::selection { background: var(--purple-glow); color: #fff; }
   
   html, body { 
-    min-height: 100vh; 
-    font-family: 'Montserrat', sans-serif; 
-    background-color: var(--bg-base); 
-    color: var(--text-main); 
-    overflow-x: hidden; 
-    scroll-behavior: smooth; 
+    min-height: 100vh; font-family: 'Montserrat', sans-serif; 
+    background-color: var(--bg-base); color: var(--text-main); 
+    overflow-x: hidden; scroll-behavior: smooth; 
     transition: background-color 0.8s var(--ease-slow), color 0.8s var(--ease-slow);
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased;
   }
-  
   body.intro-active { overflow: hidden; height: 100vh; }
-
-  h1, h2, h3, h4, .serif-font, .spread-option .big, .card-info .name, .hold-core strong, .value, .guide-title, .intro-title { 
-    font-family: 'Cormorant Garamond', serif; 
-  }
+  h1, h2, h3, h4, .serif-font, .spread-option .big, .card-info .name, .hold-core strong, .value, .guide-title, .intro-title { font-family: 'Cormorant Garamond', serif; }
 
   /* TOP DONATE MARQUEE */
   .donate-marquee-container {
-    width: min(100% - 40px, var(--max-w));
-    margin: 0 auto 30px auto;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(226, 194, 117, 0.2);
-    border-radius: 12px;
-    color: var(--gold);
-    padding: 12px 0 12px 150px;
-    overflow: hidden;
-    position: relative;
-    z-index: 10;
-    display: none; 
-    align-items: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    width: min(100% - 40px, var(--max-w)); margin: 0 auto 30px auto; background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(226, 194, 117, 0.2); border-radius: 12px; color: var(--gold);
+    padding: 12px 0 12px 150px; overflow: hidden; position: relative; z-index: 10; display: none; 
+    align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   }
   body.light-mode .donate-marquee-container { background: rgba(255, 255, 255, 0.6); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
   .donate-label {
     position: absolute; left: 0; top: 0; bottom: 0; width: 150px;
-    background: linear-gradient(90deg, var(--bg-base) 80%, transparent);
-    padding: 0 10px 0 20px; z-index: 2; font-weight: 700; color: #fff;
-    display: flex; align-items: center; font-size: 14px; letter-spacing: 1px;
+    background: linear-gradient(90deg, var(--bg-base) 80%, transparent); padding: 0 10px 0 20px; z-index: 2; font-weight: 700; color: #fff; display: flex; align-items: center; font-size: 14px; letter-spacing: 1px;
   }
   body.light-mode .donate-label { background: linear-gradient(90deg, #e6e3f0 80%, transparent); color: var(--text-main); }
   .donate-marquee-content { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center; gap: 50px; width: max-content; animation: marquee 25s linear infinite; }
@@ -184,9 +142,22 @@
   .section-title h2 { font-size: 36px; color: var(--gold); text-shadow: 0 0 20px rgba(226, 194, 117, 0.2); font-weight: 500; display: inline-flex; align-items: center; gap: 20px; margin: 0; letter-spacing: 0.05em;}
   .section-title h2::before, .section-title h2::after { content: "✧"; font-size: 20px; opacity: 0.4; color: var(--cyan);}
 
-  /* FORM ELEMENTS */
+  /* FORM ELEMENTS & HIGHLIGHT ERROR */
   .setup-stack { display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 520px; margin: 0 auto; }
   .select-btn, .field input[type="text"], .gender-group, .dob-box, .year-box, .btn { height: 68px; border-radius: 18px; transition: all 0.4s var(--ease-smooth); }
+  
+  .highlight-error {
+    border-color: #ff4545 !important;
+    box-shadow: 0 0 15px rgba(255, 69, 69, 0.4), inset 0 0 8px rgba(255, 69, 69, 0.2) !important;
+    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
+
   .select-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 28px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border); color: var(--text-main); cursor: pointer; position: relative; box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 8px 20px rgba(0,0,0,0.15);}
   body.light-mode .select-btn, body.light-mode .field input[type="text"], body.light-mode .gender-group, body.light-mode .dob-box { background: rgba(255, 255, 255, 0.8); border-color: rgba(0,0,0,0.08); color: var(--text-main); box-shadow: 0 8px 20px rgba(0,0,0,0.03);}
   .select-btn:hover { border-color: var(--purple); background: rgba(142, 68, 173, 0.1); transform: translateY(-2px); box-shadow: 0 12px 30px rgba(142, 68, 173, 0.15); }
@@ -256,33 +227,36 @@
   @keyframes shineGradient { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
   .warn { font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 16px; font-style: italic; line-height: 1.6; opacity: 0.7; letter-spacing: 0.5px;}
 
-  /* RITUAL OVERLAY & HOLD */
+  /* RITUAL OVERLAY & HOLD (NÂNG CẤP) */
   .overlay { position: fixed; inset: 0; z-index: 100; background: radial-gradient(circle at center, rgba(5, 2, 15, 0.95), rgba(0, 0, 5, 0.98)); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.8s var(--ease-slow); }
   .overlay.show { opacity: 1; pointer-events: auto; }
   .ritual-box { text-align: center; max-width: 600px; width: 90%; transform: scale(0.9); opacity: 0; transition: transform 0.8s var(--ease-out-spring), opacity 0.8s; }
   .overlay.show .ritual-box { transform: scale(1); opacity: 1; }
   .ritual-head h3 { font-size: clamp(40px, 6vw, 60px); color: var(--gold); margin-bottom: 20px; font-weight: 500; text-shadow: 0 0 30px rgba(226, 194, 117, 0.3);}
   .ritual-head p { color: var(--text-muted); font-size: 17px; margin-bottom: 70px; line-height: 1.7;}
+  
   .hold-area { position: relative; width: 340px; height: 340px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; cursor: pointer; transition: transform 0.4s var(--ease-smooth); }
   .hold-area:active { transform: scale(0.95); }
-  .hold-aura { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, var(--aura-1) 0%, transparent 70%); filter: blur(20px); transition: opacity 0.3s, transform 0.1s linear; pointer-events: none; transform: scale(calc(1 + (var(--energy, 0) / 100) * 0.5)); opacity: calc(0.1 + (var(--energy, 0) / 100) * 0.7); }
-  .hold-aura-2 { position: absolute; inset: 20px; border-radius: 50%; background: radial-gradient(circle, var(--aura-2) 0%, transparent 70%); filter: blur(15px); transition: opacity 0.3s, transform 0.1s linear; pointer-events: none; transform: scale(calc(1 + (var(--energy, 0) / 100) * 0.8)); opacity: calc(0.05 + (var(--energy, 0) / 100) * 0.8); mix-blend-mode: screen; }
+  .hold-aura { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, var(--aura-1) 0%, transparent 70%); filter: blur(25px); transition: opacity 0.3s, transform 0.1s linear; pointer-events: none; transform: scale(calc(1 + (var(--energy, 0) / 100) * 0.5)); opacity: calc(0.3 + (var(--energy, 0) / 100) * 0.8); }
+  .hold-aura-2 { position: absolute; inset: 20px; border-radius: 50%; background: radial-gradient(circle, var(--aura-2) 0%, transparent 70%); filter: blur(10px); transition: opacity 0.3s, transform 0.1s linear; pointer-events: none; transform: scale(calc(1 + (var(--energy, 0) / 100) * 0.8)); opacity: calc(0.1 + (var(--energy, 0) / 100) * 0.9); mix-blend-mode: color-dodge; }
+  
   .magic-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%; opacity: calc(0.05 + (var(--energy, 0) / 100) * 0.95); transition: opacity 0.2s, transform 0.2s; pointer-events: none; }
-  .ring-1 { width: 260px; height: 260px; border: 2px dashed var(--aura-1); animation: spinLayer 15s linear infinite; }
-  .ring-2 { width: 290px; height: 290px; border: 3px double var(--aura-2); animation: spinLayer 10s linear infinite reverse; }
-  .ring-3 { width: 330px; height: 330px; border: 1px solid var(--gold); border-top-color: transparent; border-bottom-color: transparent; animation: spinLayer 20s linear infinite; filter: drop-shadow(0 0 8px var(--gold-glow)); opacity: calc((var(--energy, 0) / 100)); }
+  .ring-1 { width: 260px; height: 260px; border: 3px dashed var(--aura-1); filter: drop-shadow(0 0 10px var(--aura-1)); animation: spinLayer 15s linear infinite; }
+  .ring-2 { width: 290px; height: 290px; border: 4px double var(--aura-2); filter: drop-shadow(0 0 15px var(--aura-2)); animation: spinLayer 10s linear infinite reverse; }
+  .ring-3 { width: 330px; height: 330px; border: 2px solid var(--gold); border-top-color: transparent; border-bottom-color: transparent; filter: drop-shadow(0 0 20px var(--gold)); opacity: calc(0.2 + (var(--energy, 0) / 100)); animation: spinLayer 20s linear infinite; }
+  
   .hold-core { position: relative; z-index: 2; width: 200px; height: 200px; border-radius: 50%; background: transparent; border: 2px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.5s var(--ease-out-spring); overflow: hidden; box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 15px 40px rgba(0,0,0,0.6); }
   .hold-core::before { content: ''; position: absolute; inset: -50%; background: conic-gradient(from 0deg, transparent, var(--aura-1), var(--aura-2), transparent); animation: spinLayer 4s linear infinite; opacity: 0; transition: opacity 0.5s ease; }
   .hold-core::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; background: radial-gradient(circle at 50% 50%, var(--aura-core), var(--bg-base)); transition: all 0.5s ease; z-index: -1; }
   .hold-core strong { font-size: 32px; color: var(--text-main); margin-bottom: 6px; font-weight: 600; text-shadow: 0 4px 15px rgba(0,0,0,0.8); z-index: 2; transition: color 0.3s;}
   .hold-core span { font-size: 13px; color: var(--gold); letter-spacing: 4px; text-transform: uppercase; z-index: 2; transition: color 0.3s;}
   body.light-mode .hold-core strong { text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-  .hold-core.active { border-color: var(--aura-2); box-shadow: 0 0 calc(var(--energy, 0) * 1px) var(--aura-1), inset 0 0 calc(var(--energy, 0) * 0.5px) var(--aura-2); transform: scale(1.1); }
+  .hold-core.active { border-color: var(--aura-2); box-shadow: 0 0 calc(var(--energy, 0) * 1.5px) var(--aura-1), inset 0 0 calc(var(--energy, 0) * 1px) var(--aura-2); transform: scale(1.1); }
   .hold-core.active::before { opacity: 1; animation-duration: 1.5s; }
-  .hold-core.full-power { animation: pulseCore 0.6s ease-in-out infinite alternate; border-color: var(--gold); box-shadow: 0 0 80px var(--gold-glow), inset 0 0 60px var(--gold-glow); }
+  .hold-core.full-power { animation: pulseCoreMega 0.5s ease-in-out infinite alternate; border-color: #fff; box-shadow: 0 0 120px var(--gold), inset 0 0 80px var(--gold), 0 0 40px #fff; }
   .hold-core.full-power #holdTitle { color: var(--gold); text-shadow: 0 0 15px var(--gold); }
   .hold-core.full-power #holdSubtitle { color: #fff; text-shadow: 0 0 10px #fff;}
-  @keyframes pulseCore { 0% { transform: scale(1.1); } 100% { transform: scale(1.18); box-shadow: 0 0 100px var(--gold), inset 0 0 80px var(--gold); } }
+  @keyframes pulseCoreMega { 0% { transform: scale(1.1); filter: brightness(1); } 100% { transform: scale(1.25); filter: brightness(1.3); } }
   @keyframes spinLayer { 100% { transform: rotate(360deg); } }
   .hold-area, .hold-core, .hold-core * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: none; }
 
@@ -348,7 +322,7 @@
   .reject-checkbox .checkbox-wrapper label { --size: 50px; --shadow: calc(var(--size) * 0.07) calc(var(--size) * 0.1); position: relative; display: block; width: var(--size); height: var(--size); margin: 0 auto; background-color: #4158d0; background-image: linear-gradient(43deg, #4158d0 0%, #c850c0 46%, #ffcc70 100%); border-radius: 50%; box-shadow: 0 var(--shadow) rgba(200,80,192,0.4); cursor: pointer; transition: 0.3s var(--ease-out-spring); overflow: hidden; z-index: 1; }
   .reject-checkbox .checkbox-wrapper label:before { content: ""; position: absolute; top: 50%; right: 0; left: 0; width: calc(var(--size) * 0.7); height: calc(var(--size) * 0.7); margin: 0 auto; background-color: var(--bg-base); transform: translateY(-50%); border-radius: 50%; transition: 0.3s var(--ease-out-spring); }
   body.light-mode .reject-checkbox .checkbox-wrapper label:before { background-color: #fff; }
-  .reject-checkbox .checkbox-wrapper label:after { content: "i"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; font-weight: bold; color: #c850c0; font-family: 'Montserrat', sans-serif; transition: 0.2s opacity; pointer-events: none;}
+  .reject-checkbox .checkbox-wrapper label:after { content: "?"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; font-weight: bold; color: #c850c0; font-family: 'Montserrat', sans-serif; transition: 0.2s opacity; pointer-events: none;}
   .reject-checkbox .checkbox-wrapper label:hover { transform: scale(1.1); }
   .reject-checkbox .checkbox-wrapper label:hover:before { width: calc(var(--size) * 0.55); height: calc(var(--size) * 0.55); }
   .reject-checkbox .checkbox-wrapper label:active { transform: scale(0.9); }
@@ -559,8 +533,8 @@
       <div class="intro-eye"></div>
     </div>
     <div class="intro-text-wrap">
-      <h1 class="intro-title serif-font">VŨ TRỤ ĐANG GỌI</h1>
-      <p class="intro-subtitle">Kết nối tần số tâm thức</p>
+      <h1 class="intro-title serif-font">LẮNG NGHE TRỰC GIÁC</h1>
+      <p class="intro-subtitle">Kết nối với thông điệp bên trong</p>
     </div>
   </div>
 
@@ -570,8 +544,8 @@
 
   <div class="wrap">
     <section class="glass-panel hero">
-      <h1 class="serif-font">Nghi Thức Tarot</h1>
-      <p>"Vũ trụ sẽ thấu hiểu qua từng lá bài."</p>
+      <h1 class="serif-font">Chiêm Nghiệm Tarot</h1>
+      <p>"Thông điệp sẽ đến qua từng lá bài."</p>
     </section>
 
     <div class="donate-marquee-container" id="donateMarquee">
@@ -586,10 +560,15 @@
         </div>
 
         <div class="setup-stack">
+          <!-- Ô Nhập Tên -->
+          <div class="field">
+            <input id="nameInput" type="text" placeholder="Tên hoặc biệt danh của bồ..." autocomplete="off" />
+          </div>
+
           <button class="select-btn" id="openSpreadModal" type="button">
             <div class="label">Quy mô trải bài</div>
             <div class="value serif-font" id="selectedSpreadText" style="display:flex; align-items:center; gap:8px;">
-              3 lá <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              Chọn số lá <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </div>
           </button>
 
@@ -645,24 +624,24 @@
             <input id="questionInput" type="text" placeholder="Gửi gắm nỗi sầu của bạn vào đây..." autocomplete="off" />
           </div>
 
-          <button class="btn btn-primary" id="readyBtn" type="button">Tiến Hành Rút Bài</button>
-          <button class="btn btn-ghost" id="quickResetBtn" type="button">Thanh Tẩy Làm Lại</button>
+          <button class="btn btn-primary" id="readyBtn" type="button">Kết Nối Lật Bài</button>
+          <button class="btn btn-ghost" id="quickResetBtn" type="button">Đổi Câu Hỏi</button>
 
-          <div class="warn">Cung cấp đúng info để Ta Văn Rót soi tần số cho chuẩn nhé.</div>
+          <div class="warn">Cung cấp đúng info để Rót kết nối năng lượng cho chuẩn nhé.</div>
         </div>
 
         <section class="results" id="resultsSection">
           <div class="results-head">
             <div>
-              <h3 class="serif-font">Thông Điệp Vũ Trụ</h3>
-              <p id="resultSub">Chạm vào bài để lật nghiệp.</p>
+              <h3 class="serif-font">Thông Điệp Dành Cho Bồ</h3>
+              <p id="resultSub">Chạm vào bài để đón nhận thông điệp.</p>
             </div>
             <button class="btn btn-ghost" id="rerollBtn" type="button" style="width: auto; padding: 0 28px;">Rút Tụ Mới</button>
           </div>
 
           <div class="cards-grid" id="cardsGrid"></div>
 
-          <button class="btn btn-epic" id="revealAiBtn" style="display: none;">✧ Mở Khóa Lời Sấm Truyền ✧</button>
+          <button class="btn btn-epic" id="revealAiBtn" style="display: none;">✧ Giải Mã Trải Bài ✧</button>
         </section>
       </div>
     </section>
@@ -677,19 +656,19 @@
   <div class="modal" id="preChatModal">
     <div class="modal-card" style="max-width: 600px;">
       <div class="modal-head" style="margin-bottom: 20px;">
-        <h3 class="serif-font" style="color: var(--cyan); font-size: 32px; margin-bottom: 5px;">Thầy Rót Cần Hỏi Thêm</h3>
-        <p style="color: var(--text-muted); font-size: 14px;">Trả lời thành tâm để quẻ bói linh ứng nhất nhé.</p>
+        <h3 class="serif-font" style="color: var(--cyan); font-size: 32px; margin-bottom: 5px;">Rót Cần Hỏi Thêm</h3>
+        <p style="color: var(--text-muted); font-size: 14px;">Trả lời chân thật để quẻ bài liên kết tốt nhất nha.</p>
       </div>
       
       <div class="follow-up-section" style="margin-top: 0; padding-top: 0; border: none;">
           <div id="preChatHistory" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;"></div>
           
           <div class="chat-input-wrapper" id="preChatInputArea" style="display: none;">
-            <input type="text" id="preChatInput" placeholder="Kể cho Thầy nghe..." autocomplete="off" />
+            <input type="text" id="preChatInput" placeholder="Kể cho tui nghe..." autocomplete="off" />
             <button id="preChatSendBtn" class="btn btn-primary" style="width: auto;">Gửi</button>
           </div>
 
-          <button class="btn btn-epic" id="preChatProceedBtn" style="display: none; width: 100%; margin: 20px 0 0 0;">Tiến Hành Tụ Khí</button>
+          <button class="btn btn-epic" id="preChatProceedBtn" style="display: none; width: 100%; margin: 20px 0 0 0;">Tiếp Tục Lật Bài</button>
       </div>
     </div>
   </div>
@@ -698,7 +677,7 @@
     <div class="ritual-box">
       <div class="ritual-head">
         <h3 class="serif-font">Nhắm Mắt Lại</h3>
-        <p>Tập trung năng lượng vào câu hỏi của bạn.<br>Nhấn giữ tụ khí, thả tay ra để giải nghiệp.</p>
+        <p>Tập trung ý niệm vào câu hỏi của bạn.<br>Nhấn giữ để kết nối, thả tay ra để nhận thông điệp.</p>
       </div>
       <div class="hold-area" id="holdArea">
         <div class="hold-aura"></div>
@@ -708,7 +687,7 @@
         <div class="magic-ring ring-3"></div>
         <div class="hold-core" id="holdCore">
           <strong id="holdTitle">Chạm & Giữ</strong>
-          <span id="holdSubtitle">Tụ Năng Lượng</span>
+          <span id="holdSubtitle">Nhắm Mắt Ý Niệm</span>
         </div>
       </div>
     </div>
@@ -719,12 +698,15 @@
       <div class="modal-head">
         <div style="display: flex; align-items: center; gap: 16px;">
           <h3 class="serif-font" style="font-size: clamp(24px, 5vw, 36px); color: var(--gold); margin: 0;">Chọn số lượng bài</h3>
-          <div class="reject-checkbox guide-toggle-wrap">
-            <div class="checkbox-wrapper">
-              <input type="checkbox" id="guideToggleBtn" />
-              <label for="guideToggleBtn" title="Xem Cẩm Nang">
-                <div class="tick_mark"><div class="cross"></div></div>
-              </label>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <span style="font-size: 13px; color: var(--cyan); font-style: italic; opacity: 0.9; animation: pulseGlow 2s infinite;">Mẹo trải bài 👉</span>
+            <div class="reject-checkbox guide-toggle-wrap">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="guideToggleBtn" />
+                <label for="guideToggleBtn" title="Xem Cẩm Nang">
+                  <div class="tick_mark"><div class="cross"></div></div>
+                </label>
+              </div>
             </div>
           </div>
         </div>
@@ -732,15 +714,15 @@
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
         <div id="guideTooltip" class="guide-tooltip">
-           <div class="guide-title serif-font">Cẩm Nang Trải Bài</div>
-           <div class="guide-item"><strong>1 Lá (Thức Tỉnh)</strong>Hỏi nhanh Có/Không hoặc xin 1 lời khuyên tức thời.</div>
-           <div class="guide-item"><strong>2 Lá (Ngã Rẽ)</strong>Đứng giữa 2 lựa chọn hoặc soi chiếu mối quan hệ.</div>
-           <div class="guide-item"><strong>3 Lá (Thời Gian)</strong>Quá khứ - Hiện tại - Tương lai. Tụ bài quốc dân.</div>
-           <div class="guide-item"><strong>4 Lá (La Bàn)</strong>Vấn đề - Rào cản - Lời khuyên - Kết quả.</div>
-           <div class="guide-item"><strong>5 Lá (Tiềm Thức)</strong>Mổ xẻ tâm lý, tìm ra nguyên nhân sâu xa.</div>
-           <div class="guide-item"><strong>7 Lá (Móng Ngựa)</strong>Dự đoán chi tiết biến động của một sự kiện.</div>
-           <div class="guide-item"><strong>10 Lá (Celtic Cross)</strong>Giải mã toàn diện một biến cố lớn trong đời.</div>
-           <div class="guide-item"><strong>12 Lá (Hoàng Đạo)</strong>Xem tổng quan vận hạn 12 tháng/12 khía cạnh.</div>
+           <div class="guide-title serif-font">Mẹo Chọn Tụ</div>
+           <div class="guide-item"><strong>1 Lá (Chốt nhanh)</strong>Hỏi nhanh đáp gọn, cần 1 lời khuyên hoặc chốt Có/Không ngay.</div>
+           <div class="guide-item"><strong>2 Lá (Giải quyết)</strong>Lá 1: Vấn đề hiện tại / Lá 2: Hướng giải quyết.</div>
+           <div class="guide-item"><strong>3 Lá (Dòng thời gian)</strong>Quá khứ - Hiện tại - Tương lai. Dễ dùng nhất.</div>
+           <div class="guide-item"><strong>4 Lá (Gỡ rối)</strong>Vấn đề - Rào cản - Lời khuyên - Kết quả.</div>
+           <div class="guide-item"><strong>5 Lá (Mổ xẻ tâm lý)</strong>Hiện tại - Kỳ vọng - Nỗi sợ - Lời khuyên - Kết quả.</div>
+           <div class="guide-item"><strong>7 Lá (Móng Ngựa)</strong>Đào sâu diễn biến của 1 sự kiện từ đầu tới cuối.</div>
+           <div class="guide-item"><strong>10 Lá (Celtic Cross)</strong>Chỉ dùng khi có biến cố lớn, phân tích toàn diện.</div>
+           <div class="guide-item"><strong>12 Lá (Tổng quan)</strong>Xem vận hạn 12 tháng tới hoặc 12 khía cạnh cuộc sống.</div>
         </div>
       </div>
       <div class="spread-grid" id="spreadGrid"></div>
@@ -781,8 +763,8 @@
   <div class="reading-modal" id="aiReadingModal">
     <div class="reading-card">
       <div class="reading-head">
-        <h4 class="serif-font">Lời Sấm Truyền</h4>
-        <p>Ta Văn Rót đang luận giải nghiệp</p>
+        <h4 class="serif-font">Giải Mã Trải Bài</h4>
+        <p>Tui đang luận giải thông điệp</p>
       </div>
       
       <div class="reading-content" id="readingContent"></div>
@@ -806,7 +788,7 @@
       <div id="donationBlock" class="donation-wrapper" style="display: none;">
         <img src="images/bank.png" alt="QR Donate" class="qr-img" />
         <div class="donation-text">
-          <p><strong>Lưu ý:</strong> Trải bài chỉ mang tính chất tham khảo sự chuẩn xác cần dựa vào năng lượng của bạn với tarot. Tương lai nằm trong tay bạn, đừng quá tin tưởng vào bất cứ thứ gì trên đời ngoài chính bản thân của mình mà hãy luôn tự quyết định cuộc đời mình nhé!</p>
+          <p><strong>Lưu ý:</strong> Trải bài chỉ mang tính chất tham khảo sự chuẩn xác cần dựa vào trực giác của bạn với tarot. Tương lai nằm trong tay bạn, đừng quá tin tưởng vào bất cứ thứ gì trên đời ngoài chính bản thân của mình mà hãy luôn tự quyết định cuộc đời mình nhé!</p>
           <p style="margin-top: 8px;">💖 Nếu thấy thông điệp ý nghĩa, bạn có thể ủng hộ Rót 1 ít lúa nghen 💖</p>
         </div>
       </div>
@@ -876,7 +858,7 @@
     { file: "Cups01.png", name: "Ace of Cups" }, { file: "Cups02.png", name: "Two of Cups" }, { file: "Cups03.png", name: "Three of Cups" }
   ];
 
-  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyd9DwjNk9n6YEwOAuVm-Mz63lgq_f1M2sZqWmNGtvRyxE_UosFwQMHr5fd7KW-I6Lp/exec';
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyAuUv2_5kIjR7fYPL5m6Xzi2YjSLaobrNTVw1k9zpql-2R6ErwlZ9wFdGiq8oXFjtP/exec';
 
   async function fetchTopDonates() {
     try {
@@ -918,7 +900,6 @@
           const selectedValue = item.dataset.value;
           vibeSelector.value = selectedValue;
           
-          // Lấy text và icon hiển thị
           const fullText = item.textContent.trim();
           const textOnly = fullText.split('(')[0].trim();
           vibeVal.innerHTML = `${textOnly} <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
@@ -929,7 +910,6 @@
           vibeList.classList.remove('show');
           vibeBtn.style.borderColor = '';
 
-          // Áp dụng class theme lên body
           document.body.className = document.body.className.replace(/\btheme-\S+/g, '');
           if (selectedValue) {
               document.body.classList.add(`theme-${selectedValue}`);
@@ -951,7 +931,18 @@
   const fullDeck = [...deck.slice(0,22), ...minorCards];
 
   const spreadOptions = [1, 2, 3, 4, 5, 7, 10, 12];
-  let selectedSpread = 3;
+  const spreadMeanings = {
+    1: "1 lá (Trả lời thẳng vấn đề, kết luận nhanh).",
+    2: "2 lá (Lá 1: Hiện tại/Vấn đề, Lá 2: Hướng giải quyết/Kết quả).",
+    3: "3 lá (Lá 1: Quá khứ, Lá 2: Hiện tại, Lá 3: Tương lai).",
+    4: "4 lá (Lá 1: Vấn đề, Lá 2: Rào cản, Lá 3: Lời khuyên, Lá 4: Kết quả).",
+    5: "5 lá (Lá 1: Hiện tại, Lá 2: Kỳ vọng, Lá 3: Nỗi sợ, Lá 4: Lời khuyên, Lá 5: Kết quả).",
+    7: "7 lá (Phân tích sâu diễn biến sự kiện từ nguyên nhân đến kết quả).",
+    10: "10 lá (Phân tích toàn diện mọi khía cạnh của vấn đề).",
+    12: "12 lá (Tổng quan vận hạn thời gian tới)."
+  };
+
+  let selectedSpread = null;
   let currentQuestion = "";
   let currentCards = [];
   
@@ -972,7 +963,7 @@
   let totMemory = [];
   let accumulatedQ = "";
   let accumulatedA = "";
-  let preChatContext = ""; // Biến lưu trí nhớ cho chế độ phân tích sâu
+  let preChatContext = ""; 
 
   const elements = {
     spreadModal: document.getElementById("spreadModal"), spreadGrid: document.getElementById("spreadGrid"),
@@ -1026,25 +1017,42 @@
   const urlParams = new URLSearchParams(window.location.search);
   const trafficSource = urlParams.get('ref') || 'Trực tiếp / Không rõ';
 
-  function trackUsage(question, conclusion, status, solver) {
+  function trackUsage(conclusion, status, solver) {
     try {
       const dobStr = (dobState.day && dobState.month && dobState.year) ? `${dobState.day}/${dobState.month}/${dobState.year}` : "Chưa chọn";
       const selectedGenderBtn = document.querySelector('input[name="gender"]:checked');
       const rawGender = selectedGenderBtn ? selectedGenderBtn.value : "Chưa chọn";
       const rawVibe = document.getElementById("vibeSelector").value || "Chưa chọn";
+      const nameVal = document.getElementById("nameInput").value.trim() || "Khách vô danh";
+      const spreadVal = selectedSpread ? selectedSpread + " lá" : "Chưa chọn";
 
       sessionTime = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
-      const payload = { action: "log_reading", time: sessionTime, ip: userIP, question: question, dob: dobStr, gender: rawGender, conclusion: conclusion, status: status, solver: solver, vibe: rawVibe, source: trafficSource };
+      const payload = { 
+        action: "log_reading", 
+        time: sessionTime, 
+        ip: userIP, 
+        name: nameVal,
+        question: currentQuestion, 
+        dob: dobStr, 
+        zodiac: userZodiac || "Chưa rõ",
+        gender: rawGender, 
+        spread: spreadVal,
+        conclusion: conclusion, 
+        status: status, 
+        solver: solver, 
+        vibe: rawVibe, 
+        source: trafficSource 
+      };
       fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     } catch (e) { console.log("Không tracking được"); }
   }
 
   const ratingNotes = {
-    1: ["Chê mạnh, bói như điêu", "Đọc xong cười khẩy", "Hông hiểu gì luôn", "Ảo ma Canada", "Thầy điêu toa"],
+    1: ["Chê mạnh, bói như điêu", "Đọc xong cười khẩy", "Hông hiểu gì luôn", "Ảo ma Canada", "Đọc linh tinh"],
     2: ["Cũng tàm tạm", "Trúng được một chút", "Hơi chung chung", "Nghe cho vui tai", "Cần cố gắng thêm"],
-    3: ["Khá ổn áp", "Phân tích có lý", "Đúng trọng tâm phết", "Cũng có tí năng lượng", "Tạm tin Thầy lần này"],
+    3: ["Khá ổn áp", "Phân tích có lý", "Đúng trọng tâm phết", "Cũng có tí năng lượng", "Tạm tin lần này"],
     4: ["Hay nha, rất cuốn", "Sâu sắc đấy", "Gãi đúng chỗ ngứa", "Quá là hợp vibe", "Nghe xong thấy nhẹ lòng"],
-    5: ["Tôi vừa có trải nghiệm rùng mình", "Nổi da gà vì quá chuẩn", "Sợ hãi sự chính xác này", "Như đi guốc trong bụng", "Chuẩn không cần chỉnh"]
+    5: ["Trải nghiệm rùng mình", "Nổi da gà vì quá chuẩn", "Sợ hãi sự chính xác này", "Như đi guốc trong bụng", "Chuẩn không cần chỉnh"]
   };
 
   const ratingBtns = document.querySelectorAll('.rating-btn');
@@ -1204,7 +1212,9 @@
   renderCalendar();
 
   elements.closeSpreadModal.onclick = elements.modalDoneBtn.onclick = () => {
-    elements.selectedSpreadText.innerHTML = `${selectedSpread} lá <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+    if(selectedSpread) {
+      elements.selectedSpreadText.innerHTML = `${selectedSpread} lá <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+    }
     elements.spreadModal.classList.remove("show");
     elements.guideTooltip.classList.remove('show');
     elements.guideToggleBtn.checked = false;
@@ -1281,13 +1291,32 @@
       return data.choices[0].message.content;
   }
 
-  // XỬ LÝ NÚT "TIẾN HÀNH RÚT BÀI"
+  // XỬ LÝ NÚT "KẾT NỐI LẬT BÀI"
   elements.readyBtn.onclick = async () => {
-    const selectedVibe = document.getElementById("vibeSelector").value;
-    if (!selectedVibe) return toastMsg("Bồ quên chọn Tone Giọng kìa!");
+    // Xóa lỗi cũ
+    document.querySelectorAll('.highlight-error').forEach(el => el.classList.remove('highlight-error'));
+    let hasError = false;
 
+    const nameInput = document.getElementById("nameInput");
+    const nameVal = nameInput.value.trim();
+    const selectedVibe = document.getElementById("vibeSelector").value;
     currentQuestion = elements.questionInput.value.trim();
-    if (currentQuestion.length < 5) return toastMsg("Viết câu hỏi rõ ràng có tâm xíu đi.");
+    const genderChecked = document.querySelector('input[name="gender"]:checked');
+
+    if (!nameVal) { nameInput.classList.add('highlight-error'); hasError = true; }
+    if (!selectedSpread) { elements.openSpreadModal.classList.add('highlight-error'); hasError = true; }
+    if (!selectedVibe) { document.getElementById("vibeBtn").classList.add('highlight-error'); hasError = true; }
+    if (!dobState.day || !dobState.month || !dobState.year) { dobElements.btn.parentNode.classList.add('highlight-error'); hasError = true; }
+    if (!genderChecked) { document.querySelector('.gender-group').classList.add('highlight-error'); hasError = true; }
+    if (currentQuestion.length < 5) { elements.questionInput.classList.add('highlight-error'); hasError = true; }
+
+    // Gắn sự kiện xóa lỗi khi thao tác lại
+    document.querySelectorAll('.highlight-error').forEach(el => {
+      el.addEventListener('click', () => el.classList.remove('highlight-error'), {once: true});
+      el.addEventListener('input', () => el.classList.remove('highlight-error'), {once: true});
+    });
+
+    if (hasError) return toastMsg("Điền đủ thông tin để kết nối đi bồ ơi!");
 
     elements.resultsSection.classList.remove("show"); 
     elements.revealAiBtn.style.display = "none";
@@ -1299,19 +1328,19 @@
     // Nếu chọn chế độ PHÂN TÍCH SÂU
     if (selectedVibe === "phansau") {
         elements.preChatModal.classList.add("show");
-        elements.preChatHistory.innerHTML = `<div class="chat-bubble bot" id="preTempTyping">Thầy đang nhẩm câu hỏi... <span class="chat-typing">chờ tí</span></div>`;
+        elements.preChatHistory.innerHTML = `<div class="chat-bubble bot" id="preTempTyping">Tui đang nhẩm câu hỏi... <span class="chat-typing">chờ tí</span></div>`;
         elements.preChatInputArea.style.display = "none";
         elements.preChatProceedBtn.style.display = "none";
         
         try {
-            const probePrompt = `Khách vừa hỏi: "${currentQuestion}". Đóng vai Thầy bói Tarot (Ta Văn Rót). Hãy hỏi lại 2-3 câu ngắn gọn để đào sâu vấn đề tâm lý, hoàn cảnh của khách. Gộp vào 1 tin nhắn duy nhất. Giọng điệu huyền bí, thấu hiểu. KHÔNG dùng ký tự đặc biệt (*, #). Trả lời thẳng vào câu hỏi, không dài dòng.`;
+            const probePrompt = `Khách (tên: ${nameVal}) vừa hỏi: "${currentQuestion}". Đóng vai bạn tâm giao Tarot (Ta Văn Rót). Hãy hỏi lại 1-2 câu ngắn gọn để đào sâu vấn đề tâm lý, hoàn cảnh của ${nameVal}. Gộp vào 1 tin nhắn. Giọng điệu vui vẻ, trêu chọc, tò mò nhưng hỏi xoáy trúng trọng tâm. Xưng hô: Tui - ${nameVal} (hoặc bồ). KHÔNG dùng ký tự đặc biệt (*, #). Trả lời thẳng vào câu hỏi, không chào hỏi dài dòng.`;
             const probeQuestion = await callOpenRouter(probePrompt);
             
             elements.preChatHistory.innerHTML = `<div class="chat-bubble bot">${probeQuestion}</div>`;
             elements.preChatInputArea.style.display = "flex";
             window.botProbeQuestion = probeQuestion;
         } catch (e) {
-            elements.preChatHistory.innerHTML = `<div class="chat-bubble bot" style="color:#ff8888">Thầy đang bận đi vệ sinh, không tiện hỏi nhiều. Bồ cứ nhập chi tiết hoàn cảnh vào ô dưới rồi gửi luôn nhé!</div>`;
+            elements.preChatHistory.innerHTML = `<div class="chat-bubble bot" style="color:#ff8888">Sóng vũ trụ bị nhiễu. Bồ cứ nhập thêm chi tiết hoàn cảnh vào ô dưới rồi gửi luôn nhé!</div>`;
             elements.preChatInputArea.style.display = "flex";
             window.botProbeQuestion = "Khách tự bổ sung thông tin do lỗi mạng.";
         }
@@ -1325,13 +1354,13 @@
   // LOGIC NÚT GỬI CỦA PHÂN TÍCH SÂU
   elements.preChatSendBtn.onclick = () => {
       const ans = elements.preChatInput.value.trim();
-      if (ans.length < 3) return toastMsg("Viết dài ra xíu đi!");
+      if (ans.length < 3) return toastMsg("Viết chi tiết ra xíu đi!");
 
       elements.preChatHistory.innerHTML += `<div class="chat-bubble user">${ans}</div>`;
-      preChatContext = `Khách hỏi ban đầu: ${currentQuestion}\nThầy đã hỏi thêm: ${window.botProbeQuestion}\nKhách trả lời thêm: ${ans}`;
+      preChatContext = `Khách hỏi ban đầu: ${currentQuestion}\nRót đã hỏi thêm: ${window.botProbeQuestion}\nKhách trả lời thêm: ${ans}`;
       
       elements.preChatInputArea.style.display = "none";
-      const readyMsg = "Vũ trụ đã ghi nhận dữ kiện... Thầy Rót đã sẵn sàng lật bài!";
+      const readyMsg = "Trực giác đã ghi nhận... Tui đã sẵn sàng lật bài!";
       elements.preChatHistory.innerHTML += `<div class="chat-bubble bot" style="color: var(--gold); border-color: var(--gold);">${readyMsg}</div>`;
       
       elements.preChatProceedBtn.style.display = "block";
@@ -1360,7 +1389,7 @@
   function startShuffle() {
     isHolding = true; 
     elements.holdCore.classList.add("active");
-    elements.holdTitle.textContent = "Đang Tụ Khí...";
+    elements.holdTitle.textContent = "Đang Tập Trung...";
     elements.holdSubtitle.textContent = "Giữ yên tay";
     window.preloadedCards = drawCards(selectedSpread);
     window.preloadedCards.forEach(card => { const img = new Image(); img.src = BASE_PATH + card.file; });
@@ -1389,7 +1418,7 @@
         elements.overlay.classList.remove("show");
         holdProgress = 0;
         elements.holdTitle.textContent = "Chạm & Giữ";
-        elements.holdSubtitle.textContent = "Tụ Năng Lượng";
+        elements.holdSubtitle.textContent = "Nhắm Mắt Ý Niệm";
         currentCards = window.preloadedCards || drawCards(selectedSpread);
         renderCards(currentCards);
     } else {
@@ -1397,8 +1426,8 @@
         elements.holdArea.style.setProperty("--energy", "0");
         elements.holdCore.classList.remove("active", "full-power");
         elements.holdTitle.textContent = "Chạm & Giữ";
-        elements.holdSubtitle.textContent = "Tụ Năng Lượng";
-        toastMsg("Tụ khí chưa xong đã nhả tay! Làm lại đi!");
+        elements.holdSubtitle.textContent = "Nhắm Mắt Ý Niệm";
+        toastMsg("Chưa kết nối xong đã nhả tay! Làm lại đi bồ!");
     }
   }
 
@@ -1446,27 +1475,30 @@
 
   elements.revealAiBtn.onclick = () => { elements.aiReadingModal.classList.add("show"); if (!aiReadingFetched) startUltimateReading(); };
 
-  function getDynamicPrompt(botName, vibeStr, genderStr, dobParam, zodiacStr, xungHo, cardText) {
+  function getDynamicPrompt(botName, vibeStr, genderStr, dobParam, zodiacStr, xungHo, cardText, clientName) {
       const currentTimeVN = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
-      const deepContextPrompt = preChatContext ? `\n[THÔNG TIN BÍ MẬT KHÁCH VỪA KHAI BÁO (BẮT BUỘC DÙNG ĐỂ GIẢI BÀI)]:\n${preChatContext}\n` : "";
+      const spreadContext = spreadMeanings[selectedSpread] || "Quy mô tùy chỉnh.";
+      const deepContextPrompt = preChatContext ? `\n[THÔNG TIN BÍ MẬT KHÁCH VỪA KHAI BÁO]:\n${preChatContext}\n` : "";
       
-      return `[QUAN TRỌNG: Trải bài Tarot giải trí, thao túng tâm lý, tự nhiên 100%]
+      return `[QUAN TRỌNG: Trải bài Tarot giải trí tâm lý, tự nhiên 100%]
 Đóng vai "${botName}", Tarot Reader Gen Z sinh năm 2006.
 Thời gian hiện tại: ${currentTimeVN}.
-Khách hàng: ${genderStr}, ${dobParam} ${zodiacStr}.
+Khách hàng tên là: "${clientName}". ${genderStr}, ${dobParam} ${zodiacStr}.
 ${xungHo}${deepContextPrompt}
+Quy mô trải bài: ${spreadContext}
 Hỏi: "${currentQuestion}". 
 Rút được: ${cardText}.
 
 YÊU CẦU ĐẶC BIỆT:
-1. THỜI GIAN: Nếu khách hỏi "bao giờ, khi nào, bao lâu", BẮT BUỘC chốt đại 1 mốc thời gian cụ thể (vd: 3 tuần nữa, cuối tháng 10, sang năm).
-2. KHÔNG ký tự đặc biệt (*, #). KHÔNG gạch đầu dòng. Viết đoạn văn mượt.
-3. ${vibeStr}
-4. CẤM TUYỆT ĐỐI in ra quá trình suy nghĩ hoặc tự kiểm tra điều kiện (kiểu "Checked"). CHỈ in ra lời thoại của thầy bói. Vào thẳng vấn đề ngay.
+1. LUẬN GIẢI CHUẨN FORM: Phân tích Ý NGHĨA CỦA TỪNG LÁ BÀI khớp đúng với vị trí của nó trong "Quy mô trải bài" ở trên.
+2. THỜI GIAN: Nếu khách hỏi "bao giờ, khi nào, bao lâu", BẮT BUỘC chốt đại 1 mốc thời gian cụ thể (vd: 3 tuần nữa, cuối tháng 10, sang năm).
+3. KHÔNG ký tự đặc biệt (*, #). KHÔNG gạch đầu dòng. Viết đoạn văn mượt. Nhớ gọi tên khách ("${clientName}").
+4. ${vibeStr}
+5. CẤM TUYỆT ĐỐI in ra quá trình suy nghĩ hoặc tự kiểm tra điều kiện (kiểu "Checked"). CHỈ in ra lời thoại luận giải. Vào thẳng vấn đề ngay.
 
 CẤU TRÚC 3 ĐOẠN CHUẨN:
-- Đoạn 1 (Phá băng): Trêu đùa, cợt nhả hoặc khịa nhẹ khách. CẤM chào kiểu văn mẫu.
-- Đoạn 2 (Đâm trúng tim đen): Lật mặt nghiêm túc. Phân tích thực tế, đọc vị tâm lý.
+- Đoạn 1 (Phá băng): Nhắc tên khách, trêu đùa, cợt nhả hoặc khịa nhẹ khách. CẤM chào kiểu văn mẫu.
+- Đoạn 2 (Đâm trúng tim đen): Lật mặt nghiêm túc. Phân tích thực tế, đọc vị tâm lý từng lá bài theo đúng vị trí.
 - Đoạn 3 (Chốt): 1 câu chốt hạ mang tính phán quyết.`;
   }
 
@@ -1481,10 +1513,10 @@ CẤU TRÚC 3 ĐOẠN CHUẨN:
 
     elements.readingContent.innerHTML = `<div class="loading-wrapper" style="flex-direction: column; gap: 25px;">
         <div class="eye-lid"><div class="eye"><div class="cornea"><div class="white-pupil"></div></div></div></div>
-        <div id="loadingText" style="color: var(--cyan); font-style: italic; font-weight: 500; font-size: 16px; letter-spacing: 1px;">Đang kết nối tần số...</div>
+        <div id="loadingText" style="color: var(--cyan); font-style: italic; font-weight: 500; font-size: 16px; letter-spacing: 1px;">Đang cảm nhận năng lượng...</div>
     </div>`;
     
-    const loadingMsgs = ["Đang xào bài...", "Đang kết nối tần số tình duyên...", "Vũ trụ đang gửi thông điệp...", "Thầy Rót đang soi nghiệp..."];
+    const loadingMsgs = ["Đang liên kết các lá bài...", "Vũ trụ đang gửi thông điệp...", "Rót đang luận giải...", "Đang kết nối trực giác..."];
     let lIdx = 0;
     let loadInt = setInterval(() => { lIdx = (lIdx + 1) % loadingMsgs.length; let txtEl = document.getElementById("loadingText"); if (txtEl) txtEl.innerText = loadingMsgs[lIdx]; }, 2500);
 
@@ -1494,6 +1526,7 @@ CẤU TRÚC 3 ĐOẠN CHUẨN:
     const rawGender = selectedGenderBtn ? selectedGenderBtn.value : "";
     const genderStr = rawGender ? `Giới tính: ${rawGender}` : "Không rõ giới tính";
     const zodiacStr = userZodiac ? `(${userZodiac})` : "";
+    const nameVal = document.getElementById("nameInput").value.trim() || "Khách";
     
     let xungHo = "";
     if (dobState.year) {
@@ -1508,23 +1541,23 @@ CẤU TRÚC 3 ĐOẠN CHUẨN:
     let vibeStr = "- TONE GIỌNG: Dịu dàng, đồng cảm, chữa lành vết thương tâm hồn. An ủi khách hàng. Xưng hô ngọt ngào.";
     if (selectedVibe === "tatnuoc") vibeStr = "- TONE GIỌNG: Thô nhưng thật, tạt gáo nước lạnh, hơi xéo xắt, châm biếm nhẹ để khách tỉnh ngộ. Đừng dông dài.";
     if (selectedVibe === "quansu") vibeStr = "- TONE GIỌNG: Khách quan, sắc bén như một quân sư. Phân tích logic vấn đề, chỉ ra nguyên nhân và vạch rõ từng bước giải quyết.";
-    if (selectedVibe === "phansau") vibeStr = "- TONE GIỌNG: Huyền bí, thấu tận tâm can. Phân tích cực kỳ sâu sắc, xoáy mạnh vào những bí mật khách vừa kể. Làm cho khách cảm thấy rùng mình vì sự chuẩn xác.";
+    if (selectedVibe === "phansau") vibeStr = "- TONE GIỌNG: Sâu sắc, tâm lý. Phân tích cực kỳ chi tiết, xoáy mạnh vào những bí mật khách vừa kể. Làm cho khách cảm thấy rùng mình vì sự chuẩn xác.";
 
     let botName = "Ta Văn Rót (OpenRouter)";
     try {
-        console.log("Đang gọi Thầy Rót...");
-        aiReadingText = await callOpenRouter(getDynamicPrompt("Ta Văn Rót", vibeStr, genderStr, dobParam, zodiacStr, xungHo, cardText));
+        console.log("Đang gọi Rót...");
+        aiReadingText = await callOpenRouter(getDynamicPrompt("Ta Văn Rót", vibeStr, genderStr, dobParam, zodiacStr, xungHo, cardText, nameVal));
     } catch (e) {
-        console.log("Thầy Rót sập mạng!");
+        console.log("Rót sập mạng!");
         clearInterval(loadInt);
-        elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Nhiễu loạn sóng vũ trụ. Ta Văn Rót đang bận đi vệ sinh rồi. Tải lại trang đi bồ!</span>";
-        trackUsage(currentQuestion, "Lỗi API không ra bài", "Thất bại", "None");
+        elements.readingContent.innerHTML = "<span style='color: #ff8888;'>Nhiễu loạn sóng vũ trụ. Rót đang bận đi vệ sinh rồi. Tải lại trang đi bồ!</span>";
+        trackUsage("Lỗi API không ra bài", "Thất bại", "None");
         return;
     }
 
     clearInterval(loadInt);
     const conclusion = aiReadingText.trim().split('\n').filter(line => line.trim() !== '').pop();
-    trackUsage(currentQuestion, conclusion, "Thành công", botName);
+    trackUsage(conclusion, "Thành công", botName);
 
     typeEffectFast(elements.readingContent, aiReadingText, () => {
         elements.donationBlock.style.display = 'flex';
@@ -1536,11 +1569,11 @@ CẤU TRÚC 3 ĐOẠN CHUẨN:
   // LOGIC FOLLOW UP CHAT CÓ GHI NHỚ NGỮ CẢNH SÂU
   elements.sendFollowUpBtn.onclick = async () => {
     const q = elements.followUpInput.value.trim();
-    if (q.length < 3) return toastMsg("Hỏi cụt lủn vậy bồ? Nhập dài ra xíu.");
+    if (q.length < 3) return toastMsg("Hỏi cụt lủn vậy bồ? Nhập chi tiết ra xíu.");
     
     if (chatCount >= 3) {
       elements.chatInputWrapper.style.display = 'none';
-      const finalMsg = "Ê tao phán 3 câu thôi nha, lộ hết thiên cơ òi. Tới giờ đi chạy deadline, tha cho tao nghen! 🥺 Thấy Thầy gieo quẻ chuẩn thì kéo lên quăng cho Thầy ly trà sữa vô mã QR nhennn 💖";
+      const finalMsg = "Ê tui trả lời 3 câu thôi nha, lộ hết thiên cơ òi. Tới giờ đi chạy deadline, tha cho tui nghen! 🥺 Thấy Rót phán chuẩn thì kéo lên quăng cho ly trà sữa vô mã QR nhennn 💖";
       elements.chatHistory.innerHTML += `<div class="chat-bubble user">${q}</div>`;
       const botBubble = document.createElement("div"); botBubble.className = "chat-bubble bot"; elements.chatHistory.appendChild(botBubble);
       typeEffectFast(botBubble, finalMsg, () => { botBubble.scrollIntoView({ behavior: 'smooth' }); });
@@ -1549,11 +1582,11 @@ CẤU TRÚC 3 ĐOẠN CHUẨN:
 
     chatCount++;
     elements.sendFollowUpBtn.disabled = true; elements.followUpInput.disabled = true; 
-    elements.sendFollowUpBtn.textContent = "Đang gõ..."; elements.followUpInput.placeholder = "Đang nhẩm quẻ, đợi xíu..."; elements.followUpInput.value = "";
+    elements.sendFollowUpBtn.textContent = "Đang gõ..."; elements.followUpInput.placeholder = "Đang cảm nhận năng lượng, đợi xíu..."; elements.followUpInput.value = "";
     
     const oldTypings = document.querySelectorAll("#tempBotTyping"); oldTypings.forEach(el => el.remove());
     elements.chatHistory.innerHTML += `<div class="chat-bubble user">${q}</div>`;
-    elements.chatHistory.innerHTML += `<div class="chat-bubble bot" id="tempBotTyping">Thầy đang gieo quẻ... <span class="chat-typing">gõ phím tạch tạch</span></div>`;
+    elements.chatHistory.innerHTML += `<div class="chat-bubble bot" id="tempBotTyping">Rót đang gõ... <span class="chat-typing">tạch tạch</span></div>`;
     elements.chatHistory.lastElementChild.scrollIntoView({ behavior: 'smooth' });
     
     if (totMemory.length === 0) {
@@ -1563,9 +1596,10 @@ CẤU TRÚC 3 ĐOẠN CHUẨN:
         if(selectedVibe === 'quansu') tVibe = "phân tích logic, nghiêm túc";
         if(selectedVibe === 'phansau') tVibe = "thấu hiểu, sắc bén, đọc vị tâm lý";
 
-        const deepContextPrompt = preChatContext ? `\nLƯU Ý: Khách từng khai báo bí mật này, hãy nhớ kỹ để trả lời: ${preChatContext}` : "";
-        const sysPrompt = `Bạn là "Ta Văn Rót", một Thầy Tarot Gen Z (2006). Vừa giải bài cho khách với nội dung: "${aiReadingText}". ${deepContextPrompt}
-YÊU CẦU: Trả lời NGẮN GỌN (2-4 câu). Tone giọng: ${tVibe}. Nếu khách hỏi thời gian phải chốt mốc cụ thể. KHÔNG dùng ký tự đặc biệt (*, #). Nửa đùa nửa thật nhưng phán phải sắc bén.`;
+        const nameVal = document.getElementById("nameInput").value.trim() || "Khách";
+        const deepContextPrompt = preChatContext ? `\nLƯU Ý: ${nameVal} từng khai báo: ${preChatContext}` : "";
+        const sysPrompt = `Bạn là "Ta Văn Rót", một Tarot Reader Gen Z (2006). Vừa giải bài cho ${nameVal} với nội dung: "${aiReadingText}". ${deepContextPrompt}
+YÊU CẦU: Trả lời NGẮN GỌN (2-4 câu). Tone giọng: ${tVibe}. Nếu khách hỏi thời gian phải chốt mốc cụ thể. KHÔNG dùng ký tự đặc biệt (*, #). Nửa đùa nửa thật nhưng sắc bén.`;
         totMemory.push({ role: "system", content: sysPrompt });
     }
     
@@ -1573,7 +1607,7 @@ YÊU CẦU: Trả lời NGẮN GỌN (2-4 câu). Tone giọng: ${tVibe}. Nếu k
 
     let botAns = "";
     try {
-        console.log("Chat Thầy Rót...");
+        console.log("Chat với Rót...");
         botAns = await callOpenRouter("", true, totMemory);
     } catch(ec) {
          const tempTyping = document.getElementById("tempBotTyping");
@@ -1592,12 +1626,12 @@ YÊU CẦU: Trả lời NGẮN GỌN (2-4 câu). Tone giọng: ${tVibe}. Nếu k
     typeEffectFast(botBubble, botAns, () => {
        botBubble.scrollIntoView({ behavior: 'smooth' });
        accumulatedQ += (accumulatedQ ? "\n---\n" : "") + "Khách: " + q;
-       accumulatedA += (accumulatedA ? "\n---\n" : "") + "Thầy: " + botAns;
+       accumulatedA += (accumulatedA ? "\n---\n" : "") + "Rót: " + botAns;
        const payload = { action: "update_followup", time: sessionTime, ip: userIP, followUpQ: accumulatedQ, followUpA: accumulatedA };
        fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
 
        setTimeout(() => {
-          elements.sendFollowUpBtn.disabled = false; elements.followUpInput.disabled = false; elements.sendFollowUpBtn.textContent = "Gửi"; elements.followUpInput.placeholder = "Bồ iu còn thắc mắc ? (Thầy trả lời nốt)..."; elements.followUpInput.focus();
+          elements.sendFollowUpBtn.disabled = false; elements.followUpInput.disabled = false; elements.sendFollowUpBtn.textContent = "Gửi"; elements.followUpInput.placeholder = "Bồ iu còn thắc mắc ? (Rót trả lời nốt)..."; elements.followUpInput.focus();
        }, 1500);
     });
   };
