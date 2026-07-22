@@ -524,6 +524,29 @@
     .donation-wrapper { flex-direction: column; align-items: center; text-align: center; }
   }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
+/* SHOPEE AFFILIATE BUTTON */
+  .shopee-glow-link {
+    display: inline-block;
+    background: linear-gradient(135deg, #ff6600, #ff8c00);
+    color: #fff !important;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(255, 102, 0, 0.4);
+    transition: all 0.4s var(--ease-out-spring);
+    white-space: nowrap;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .shopee-glow-link:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(255, 102, 0, 0.6);
+    filter: brightness(1.1);
+  }
+  .shopee-glow-link:active {
+    transform: scale(0.95);
+  }
 </style>
 </head>
 <body class="intro-active">
@@ -784,12 +807,15 @@
         </div>
       </div>
 
-      <!-- DONATION -->
+     <!-- DONATION -->
       <div id="donationBlock" class="donation-wrapper" style="display: none;">
         <img src="images/bank.png" alt="QR Donate" class="qr-img" />
         <div class="donation-text">
           <p><strong>Lưu ý:</strong> Trải bài chỉ mang tính chất tham khảo sự chuẩn xác cần dựa vào trực giác của bạn với tarot. Tương lai nằm trong tay bạn, đừng quá tin tưởng vào bất cứ thứ gì trên đời ngoài chính bản thân của mình mà hãy luôn tự quyết định cuộc đời mình nhé!</p>
-          <p style="margin-top: 8px;">💖 Nếu thấy thông điệp ý nghĩa, bạn có thể ủng hộ Rót 1 ít lúa nghen 💖</p>
+          <div style="margin-top: 12px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; border: 1px dashed rgba(255, 102, 0, 0.3);">
+            <p style="margin-bottom: 8px;">💖 Nếu thông điệp ý nghĩa, bồ có thể ủng hộ Rót 1 ít lúa qua mã QR bên cạnh nghen.</p>
+            <p>Hoặc hổng tốn tiền thì <a href="https://s.shopee.vn/9fJUqfFJsC" target="_blank" class="shopee-glow-link">ủng hộ tớ bằng 1 click nhéee ✨</a></p>
+          </div>
         </div>
       </div>
 
@@ -1276,7 +1302,6 @@
   }
 
   // Tiện ích gọi API OpenRouter
-  // Tiện ích gọi API OpenRouter đã fix tăng max_tokens chống cụt chữ
   async function callOpenRouter(systemPrompt, isChat = false, chatMemory = []) {
       const messages = isChat ? chatMemory : [{ role: "user", content: systemPrompt }];
       const res = await fetchWithRetry("https://openrouter.ai/api/v1/chat/completions", {
@@ -1285,7 +1310,7 @@
           "Authorization": `Bearer ${OPENROUTER_API_KEY}`, "Content-Type": "application/json",
           "HTTP-Referer": "https://tavanrot.com", "X-Title": "Ta Van Rot Tarot"
         },
-        body: JSON.stringify({ model: "deepseek/deepseek-chat", messages: messages, max_tokens: 3000 })
+        body: JSON.stringify({ model: "deepseek/deepseek-chat", messages: messages, max_tokens: 1500 })
       }, 3, 1000);
       if (!res.ok) throw new Error("OpenRouter Sập");
       const data = await res.json();
