@@ -404,8 +404,8 @@
   body.light-mode .feedback-box textarea:focus { background: #fff; border-color: var(--purple); }
 
   /* DONATION & QR CSS */
-  .donation-wrapper { margin-top: 40px; padding-top: 30px; border-top: 1px dashed rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: flex-start; gap: 20px; animation: slideUpFade 0.8s var(--ease-out-spring) forwards; }
-  body.light-mode .donation-wrapper { border-top-color: rgba(0,0,0,0.1); }
+  .donation-action-box { flex-direction: column; text-align: center; gap: 20px; padding: 24px 16px;}
+    .qr-img { width: 200px; height: 200px; margin: 0 auto; box-shadow: 0 20px 40px rgba(0,0,0,0.6);}
   .qr-img { width: 100px; height: 100px; border-radius: 12px; object-fit: cover; border: 2px solid var(--gold); box-shadow: 0 10px 25px rgba(0,0,0,0.4); transition: transform 0.4s var(--ease-out-spring); flex-shrink: 0; }
   .qr-img:hover { transform: scale(1.08) rotate(-3deg); box-shadow: 0 15px 35px rgba(226, 194, 117, 0.4); }
   .donation-text { flex: 1; font-style: italic; font-size: 14.5px; color: var(--text-muted); line-height: 1.6; opacity: 0.7; text-align: justify; }
