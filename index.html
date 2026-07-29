@@ -883,6 +883,7 @@
   });
 
   const OPENROUTER_API_KEY = atob("c2stb3ItdjEtOGU1NmRjNjcyYzVlZmU5MTYwYjA1YTQ3NTRhMzFkMDE5ZTJiODk2MTg3ODRkMjAzZDUzMGEyMTM2ZGMwZmI5ZQ==");
+  const GEMINI_API_KEY = atob("QVEuQWI4Uk42THpwNHRHMUZ2TkdUbzgxVlpyNGQtRFlzM254QndNLU9XZVF6TEVjd05yblE=");
   
   let typeWriter; 
   const BASE_PATH = "images/";
@@ -1052,6 +1053,60 @@
         await new Promise(r => setTimeout(r, delay)); delay *= 2;
       }
     }
+  }
+
+  // Tiện ích gọi API OpenRouter
+  async function callOpenRouter(systemPrompt, isChat = false, chatMemory = []) {
+      const messages = isChat ? chatMemory : [{ role: "user", content: systemPrompt }];
+      const res = await fetchWithRetry("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`, "Content-Type": "application/json",
+          "HTTP-Referer": "https://tavanrot.com", "X-Title": "Ta Van Rot Tarot"
+        },
+        body: JSON.stringify({ model: "auto", messages: messages, max_tokens: 1500 })
+      }, 3, 1000);
+      if (!res.ok) throw new Error("OpenRouter Sập");
+      const data = await res.json();
+      return data.choices[0].message.content;
+  }
+
+  // Gọi Gemini 2.5 Flash-Lite
+  async function callGemini(systemPrompt, isChat = false, chatMemory = []) {
+      let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
+      let bodyData = {};
+      
+      if (!isChat) {
+         bodyData = { contents: [{ role: "user", parts: [{ text: systemPrompt }] }] };
+      } else {
+         let contents = [];
+         let sysInstruction = null;
+         chatMemory.forEach(msg => {
+            if (msg.role === 'system') sysInstruction = msg.content;
+            else contents.push({ role: msg.role === 'assistant' ? 'model' : 'user', parts: [{ text: msg.content }] });
+         });
+         bodyData = { contents: contents };
+         if (sysInstruction) bodyData.systemInstruction = { parts: [{ text: sysInstruction }] };
+      }
+
+      const res = await fetchWithRetry(url, {
+         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bodyData)
+      }, 3, 1000);
+      
+      if (!res.ok) throw new Error("Gemini Sập");
+      const data = await res.json();
+      return data.candidates[0].content.parts[0].text;
+  }
+
+  // Hàm master: Ưu tiên Gemini, lỗi thì qua OpenRouter
+  async function callAI(systemPrompt, isChat = false, chatMemory = []) {
+      try {
+          console.log("Đang gọi Gemini 2.5 Flash-Lite...");
+          return await callGemini(systemPrompt, isChat, chatMemory);
+      } catch (err) {
+          console.warn("Gemini lỗi, chuyển sang OpenRouter...", err);
+          return await callOpenRouter(systemPrompt, isChat, chatMemory);
+      }
   }
 
   let userIP = "Unknown";
@@ -1318,22 +1373,6 @@
     preChatContext = "";
   }
 
-  // Tiện ích gọi API OpenRouter
-  async function callOpenRouter(systemPrompt, isChat = false, chatMemory = []) {
-      const messages = isChat ? chatMemory : [{ role: "user", content: systemPrompt }];
-      const res = await fetchWithRetry("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`, "Content-Type": "application/json",
-          "HTTP-Referer": "https://tavanrot.com", "X-Title": "Ta Van Rot Tarot"
-        },
-        body: JSON.stringify({ model: "free", messages: messages, max_tokens: 1500 })
-      }, 3, 1000);
-      if (!res.ok) throw new Error("OpenRouter Sập");
-      const data = await res.json();
-      return data.choices[0].message.content;
-  }
-
   // XỬ LÝ NÚT "KẾT NỐI LẬT BÀI"
   elements.readyBtn.onclick = async () => {
     // Xóa lỗi cũ
@@ -1377,7 +1416,7 @@
         
         try {
             const probePrompt = `Khách (tên: ${nameVal}) vừa hỏi: "${currentQuestion}". Đóng vai bạn tâm giao Tarot (Ta Văn Rót). Hãy hỏi lại 1-2 câu ngắn gọn để đào sâu vấn đề tâm lý, hoàn cảnh của ${nameVal}. Gộp vào 1 tin nhắn. Giọng điệu vui vẻ, trêu chọc, tò mò nhưng hỏi xoáy trúng trọng tâm. Xưng hô: Tui - ${nameVal} (hoặc bồ). KHÔNG dùng ký tự đặc biệt (*, #). Trả lời thẳng vào câu hỏi, không chào hỏi dài dòng.`;
-            const probeQuestion = await callOpenRouter(probePrompt);
+            const probeQuestion = await callAI(probePrompt);
             
             elements.preChatHistory.innerHTML = `<div class="chat-bubble bot">${probeQuestion}</div>`;
             elements.preChatInputArea.style.display = "flex";
@@ -1593,10 +1632,10 @@ ${vibeStr}`;
     if (selectedVibe === "quansu") vibeStr = "- TONE GIỌNG: Khách quan, sắc bén, logic như một quân sư. Phân tích rõ ngọn ngành và vạch ra từng bước hành động cụ thể.";
     if (selectedVibe === "phansau") vibeStr = "- TONE GIỌNG: Sâu sắc, đậm chất tâm lý học. Phân tích cặn kẽ nguyên nhân gốc rễ, xoáy sâu vào ẩn khuất trong lòng khách.";
 
-    let botName = "Ta Văn Rót (OpenRouter)";
+    let botName = "Ta Văn Rót";
     try {
         console.log("Đang gọi Rót...");
-        aiReadingText = await callOpenRouter(getDynamicPrompt("Ta Văn Rót", vibeStr, genderStr, dobParam, zodiacStr, xungHo, cardText, nameVal));
+        aiReadingText = await callAI(getDynamicPrompt("Ta Văn Rót", vibeStr, genderStr, dobParam, zodiacStr, xungHo, cardText, nameVal));
     } catch (e) {
         console.log("Rót sập mạng!");
         clearInterval(loadInt);
@@ -1669,7 +1708,7 @@ YÊU CẦU ĐẶC BIỆT:
     let botAns = "";
     try {
         console.log("Chat với Rót...");
-        botAns = await callOpenRouter("", true, totMemory);
+        botAns = await callAI("", true, totMemory);
     } catch(ec) {
          const tempTyping = document.getElementById("tempBotTyping");
          if(tempTyping) { tempTyping.innerHTML = "<span style='color:#ff8888'>Sập mạng diện rộng rồi bồ ơi, đợi tí chat lại nha!</span>"; tempTyping.removeAttribute("id"); }
