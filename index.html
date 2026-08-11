@@ -883,7 +883,9 @@
   });
 
   const OPENROUTER_API_KEY = atob("c2stb3ItdjEtOGU1NmRjNjcyYzVlZmU5MTYwYjA1YTQ3NTRhMzFkMDE5ZTJiODk2MTg3ODRkMjAzZDUzMGEyMTM2ZGMwZmI5ZQ==");
-  const OPENCODE_API_KEY = atob("c2stT0pFVURxU3RxZG1Lb3hOYnZieHppTnlHRTJZUXVDTEkxdDBEMkxZVlYxQldZU1E2RU01M0VaNlNLSnBlRU4wUw==");
+  
+  // Lấy model từ LocalStorage (do Admin set), nếu không có thì dùng mặc định
+  const getCurrentModel = () => localStorage.getItem("or_model") || "google/gemma-4-26b-a4b-it:free";
   
   let typeWriter; 
   const BASE_PATH = "images/";
@@ -1055,7 +1057,7 @@
     }
   }
 
-  // Tiện ích gọi API OpenRouter (Fallback)
+  // Cập nhật hàm callOpenRouter lấy model động
   async function callOpenRouter(systemPrompt, isChat = false, chatMemory = []) {
       const messages = isChat ? chatMemory : [{ role: "user", content: systemPrompt }];
       const res = await fetchWithRetry("https://openrouter.ai/api/v1/chat/completions", {
@@ -1066,44 +1068,17 @@
           "HTTP-Referer": "https://tavanrot.online", 
           "X-Title": "Ta Van Rot Tarot"
         },
-        body: JSON.stringify({ model: "google/gemma-4-26b-a4b-it:free", messages: messages, max_tokens: 1500 })
+        body: JSON.stringify({ model: getCurrentModel(), messages: messages, max_tokens: 1500 })
       }, 3, 1000);
       if (!res.ok) throw new Error("OpenRouter Sập");
       const data = await res.json();
       return data.choices[0].message.content;
   }
 
-  // Tiện ích gọi API OpenCode (Chính)
-  async function callOpenCode(systemPrompt, isChat = false, chatMemory = []) {
-      const messages = isChat ? chatMemory : [{ role: "user", content: systemPrompt }];
-      
-      const res = await fetchWithRetry("https://api.opencode.ai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${OPENCODE_API_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: "deepseek-v4-flash-free",
-          messages: messages,
-          max_tokens: 1500
-        })
-      }, 3, 1000);
-      
-      if (!res.ok) throw new Error("OpenCode Sập");
-      const data = await res.json();
-      return data.choices[0].message.content;
-  }
-
-  // Hàm master: Ưu tiên OpenCode, lỗi thì qua OpenRouter
+  // Master function giờ chỉ trỏ thẳng vào OpenRouter
   async function callAI(systemPrompt, isChat = false, chatMemory = []) {
-      try {
-          console.log("Đang gọi OpenCode (DeepSeek)...");
-          return await callOpenCode(systemPrompt, isChat, chatMemory);
-      } catch (err) {
-          console.warn("OpenCode lỗi, chuyển sang OpenRouter...", err);
-          return await callOpenRouter(systemPrompt, isChat, chatMemory);
-      }
+      console.log(`Đang gọi OpenRouter với model: ${getCurrentModel()}`);
+      return await callOpenRouter(systemPrompt, isChat, chatMemory);
   }
 
   let userIP = "Unknown";
