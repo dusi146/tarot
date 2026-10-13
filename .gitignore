@@ -1,0 +1,7 @@
+# Local credentials and secret configs
+gemini_config.json
+
+# Operating system artifacts
+.DS_Store
+Thumbs.db
+Desktop.ini

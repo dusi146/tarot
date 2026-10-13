@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Ta Văn Rót</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b16; --panel: rgba(20, 15, 35, 0.8);
+    --text: #fcfafc; --cyan: #48cae4; --purple: #8e44ad;
+  }
+  body { 
+    background: var(--bg); color: var(--text); 
+    font-family: 'Montserrat', sans-serif; 
+    display: flex; justify-content: center; align-items: center; 
+    height: 100vh; margin: 0; 
+  }
+  .admin-box {
+    background: var(--panel); border: 1px solid var(--purple);
+    padding: 40px; border-radius: 20px; width: 100%; max-width: 500px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center;
+  }
+  h2 { color: var(--cyan); margin-bottom: 24px; }
+  .field { text-align: left; margin-bottom: 24px; }
+  label { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 8px; display: block; }
+  input {
+    width: 100%; padding: 14px; background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+    color: white; font-family: inherit; font-size: 16px; box-sizing: border-box;
+  }
+  input:focus { outline: none; border-color: var(--cyan); }
+  button {
+    width: 100%; padding: 16px; background: linear-gradient(135deg, var(--purple), var(--cyan));
+    color: white; border: none; border-radius: 12px; font-weight: bold;
+    cursor: pointer; font-size: 16px; transition: transform 0.2s;
+  }
+  button:active { transform: scale(0.98); }
+  #status { margin-top: 16px; font-size: 14px; color: #a5d6a7; display: none; }
+</style>
+</head>
+<body>
+  <div class="admin-box">
+    <h2>Trạm Điều Khiển Vũ Trụ</h2>
+    <div class="field">
+      <label>OpenRouter Model ID</label>
+      <input type="text" id="modelId" placeholder="google/gemma-4-26b-a4b-it:free" />
+    </div>
+    <button onclick="saveConfig()">Cập Nhật Cấu Hình</button>
+    <div id="status">Đã đồng bộ kết nối thành công!</div>
+  </div>
+
+  <script>
+    // Load model hiện tại
+    const currentModel = localStorage.getItem("or_model") || "google/gemma-4-26b-a4b-it:free";
+    document.getElementById("modelId").value = currentModel;
+
+    function saveConfig() {
+      const newModel = document.getElementById("modelId").value.trim();
+      if(newModel) {
+        localStorage.setItem("or_model", newModel);
+        const status = document.getElementById("status");
+        status.style.display = "block";
+        setTimeout(() => status.style.display = "none", 3000);
+      }
+    }
+  </script>
+</body>
+</html>

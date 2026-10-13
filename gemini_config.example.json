@@ -1,0 +1,6 @@
+{
+  "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY_HERE",
+  "GEMINI_MODEL": "gemini-2.5-flash",
+  "GEMINI_API_ENDPOINT": "https://generativelanguage.googleapis.com/v1beta/models",
+  "NOTE": "Điền API key Gemini vào gemini_config.json khi cần thử nghiệm cục bộ."
+}

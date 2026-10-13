@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Ta Văn Rót — Chiêm Nghiệm Tarot 3D</title>
+  <meta name="description" content="Không gian chiêm nghiệm Tarot 3D cùng Ta Văn Rót. Tự tay rút bài trong vũ trụ và nhận lời giải mã sâu sắc từ Gemini AI." />
+  <link rel="icon" type="image/png" href="images/logo.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="vendor/three.r128.min.js" defer></script>
+  <script src="vendor/gsap.3.12.5.min.js" defer></script>
+  <script src="tarot-motion.js" defer></script>
+  <script src="tarot-geometry.js" defer></script>
+  <script src="tarot-data.js" defer></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="intro-active">
+
+  <!-- Canvas 3D fullscreen -->
+  <canvas id="webgl-canvas" tabindex="0" aria-label="Bàn bài 3D. Dùng phím mũi tên để dạo bài, Enter để rút lá ở giữa."></canvas>
+  <output id="sceneDiagnostics" hidden aria-hidden="true"></output>
+
+  <!-- Intro -->
+  <div id="intro-screen">
+    <div class="intro-brand">
+      <div class="intro-monogram">TVR</div>
+      <h1 class="intro-title">TA VĂN RÓT</h1>
+      <p class="intro-sub">Một khoảng lặng cho bạn</p>
+      <div class="intro-loader"></div>
+    </div>
+  </div>
+
+  <!-- HUD Nav (mỏng, dính đỉnh) -->
+  <header class="hud-nav">
+    <a class="nav-brand" href="index.html" aria-label="Ta Văn Rót — trang chủ">
+      <svg class="brand-symbol" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 19.2 12.8 30 16 19.2 19.2 16 30 12.8 19.2 2 16 12.8 12.8Z"/><circle cx="16" cy="16" r="11.5"/></svg>
+      <span class="brand-name">Ta Văn Rót</span>
+    </a>
+    <div class="nav-tools">
+      <span class="nav-caption">Một khoảng lặng cho bạn</span>
+      <button class="tool-btn" id="audioToggleBtn" aria-label="Bật âm thanh" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m11 5-5 4H3v6h3l5 4V5Z"/><path class="sound-muted" d="m16 9 5 6m0-6-5 6"/><path class="sound-waves" d="M16 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="stage-layer stage-active" id="stageIntent">
+    <div class="config-panel">
+      <div class="panel-header">
+        <span class="panel-eyebrow">TAROT · TRỰC GIÁC · BẠN</span>
+        <h1 class="panel-title-main">Lắng nghe<br> <em>vũ trụ.</em></h1>
+        <p class="panel-desc">Một câu hỏi. Một góc nhìn mới.</p>
+      </div>
+      <div class="form-block question-block">
+        <label class="sr-only" for="questionInput">Điều bạn muốn hỏi</label>
+        <input class="f-input" type="text" id="questionInput" placeholder="Điều bạn muốn hỏi…" autocomplete="off" />
+        <svg class="input-spark" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.2 6.8L21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2Z"/></svg>
+      </div>
+      <div class="form-block spread-block">
+        <div class="spread-grid" id="spreadGrid" aria-label="Kiểu trải bài">
+          <button class="spread-tile active" data-spread="time" aria-pressed="true">
+            <span class="spread-glyph" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="spread-tile-name">Thời gian</span><span class="spread-tile-count">3 lá</span>
+          </button>
+          <button class="spread-tile" data-spread="single" aria-pressed="false">
+            <span class="spread-glyph one" aria-hidden="true"><i></i></span>
+            <span class="spread-tile-name">Một lá</span><span class="spread-tile-count">1 lá</span>
+          </button>
+          <button class="spread-tile" data-spread="mind" aria-pressed="false">
+            <span class="spread-glyph triangle" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="spread-tile-name">Cân bằng</span><span class="spread-tile-count">3 lá</span>
+          </button>
+          <button class="spread-tile" data-spread="solution" aria-pressed="false">
+            <span class="spread-glyph four" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <span class="spread-tile-name">Gỡ rối</span><span class="spread-tile-count">4 lá</span>
+          </button>
+        </div>
+        <p class="spread-guide" id="spreadGuideText">Quá khứ · Hiện tại · Tương lai</p>
+      </div>
+      <details class="personal-options" id="personalOptions">
+        <summary>Tùy chỉnh thêm <span aria-hidden="true">+</span></summary>
+        <div class="options-content">
+          <div class="form-block">
+            <label class="f-label" for="nameInput">Tên của bạn</label>
+            <input class="f-input" type="text" id="nameInput" placeholder="Tên hoặc biệt danh" autocomplete="off" />
+          </div>
+          <div class="form-block">
+            <label class="f-label">Tông giọng</label>
+            <div class="tone-row" id="toneRow">
+              <button class="tone-chip active" data-vibe="chualanh" aria-pressed="true">Chữa lành</button>
+              <button class="tone-chip" data-vibe="tatnuoc" aria-pressed="false">Thẳng thắn</button>
+              <button class="tone-chip" data-vibe="quansu" aria-pressed="false">Chiến lược</button>
+              <button class="tone-chip" data-vibe="phansau" aria-pressed="false">Triết lý</button>
+            </div>
+          </div>
+          <div class="form-block">
+            <label class="f-label">Ngày sinh <span class="optional-label">tùy chọn</span></label>
+            <div class="dob-row"><div class="dob-row-selects">
+              <select class="glass-select" id="dobDay" aria-label="Ngày"><option value="">Ngày</option></select>
+              <select class="glass-select" id="dobMonth" aria-label="Tháng"><option value="">Tháng</option></select>
+              <select class="glass-select" id="dobYear" aria-label="Năm"><option value="">Năm</option></select>
+            </div><div class="zodiac-badge-inline" id="zodiacBadge">—</div></div>
+          </div>
+        </div>
+      </details>
+      <button class="btn-main" id="startRitualBtn">Bắt đầu trải bài <span aria-hidden="true">↗</span></button>
+    </div>
+    <span class="scene-caption" aria-hidden="true">ĐỂ TRỰC GIÁC DẪN LỐI</span>
+  </section>
+
+  <!-- STAGE 2: TỤ KHÍ -->
+  <section class="stage-layer" id="stageCharge">
+    <!-- Instruction label ở trên -->
+    <div class="charge-label-bar">
+      <span class="charge-label-eye">01 · XÁO BÀI</span>
+      <h3 class="charge-label-title" id="chargeLabelTitle">Xáo bộ bài</h3>
+    </div>
+    <!-- Orb giữa màn hình -->
+    <div class="charge-orb-wrap">
+      <div class="charge-orb" id="chargeOrb" role="button" tabindex="0" aria-label="Giữ để xáo bài; nhấn Enter để xáo bằng bàn phím">
+        <div class="orb-ring"></div>
+        <div class="orb-core">
+          <span class="orb-pct" id="chargePct">✦</span>
+          <span class="orb-hint" id="chargeHint">Giữ để xáo</span>
+        </div>
+      </div>
+      <div class="charge-tip-pill" id="chargeTipPill">Thả tay khi bạn sẵn sàng</div>
+    </div>
+  </section>
+
+  <!-- STAGE 3: CHỌN BÀI -->
+  <section class="stage-layer" id="stageDraw">
+    <!-- Instruction dạng pill gắn đỉnh -->
+    <div class="draw-top-hud">
+      <span class="draw-step-tag" id="drawStepTag">1 / 3</span>
+      <span class="draw-step-txt" id="drawStepTxt">Quá khứ</span>
+      <span class="draw-step-hint">Vuốt để đổi lá</span>
+    </div>
+    <div class="draw-action-bar">
+      <div class="deck-navigation">
+        <input id="deckScrubber" type="range" min="0" max="77" step="1" value="39" aria-label="Vị trí trong bộ bài">
+        <span id="deckPosition" aria-hidden="true">40 / 78</span>
+      </div>
+      <button class="btn-main" id="pickCenterBtn">Chọn lá này <span aria-hidden="true">↗</span></button>
+    </div>
+  </section>
+
+  <!-- STAGE 4: LẬT BÀI -->
+  <section class="stage-layer" id="stageReveal">
+    <div id="cardLabels" aria-live="polite"></div>
+    <div class="reveal-top-hud">
+      <span class="reveal-title-pill">Thông điệp của bạn</span>
+      <span class="reveal-sub-pill">Chạm một lá để mở</span>
+    </div>
+    <div class="oracle-trigger-bar" id="oracleTriggerBar">
+      <button class="btn-oracle-trigger" id="summonOracleBtn">Xem lời giải ↗</button>
+    </div>
+  </section>
+
+  <!-- DOCK SLOTS ĐÁY MÀN HÌNH (HIỆN TRONG CẢ GIAI ĐOẠN CHỌN & LẬT BÀI) -->
+  <div class="dock-bottom" id="dockBottom">
+    <!-- Render động theo kiểu trải bài -->
+  </div>
+
+  <!-- STAGE 5: LỜI GIẢI MÃ CỦA RÓT (Bottom Sheet) -->
+  <div class="oracle-modal" id="oracleModal">
+    <div class="oracle-scrim" id="oracleScrim"></div>
+    <div class="oracle-sheet">
+      <div class="oracle-drag-handle" aria-hidden="true"></div>
+
+      <div class="oracle-header">
+        <div class="oracle-header-left">
+          <span class="oracle-tag">GÓC NHÌN TỪ RÓT</span>
+          <h3 class="oracle-heading" id="oracleHeading">Chiêm Nghiệm</h3>
+        </div>
+        <button class="oracle-close" id="closeOracleBtn" aria-label="Đóng">✕</button>
+      </div>
+
+      <div class="oracle-cards-row" id="oracleCardsRow"></div>
+
+      <div class="oracle-body">
+
+        <div class="reading-loader" id="readingLoader">
+          <div class="loader-ring"></div>
+          <p>Rót đang đọc những lá bài…</p>
+        </div>
+
+        <div class="reading-text" id="readingText"></div>
+
+        <div class="rating-block" id="ratingBlock" style="display:none">
+          <p class="rating-q">Lời giải có hữu ích với bạn?</p>
+          <div class="rating-row">
+            <button class="r-btn" data-v="1">1</button>
+            <button class="r-btn" data-v="2">2</button>
+            <button class="r-btn" data-v="3">3</button>
+            <button class="r-btn" data-v="4">4</button>
+            <button class="r-btn" data-v="5">5</button>
+          </div>
+          <div class="rating-note" id="ratingNote"></div>
+        </div>
+
+        <div class="followup-block" id="followupBlock" style="display:none">
+          <h4 class="followup-title">Hỏi thêm</h4>
+          <div class="followup-msgs" id="followupMsgs"></div>
+          <div class="followup-input-row">
+            <input type="text" id="followupInput" placeholder="Bạn muốn hỏi thêm điều gì?" autocomplete="off" />
+            <button class="btn-send" id="followupSendBtn">Gửi</button>
+          </div>
+        </div>
+
+        <div class="donate-block" id="donateBlock" style="display:none">
+          <img src="images/bank.png" alt="QR donate" class="donate-qr" />
+          <div class="donate-txt">
+            <h5>Gửi Chút Lúa Cho Rót</h5>
+            <p>Nếu lời giải của Rót giúp bạn nhẹ lòng, hãy ủng hộ Rót duy trì máy chủ nhé!</p>
+            <a href="https://s.shopee.vn/6L3YFi6rMm" target="_blank" class="donate-link">Ủng hộ qua Shopee</a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="oracle-footer">
+        <button class="btn-footer-act" id="ttsBtn">
+          <span id="ttsBtnLabel">Nghe Đọc</span>
+        </button>
+        <button class="btn-footer-act" id="restartBtn">Trải bài mới</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-bubble" id="toastBubble"></div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
