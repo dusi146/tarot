@@ -51,17 +51,17 @@ const devices = [
         assert.ok(positions.form > positions.heading + 40, 'Mobile heading has its own visible area above the form');
       }
       await page.screenshot({ path: path.join(root, 'artifacts', device.name + '-home.png') });
-      if (await page.$eval('#btn-motion-top', element => !element.hidden)) {
-        await page.click('#btn-motion-top');
+      assert.equal(await page.$$('#btn-motion-top,#btn-sound-top,#toggle-haptics').then(items => items.length), 0);
+      await page.click('#options-toggle');
+      if (await page.evaluate(() => window.TarotMobile.status().supportedMotion)) {
+        assert.equal(await page.evaluate(() => window.TarotMobile.status().motion), true, 'First interaction starts motion feedback');
         await page.evaluate(() => {
           for (const [beta, gamma] of [[30, 0], [36, 14]]) {
             const event = new Event('deviceorientation'); Object.defineProperties(event, { beta: { value: beta }, gamma: { value: gamma } }); dispatchEvent(event);
           }
         });
         assert.ok(await page.evaluate(() => window.TarotMobile.sample().x > 0));
-        await page.click('#btn-motion-top');
       }
-      await page.click('#options-toggle');
       await page.waitForFunction(() => !document.querySelector('#personal-options').hidden && document.querySelector('#personal-options').getAnimations().length === 0);
       await page.click('#name'); await page.keyboard.down('Control'); await page.keyboard.press('A'); await page.keyboard.up('Control'); await page.keyboard.press('Backspace');
       await page.type('#name', 'Bạn thử');
@@ -122,7 +122,6 @@ const devices = [
       await page.waitForFunction(() => document.querySelector('#scene-status').dataset.inspected === '0');
       await wait(400); await page.keyboard.press('Escape');
       await page.waitForFunction(() => document.querySelector('#scene-status').dataset.inspected === '-1');
-      await page.click('#btn-sound-top'); await page.click('#btn-sound-top');
       await page.click('#open-reading');
       await page.waitForSelector('#conversation:not([hidden])');
       await page.waitForFunction(() => document.querySelector('#reading-modal').classList.contains('is-visible') && document.querySelector('#reading-modal').getAnimations().length === 0);

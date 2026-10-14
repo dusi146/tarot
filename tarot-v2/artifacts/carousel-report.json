@@ -1,30 +1,33 @@
 [
   {
     "width": 1440,
-    "loops": "forward + reverse + full revolution",
+    "loops": "forward + reverse + full revolution + three reverse revolutions after picking",
+    "directCardTap": "passed",
     "pickedAtSeam": [
-      "19",
-      "05"
+      "P11",
+      "W05"
     ],
     "errors": [],
     "touchFocus": "not applicable"
   },
   {
     "width": 390,
-    "loops": "forward + reverse + full revolution",
+    "loops": "forward + reverse + full revolution + three reverse revolutions after picking",
+    "directCardTap": "passed",
     "pickedAtSeam": [
-      "C01",
-      "C13"
+      "P13",
+      "01"
     ],
     "errors": [],
     "touchFocus": "passed"
   },
   {
     "width": 320,
-    "loops": "forward + reverse + full revolution",
+    "loops": "forward + reverse + full revolution + three reverse revolutions after picking",
+    "directCardTap": "passed",
     "pickedAtSeam": [
-      "W02",
-      "16"
+      "18",
+      "W05"
     ],
     "errors": [],
     "touchFocus": "passed"

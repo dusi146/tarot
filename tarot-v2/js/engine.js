@@ -101,7 +101,8 @@
         constructor() {
           this.ctx = null;
           this.masterGain = null;
-          this.enabled = true; // Active as soon as user interacts; can be muted anytime
+          this.enabled = true; // Automatically starts on the first trusted interaction.
+          this.volume = 3.2;
           this.unlocked = false;
           this.pinkNoiseBuffer = null;
           this.whiteNoiseBuffer = null;
@@ -116,7 +117,7 @@
           if (!AudioCtx) return;
           this.ctx = new AudioCtx();
           this.masterGain = this.ctx.createGain();
-          this.masterGain.gain.value = this.enabled ? 1.65 : 0.0001;
+          this.masterGain.gain.value = this.enabled ? this.volume : 0.0001;
           this.compressor = this.ctx.createDynamicsCompressor();
           this.compressor.threshold.value = -8; this.compressor.knee.value = 12;
           this.compressor.ratio.value = 4; this.compressor.attack.value = .006; this.compressor.release.value = .18;
@@ -135,7 +136,7 @@
             b3 = 0.86650 * b3 + white * 0.3104856;
             b4 = 0.55000 * b4 + white * 0.5329522;
             b5 = -0.7616 * b5 - white * 0.0168980;
-            pData[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.045;
+            pData[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.065;
             b6 = white * 0.115926;
           }
 
@@ -143,7 +144,7 @@
           this.whiteNoiseBuffer = this.ctx.createBuffer(1, sr * 1.5, sr);
           const wData = this.whiteNoiseBuffer.getChannelData(0);
           for (let i = 0; i < wData.length; i++) {
-            wData[i] = (Math.random() * 2 - 1) * 0.25;
+            wData[i] = (Math.random() * 2 - 1) * 0.32;
           }
         }
 
@@ -152,7 +153,7 @@
             this.initContext();
           }
           if (this.ctx && this.ctx.state === 'suspended') {
-            this.ctx.resume();
+            this.ctx.resume().catch(() => {});
           }
           if (!this.unlocked && this.ctx) {
             this.unlocked = true;
@@ -182,7 +183,7 @@
             this.ctx.resume();
           }
           if (this.masterGain && this.ctx) {
-            this.masterGain.gain.setTargetAtTime(this.enabled ? 1.65 : 0.0001, this.ctx.currentTime, 0.05);
+            this.masterGain.gain.setTargetAtTime(this.enabled ? this.volume : 0.0001, this.ctx.currentTime, 0.05);
           }
           this.syncUiIcon();
           if (this.enabled) {
@@ -466,7 +467,7 @@
           osc.type = 'sine';
           osc.frequency.setValueAtTime(880 * pitch, now);
           osc.frequency.exponentialRampToValueAtTime(440 * pitch, now + 0.045);
-          gain.gain.setValueAtTime(0.035, now);
+          gain.gain.setValueAtTime(0.05, now);
           gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
           osc.connect(gain);
           gain.connect(this.masterGain);
@@ -3491,10 +3492,12 @@
 
       // Unlock Web Audio automatically on the very first user gesture anywhere in the window
       window.addEventListener('pointerdown', event => {
-        if (!event.target.closest?.('#btn-sound-top')) sound.unlockOnGesture();
+        if (!event.isTrusted) return;
+        sound.unlockOnGesture();
+        if (event.target.closest?.('button, summary, .spread-picker label, .tone-picker label')) sound.playUiClick(.95);
       }, { passive: true });
       window.addEventListener('keydown', event => {
-        if (!event.target.closest?.('#btn-sound-top')) sound.unlockOnGesture();
+        if (event.isTrusted) sound.unlockOnGesture();
       }, { passive: true });
 
       function updatePointerNDC(clientX, clientY) {
@@ -3510,7 +3513,7 @@
         if (state.act === 'FAN') {
           const avail = getAvailableFanCards();
           avail.forEach((c, listIdx) => {
-            if (Math.abs(listIdx - state.fanFocusIndex) <= 3.4) {
+            if (c.mesh.visible && Math.abs(window.TarotCarousel.offset(listIdx, state.fanFocusIndex, avail.length)) <= 3.4) {
               candidateMeshes.push(c.mesh);
             }
           });
@@ -3734,16 +3737,11 @@
       const btnFanMode = document.getElementById('btn-fan-mode');
       const btnReveal = document.getElementById('btn-reveal');
       const btnReplay = document.getElementById('btn-replay');
-      const btnSoundTop = document.getElementById('btn-sound-top');
 
       function setActiveDockButton(activeBtn) {
         [btnPlayAll, btnShuffle, btnFanMode, btnReveal].forEach(b => b.classList.remove('active'));
         if (activeBtn) activeBtn.classList.add('active');
       }
-
-      btnSoundTop.addEventListener('click', () => {
-        sound.toggle();
-      });
 
       /* ============================================================================
        * 10. WINDOW RESIZE & MAIN DELTA-TIME RENDER LOOP
@@ -4112,7 +4110,9 @@ window.TarotExperience = {
       card.mesh.updateMatrixWorld(true);
       if (!card.mesh.geometry.boundingBox) card.mesh.geometry.computeBoundingBox();
       const box = card.mesh.geometry.boundingBox.clone().applyMatrix4(card.mesh.matrixWorld);
-      return { index: card.index, min: box.min.toArray(), max: box.max.toArray(), flying: card.flightActive };
+      const point = card.mesh.getWorldPosition(new THREE.Vector3()).project(camera);
+      return { index: card.index, id: card.data?.id, min: box.min.toArray(), max: box.max.toArray(), flying: card.flightActive,
+        screen: [(point.x + 1) * innerWidth / 2, (1 - point.y) * innerHeight / 2] };
     });
   },
   fanSnapshot() {

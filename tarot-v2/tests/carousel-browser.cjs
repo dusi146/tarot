@@ -7,7 +7,7 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     headless: true, userDataDir: path.resolve(root, '../backups/v2-carousel-browser'), args: ['--no-first-run'] });
   const report = [];
   try {
-    for (const width of [1440, 390, 320]) {
+    for (const width of [1440, 390, 320].filter(width => !process.env.TASK_CAROUSEL_WIDTH || width === Number(process.env.TASK_CAROUSEL_WIDTH))) {
       const page = await browser.newPage(), errors = [];
       page.on('pageerror', error => errors.push(error.message));
       await page.setViewport({ width, height: width > 700 ? 900 : 844, hasTouch: width < 700, isMobile: width < 700 });
@@ -18,12 +18,13 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
       await wait(2000); await page.screenshot({ path: path.join(root, 'artifacts', 'intro-orbit-' + width + '.png') });
       await page.click('#skip-intro'); await page.waitForSelector('#welcome-panel:not([hidden])'); await wait(900);
       if (width < 700) {
-        const sound = await page.$eval('#btn-sound-top', el => { const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; });
-        await page.touchscreen.tap(sound.x, sound.y);
-        assert.equal(await page.$eval('#btn-sound-top', el => getComputedStyle(el).webkitTapHighlightColor), 'rgba(0, 0, 0, 0)');
-        assert.equal(await page.$eval('#btn-sound-top', el => getComputedStyle(el).outlineStyle), 'none', 'Touch does not show an outline');
+        const options = await page.$eval('#options-toggle', el => { const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; });
+        await page.touchscreen.tap(options.x, options.y);
+        assert.equal(await page.$eval('#options-toggle', el => getComputedStyle(el).webkitTapHighlightColor), 'rgba(0, 0, 0, 0)');
+        assert.equal(await page.$eval('#options-toggle', el => getComputedStyle(el).outlineStyle), 'none', 'Touch does not show an outline');
         await page.keyboard.press('Tab');
         assert.equal(await page.evaluate(() => getComputedStyle(document.activeElement).outlineStyle), 'solid', 'Keyboard navigation still has a focus indicator');
+        await wait(500); await page.click('#options-toggle'); await wait(550);
       }
       await page.type('#question', 'Mình muốn nhìn lại tuần này.');
       await page.click('input[name="spread"][value="time"] + span'); await page.click('#begin-reading');
@@ -46,12 +47,21 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
       assert.equal(snap.index, 77); assert.ok(snap.phase > last.phase + 77);
       assert.equal(snap.focusedId, last.focusedId);
       assert.equal(await page.$eval('#scene-status', el => el.dataset.selected), '0');
+      await page.click('#btn-fan-next'); await wait(700);
+      assert.equal(await page.evaluate(() => window.TarotExperience.fanSnapshot().index), 0);
       // Pick the last card, then the newly centred first card. Both must land in their slots.
       const selected = [];
       for (let i = 0; i < 2; i++) {
+        if (i === 1) {
+          const count = await page.evaluate(() => window.TarotExperience.fanSnapshot().count);
+          await page.mouse.move(width / 2, 360); await page.mouse.wheel({ deltaX: -count * 110 * 3 }); await wait(1600);
+          assert.ok(await page.evaluate(() => window.TarotExperience.fanSnapshot().phase < 0));
+        }
         const before = await page.evaluate(() => window.TarotExperience.fanSnapshot());
         selected.push(before.focusedId);
-        await page.click('#btn-draw-current'); await page.waitForSelector('#slot-box-' + i + '.filled'); await wait(300);
+        const point = await page.evaluate(id => window.TarotExperience.geometrySnapshot().find(card => card.id === id).screen, before.focusedId);
+        if (width < 700) await page.touchscreen.tap(...point); else await page.mouse.click(...point);
+        await page.waitForSelector('#slot-box-' + i + '.filled', { timeout: 4000 }); await wait(300);
         const after = await page.evaluate(() => ({ fan: window.TarotExperience.fanSnapshot(), picked: window.TarotExperience.snapshot().map(c => c.data.id) }));
         assert.equal(after.fan.count, 77 - i); assert.equal(after.picked[i], before.focusedId);
         for (const id of after.picked) assert.ok(!after.fan.availableIds.includes(id), 'Chosen cards are removed from the loop');
@@ -60,7 +70,7 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
         await page.click('#btn-fan-next'); await wait(600);
       }
       assert.equal(new Set(selected).size, 2); assert.deepEqual(errors, []);
-      report.push({ width, loops: 'forward + reverse + full revolution', pickedAtSeam: selected, errors, touchFocus: width < 700 ? 'passed' : 'not applicable' });
+      report.push({ width, loops: 'forward + reverse + full revolution + three reverse revolutions after picking', directCardTap: 'passed', pickedAtSeam: selected, errors, touchFocus: width < 700 ? 'passed' : 'not applicable' });
       await page.screenshot({ path: path.join(root, 'artifacts', 'loop-seam-' + width + '.png') });
       await page.close();
     }

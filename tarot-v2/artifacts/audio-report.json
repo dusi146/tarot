@@ -1,7 +1,13 @@
 {
-  "firstTapEnables": true,
-  "toggleWorks": true,
-  "gain": 1.649999976158142,
-  "ratio": 4,
-  "threshold": -8
+  "contextState": "running",
+  "masterGain": 3.200000047683716,
+  "peak": 0.17861470580101013,
+  "compressor": {
+    "threshold": -8,
+    "ratio": 4
+  },
+  "motionRequests": 1,
+  "motionEnabled": true,
+  "hapticPulses": 3,
+  "errors": []
 }

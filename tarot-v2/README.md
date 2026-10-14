@@ -28,8 +28,8 @@ Máy chủ chỉ nghe tại máy đang chạy. Có thể đặt biến môi trư
 - Tùy chỉnh màu vàng, mở/đóng có chuyển động; tên, ngày sinh hợp lệ, cung hoàng đạo và bốn tông giọng. Nhớ thông tin trên cùng trình duyệt, có nút quên; không đồng bộ giữa thiết bị.
 - Lời giải theo từng lá, kết luận và gợi ý hành động; có thử lại khi thiếu nội dung. Tâm sự giữ bối cảnh trải bài, mời ủng hộ một lần sau lượt thứ ba.
 - Đánh giá, ghi chú, góp ý; phần ủng hộ có chia sẻ Rót, chuyển đổi đơn hàng và QR mở khi cần. Bảng người ủng hộ dùng kết nối cũ ở chế độ thật.
-- Âm lượng hiệu ứng đã tăng, có nén đỉnh để giữ tiếng dịu. Đọc thành tiếng khi trình duyệt hỗ trợ, bật/tắt âm thanh và tùy chọn giảm chuyển động của hệ điều hành.
-- Điện thoại có nút nghiêng máy ở góc trên. Chỉ sau khi bật/cấp quyền, cảm biến mới điều khiển ánh sáng và độ nghiêng; không ảnh hưởng chọn lá. Rung nhẹ khi lướt, rút, đáp ô và mở bài; khi xáo có nhịp nghỉ, có thể tắt riêng trong Tùy chỉnh thêm.
+- Âm thanh tự bật sau lần chạm hoặc nhấn phím đầu tiên. Hệ số âm tổng tăng từ 1,65 lên 3,2, tăng thêm tiếng giấy và tiếng bấm, giữ nén đỉnh để tiếng không chói. Có đọc thành tiếng khi trình duyệt hỗ trợ và tôn trọng tùy chọn giảm chuyển động của hệ điều hành.
+- Bỏ hai nút âm thanh/cảm biến ở góc và nút rung trong Tùy chỉnh thêm. Phản hồi điện thoại tự bật khi tương tác lần đầu; trình duyệt có thể yêu cầu quyền cảm biến một lần. Nếu bị từ chối hoặc không hỗ trợ, chạm/vuốt vẫn hoạt động. Cảm biến chỉ điều khiển ánh sáng và độ nghiêng, không ảnh hưởng chọn lá. Rung ngắn khi bấm giao diện, lướt, rút, đáp ô và mở bài; khi xáo có nhịp nghỉ.
 - Nút đóng dùng SVG căn giữa. Cửa sổ lời giải/ủng hộ mở và đóng khoảng 0,8 giây, lớp nền tối/mờ chuyển trong 0,9 giây, dùng chung khi mở cửa sổ lồng nhau.
 - Tắt lớp tô xanh mặc định khi chạm trên điện thoại và viền focus của thao tác con trỏ; vẫn giữ viền vàng khi dùng bàn phím.
 
@@ -39,7 +39,7 @@ Khử răng cưa WebGL, lọc texture theo góc nhìn, giới hạn số điểm
 
 Việc tạo mặt bài được chia thành các bước sau nhịp vẽ, tránh làm lúc lá đang bay hoặc lật. Ảnh thu nhỏ mã hóa bằng `toBlob` bất đồng bộ; các texture và shader của hai lớp vẽ được chuẩn bị trước. Không đổi kích thước bộ đệm GPU trong lúc chọn, bay hoặc mở bài. Giữ nguyên chất liệu, ánh sáng, hạt và các lớp hiệu ứng.
 
-Nghiêng máy yêu cầu [ngữ cảnh bảo mật và đôi khi quyền cảm biến](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/requestPermission_static). [Rung phụ thuộc trình duyệt và phần cứng](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/vibrate); điều khiển rung được ẩn nếu không hỗ trợ. Đã kiểm tra logic quyền, hiệu chỉnh, đổi hướng màn hình và giới hạn nhịp bằng mô phỏng; cần thử cảm giác thực tế trên điện thoại. Không thể kiểm tra cảm biến vật lý bằng chế độ giả lập màn hình trên máy tính.
+Nghiêng máy yêu cầu [ngữ cảnh bảo mật và đôi khi quyền cảm biến](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/requestPermission_static). [Rung phụ thuộc trình duyệt và phần cứng](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/vibrate). Đã kiểm tra kích hoạt bằng lần chạm đầu tiên, quyền cấp/từ chối, hiệu chỉnh, đổi hướng màn hình và giới hạn nhịp bằng mô phỏng. Đã đo tín hiệu Web Audio thật trong Chromium sau thao tác chạm; cảm giác âm thanh, rung và cảm biến trên phần cứng điện thoại vẫn cần đối chiếu trực tiếp.
 
 ## Kiểm tra
 
@@ -56,11 +56,12 @@ node --test tarot-v2/tests/ai.test.cjs tarot-v2/tests/providers.test.cjs
 node --test tarot-v2/tests/mobile.test.cjs
 node --test tarot-v2/tests/carousel.test.cjs tarot-v2/tests/pages.test.cjs
 node tarot-v2/tests/carousel-browser.cjs
+node tarot-v2/tests/feedback-browser.cjs
 ```
 
 Báo cáo JSON và ảnh chụp nằm tại `artifacts/`. Các ảnh chụp không được đưa vào Git theo mặc định.
 
-Kiểm tra vòng lặp riêng ở 1440, 390 và 320 pixel: qua ranh giới theo cả hai chiều, quay trọn vòng, rút ở ranh giới rồi tiếp tục chọn; không trùng lá hoặc chọn tự động. Kiểm tra thao tác chạm không hiện viền xanh, bàn phím vẫn có viền nhận biết. Các thao tác này dùng dữ liệu mô phỏng, không gọi AI/Sheet. `tests/check-connection.cjs` là lệnh thử thật theo yêu cầu, không nằm trong CI; chỉ in nhà cung cấp/model/trạng thái, không in khóa hoặc nội dung lời giải.
+Kiểm tra vòng lặp riêng ở 1440, 390 và 320 pixel: qua ranh giới hai chiều, quay trọn vòng rồi chạm trực tiếp lá, rút một lá, quay ngược ba vòng và chạm lá tiếp theo; không trùng lá hoặc chọn tự động. Bài kiểm tra chạm trực tiếp tái hiện lỗi bộ lọc raycast còn dùng chỉ số tuyến tính; đã đổi sang khoảng cách trong vòng bài như phần hiển thị. Kiểm tra thao tác chạm không hiện viền xanh, bàn phím vẫn có viền nhận biết. Các thao tác này dùng dữ liệu mô phỏng, không gọi AI/Sheet. `tests/check-connection.cjs` là lệnh thử thật theo yêu cầu, không nằm trong CI; chỉ in nhà cung cấp/model/trạng thái, không in khóa hoặc nội dung lời giải.
 
 ## Mã nguồn
 

@@ -43,3 +43,16 @@ test('haptics are brief, throttled, independently mutable and stopped in backgro
   assert.equal(JSON.parse(f.stored.get('tarot-v2:sensory')).haptics, false);
   f.api.toggleHaptics(); f.doc.hidden = true; f.doc.dispatchEvent(new Event('visibilitychange')); assert.equal(f.pulses.at(-1), 0); assert.equal(f.api.feel('select'), false);
 });
+
+test('first interaction enables supported feedback once; further gestures never toggle it off or repeat permission', async () => {
+  const f = fixture(); assert.equal(f.permissions(), 0);
+  assert.equal(await f.api.activate(), true);
+  assert.equal(f.api.status().haptics, true); assert.equal(f.api.status().motion, true);
+  await f.api.activate(); await f.api.activate(); assert.equal(f.permissions(), 1);
+  assert.equal(f.api.status().motion, true);
+  const denied = fixture({ permission: 'denied' });
+  assert.equal(await denied.api.activate(), false); await denied.api.activate();
+  assert.equal(denied.permissions(), 1); assert.equal(denied.api.status().haptics, true);
+  const desktop = fixture({ touch: false }); await desktop.api.activate();
+  assert.equal(desktop.permissions(), 0); assert.equal(desktop.api.sample().active, false);
+});
