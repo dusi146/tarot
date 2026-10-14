@@ -12,18 +12,19 @@
 
   <script src="vendor/three.r128.min.js" defer></script>
   <script src="vendor/gsap.3.12.5.min.js" defer></script>
-  <script src="tarot-motion.js?v=20261014-05" defer></script>
-  <script src="tarot-geometry.js?v=20261014-05" defer></script>
-  <script src="tarot-data.js?v=20261014-05" defer></script>
-  <script src="tarot-persona.js?v=20261014-05" defer></script>
-  <script src="tarot-atmosphere.js?v=20261014-05" defer></script>
-  <script src="tarot-audio.js?v=20261014-05" defer></script>
-  <script src="tarot-profile.js?v=20261014-05" defer></script>
-  <script src="tarot-ui.js?v=20261014-05" defer></script>
-  <script src="tarot-render.js?v=20261014-05" defer></script>
-  <script src="sheets-config.js?v=20261014-05" defer></script>
-  <script src="tarot-sheets.js?v=20261014-05" defer></script>
-  <link rel="stylesheet" href="style.css?v=20261014-05">
+  <script src="tarot-motion.js?v=20261014-06" defer></script>
+  <script src="tarot-geometry.js?v=20261014-06" defer></script>
+  <script src="tarot-data.js?v=20261014-06" defer></script>
+  <script src="tarot-persona.js?v=20261014-06" defer></script>
+  <script src="tarot-reading.js?v=20261014-06" defer></script>
+  <script src="tarot-atmosphere.js?v=20261014-06" defer></script>
+  <script src="tarot-audio.js?v=20261014-06" defer></script>
+  <script src="tarot-profile.js?v=20261014-06" defer></script>
+  <script src="tarot-ui.js?v=20261014-06" defer></script>
+  <script src="tarot-render.js?v=20261014-06" defer></script>
+  <script src="sheets-config.js?v=20261014-06" defer></script>
+  <script src="tarot-sheets.js?v=20261014-06" defer></script>
+  <link rel="stylesheet" href="style.css?v=20261014-06">
 </head>
 <body class="intro-active">
 
@@ -38,7 +39,7 @@
       <span class="brand-name">Ta Văn Rót</span>
     </div>
     <p class="intro-sub" id="introSubtitle">Một khoảng lặng. Một người bạn.</p>
-    <button class="intro-skip" id="skipIntroBtn" type="button">Vào cùng Rót ↗</button>
+    <button class="intro-skip" id="skipIntroBtn" type="button">Vào cùng Rót</button>
   </div>
 
   <!-- HUD Nav (mỏng, dính đỉnh) -->
@@ -128,7 +129,7 @@
           </div>
         </div>
       </details>
-      <button class="btn-main" id="startRitualBtn">Bắt đầu trải bài <span aria-hidden="true">↗</span></button>
+      <button class="btn-main" id="startRitualBtn">Bắt đầu trải bài</button>
     </div>
     <span class="scene-caption" aria-hidden="true">ĐỂ TRỰC GIÁC DẪN LỐI</span>
   </section>
@@ -170,7 +171,7 @@
         <span id="deckPosition" aria-hidden="true">40 / 78</span>
         <button class="deck-arrow" id="nextCardBtn" aria-label="Xem lá bài bên phải">›</button>
       </div>
-      <button class="btn-main" id="pickCenterBtn">Rút lá đang xem <span aria-hidden="true">↗</span></button>
+      <button class="btn-main" id="pickCenterBtn">Rút lá đang xem</button>
     </div>
   </section>
 
@@ -182,7 +183,7 @@
       <span class="reveal-sub-pill">Chạm một lá để mở</span>
     </div>
     <div class="oracle-trigger-bar" id="oracleTriggerBar">
-      <button class="btn-oracle-trigger" id="summonOracleBtn">Xem lời giải ↗</button>
+      <button class="btn-oracle-trigger" id="summonOracleBtn">Xem lời giải</button>
     </div>
   </section>
 
@@ -202,10 +203,10 @@
           <span class="oracle-tag">GÓC NHÌN TỪ RÓT</span>
           <h3 class="oracle-heading" id="oracleHeading">Chiêm Nghiệm</h3>
         </div>
-        <button class="oracle-close" id="closeOracleBtn" aria-label="Đóng">✕</button>
+        <button class="oracle-close" id="closeOracleBtn" aria-label="Đóng"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
       </div>
 
-      <div class="oracle-cards-row" id="oracleCardsRow"></div>
+      <div class="oracle-cards-row" id="oracleCardsRow" aria-label="Các lá trong trải bài"></div>
 
       <div class="oracle-body">
 
@@ -255,7 +256,7 @@
           <div class="donate-txt">
             <h5>Gửi Chút Lúa Cho Rót</h5>
             <p>Bạn có thể gửi chút lúa qua mã QR, hoặc chuyển đổi link đơn hàng để ủng hộ sinh viên Rót nè.</p>
-            <a href="https://hoahong.vercel.app/" target="_blank" rel="noopener noreferrer" class="donate-link">Chuyển đổi link đơn hàng ủng hộ Rót ↗</a>
+            <a href="https://hoahong.vercel.app/" target="_blank" rel="noopener noreferrer" class="donate-link">Chuyển đổi link đơn hàng ủng hộ Rót</a>
           </div>
         </div>
 
@@ -272,6 +273,6 @@
 
   <div class="toast-bubble" id="toastBubble"></div>
 
-  <script src="script.js?v=20261014-05" defer></script>
+  <script src="script.js?v=20261014-06" defer></script>
 </body>
 </html>

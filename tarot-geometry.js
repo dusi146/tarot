@@ -13,13 +13,15 @@
     shape.lineTo(x, y + r); shape.quadraticCurveTo(x, y, x + r, y);
     const bevelDepth = thickness * 0.22, depth = thickness - bevelDepth * 2;
     const raw = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: true,
-      bevelThickness: bevelDepth, bevelSize: bevel, bevelSegments: 3, curveSegments: 10, steps: 1 });
+      bevelThickness: bevelDepth, bevelSize: bevel, bevelSegments: 4, curveSegments: 12, steps: 1 });
     raw.translate(0, 0, -depth / 2);
     const positions = raw.attributes.position, normals = raw.attributes.normal;
     const buckets = [[], [], []];
     for (let i = 0; i < positions.count; i += 3) {
-      const nz = (normals.getZ(i) + normals.getZ(i + 1) + normals.getZ(i + 2)) / 3;
-      const kind = nz > 0.999 ? 1 : nz < -0.999 ? 2 : 0;
+      // Near-flat bevel triangles still belong to the rim, not the printed face.
+      const triangle = [i, i + 1, i + 2];
+      const kind = triangle.every(j => normals.getZ(j) > 0.999999) ? 1
+        : triangle.every(j => normals.getZ(j) < -0.999999) ? 2 : 0;
       for (let j = i; j < i + 3; j++) {
         const px = positions.getX(j), py = positions.getY(j);
         buckets[kind].push(px, py, positions.getZ(j), normals.getX(j), normals.getY(j), normals.getZ(j),

@@ -11,12 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const button = document.getElementById('startRitualBtn');
     if (button) { button.disabled = true; button.textContent = message; }
   }
-  if (!window.THREE || !window.gsap || !window.TarotMotion || !window.TarotGeometry || !window.TarotPersona || !window.TarotAtmosphere || !window.TarotAudio || !window.TarotRender || !window.TAROT_CARDS) {
+  if (!window.THREE || !window.gsap || !window.TarotMotion || !window.TarotGeometry || !window.TarotPersona || !window.TarotReading || !window.TarotAtmosphere || !window.TarotAudio || !window.TarotRender || !window.TAROT_CARDS) {
     sceneFailure('Không tải được bàn bài. Hãy tải lại trang.');
     return;
   }
   const motion = window.TarotMotion;
   const persona = window.TarotPersona;
+  const reading = window.TarotReading;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // =========================================================================
@@ -465,7 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.restore();
     const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding;
     tex.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 16);
-    tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter; tex.generateMipmaps = false;
+    tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.generateMipmaps = true;
     return tex;
   }
 
@@ -475,8 +476,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // VIỀN VÀNG KIM LOẠI LẤP LÁNH CAO CẤP
   const goldRimMat = new THREE.MeshStandardMaterial({
     color: 0xedd59c,
-    metalness: 0.94,
-    roughness: 0.16
+    metalness: 0.78,
+    roughness: 0.32
   });
 
   const backFaceMat = new THREE.MeshBasicMaterial({
@@ -491,12 +492,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const roundedCards = window.TarotGeometry.createCards(THREE, CARD_W, CARD_H, CARD_D);
   const cardGeo = roundedCards.back;
   const selectedCardGeo = roundedCards.selected;
-  const edgeGeo = roundedCards.outline;
-  const edgeLineMat = new THREE.LineBasicMaterial({
-    color: 0xffdf78,
-    transparent: true,
-    opacity: 0.55
-  });
+  const edgeGeo = new THREE.PlaneGeometry(CARD_W + .06, CARD_H + .06);
+  const edgeLineMat = window.TarotRender.outlineMaterial(THREE, CARD_W, CARD_H);
 
   const deckGroup = new THREE.Group();
   scene.add(deckGroup);
@@ -512,7 +509,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const mesh = new THREE.Mesh(cardGeo, initialCardMats);
 
     // GẮN THÊM ĐƯỜNG VIỀN PHÁT SÁNG ÁNH KIM CHO TỪNG LÁ BÀI
-    const edgeLine = new THREE.LineSegments(edgeGeo, edgeLineMat);
+    const edgeLine = new THREE.Mesh(edgeGeo, edgeLineMat);
+    edgeLine.position.z = CARD_D / 2 + .0005;
     edgeLine.visible = false;
     mesh.add(edgeLine);
 
@@ -603,8 +601,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Set encoding before the material's first shader compilation.
       entry.texture.encoding = THREE.sRGBEncoding;
       entry.texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 16);
-      entry.texture.generateMipmaps = false;
-      entry.texture.minFilter = THREE.LinearFilter;
+      entry.texture.generateMipmaps = true;
+      entry.texture.minFilter = THREE.LinearMipmapLinearFilter;
       entry.texture.magFilter = THREE.LinearFilter;
     });
     faceCache.set(data.id, entry);
@@ -667,6 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bottom = Math.max(bottom, (-corner.y * 0.5 + 0.5) * window.innerHeight);
       }
       label.textContent = card.data.viName;
+      label.dataset.tone = reading.themeFor(card.slotTitle, card.slotIndex).key;
       label.style.left = (left + right) / 2 + 'px';
       label.style.top = bottom + 4 + 'px';
       label.style.width = Math.min(180, Math.max(64, (right - left) * 1.2)) + 'px';
@@ -865,12 +864,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!dockBottom) return;
 
     dockBottom.innerHTML = appState.activeSpread.slots.map((slot, idx) => `
-      <button type="button" class="dock-slot" id="dockSlot-${idx}" data-idx="${idx}" aria-label="${slot.title}: chưa rút bài">
+      <button type="button" class="dock-slot" id="dockSlot-${idx}" data-idx="${idx}" data-tone="${reading.themeFor(slot.title, idx).key}" aria-label="${slot.title}: chưa rút bài">
         <span class="slot-role">${slot.title}</span>
         <div class="slot-thumb" id="dockThumb-${idx}">
-          <span class="slot-empty-icon">✦</span>
+          <span class="slot-empty-icon" aria-hidden="true"></span>
         </div>
-        <span class="slot-name" id="dockName-${idx}">—</span>
+        <span class="slot-name" id="dockName-${idx}"></span>
       </button>
     `).join('');
 
@@ -902,7 +901,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (title) title.textContent = current < total ? appState.activeSpread.slots[current].title : 'Đã chọn đủ lá';
     if (pickButton) {
       pickButton.disabled = current >= total || appState.isTransitioning || appState.isPickingCard || moving;
-      pickButton.innerHTML = appState.isPickingCard ? 'Đang nâng lá bài…' : 'Rút lá đang xem <span aria-hidden="true">↗</span>';
+      pickButton.textContent = appState.isPickingCard ? 'Đang nâng lá bài' : 'Rút lá đang xem';
     }
     const scrubber = document.getElementById('deckScrubber'); if (scrubber) scrubber.disabled = current >= total || appState.isTransitioning || appState.isPickingCard;
     for (const id of ['previousCardBtn', 'nextCardBtn']) {
@@ -945,6 +944,8 @@ document.addEventListener('DOMContentLoaded', () => {
     mesh.material = [goldRimMat, backFaceMat, frontMat];
     const card = { data, mesh, slotIndex, slotTitle: appState.activeSpread.slots[slotIndex].title,
       isReversed: !!data.isReversed, isFlipped: false, isFlipping: false, isPlaced: false, face };
+    mesh.children[0].material = edgeLineMat.clone();
+    mesh.children[0].material.uniforms.uColor.value.set(reading.themeFor(card.slotTitle, slotIndex).color);
     appState.selectedCards.push(card);
     face.promise.then(result => {
       if (pickSession !== sessionVersion) return;
@@ -1002,7 +1003,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const labels = document.getElementById('cardLabels');
     if (labels) labels.innerHTML = appState.selectedCards.map(card => '<span class="card-label" id="cardLabel-' + card.slotIndex + '" hidden></span>').join('');
     const revealAction = document.getElementById('summonOracleBtn');
-    if (revealAction) { revealAction.textContent = 'Mở tất cả ↗'; revealAction.disabled = true; }
+    if (revealAction) { revealAction.textContent = 'Mở tất cả'; revealAction.disabled = true; }
     document.getElementById('oracleTriggerBar')?.classList.add('show');
     hoveredCardMesh = null;
     ribbon.velocity = 0;
@@ -1019,6 +1020,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const delay = reducedMotion ? 0 : .08 + index * .07;
       gsap.delayedCall(delay, () => {
         card.mesh.visible = true;
+        card.mesh.children[0].visible = true;
         document.getElementById('dockSlot-' + card.slotIndex)?.classList.add('departing');
         const target = setCardTarget(card, false);
         gsap.to(card.mesh.position, { x: target.x, y: target.y, z: target.z, duration: riseDuration, ease: 'power3.inOut', overwrite: true });
@@ -1069,7 +1071,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (appState.selectedCards.every(c => c.isFlipped)) {
         document.getElementById('oracleTriggerBar')?.classList.add('show');
         const action = document.getElementById('summonOracleBtn');
-        if (action) { action.textContent = 'Xem lời giải ↗'; action.disabled = false; }
+        if (action) { action.textContent = 'Xem lời giải'; action.disabled = false; }
         const title = document.querySelector('.reveal-title-pill');
         const subtitle = document.querySelector('.reveal-sub-pill');
         if (title) title.textContent = 'Quẻ bài đã mở';
@@ -1402,7 +1404,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
+    const text = reading.cleanText(data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim());
     if (!text) throw new Error('Gemini không trả về lời giải.');
     return text;
   }
@@ -1422,7 +1424,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!res.ok) throw new Error(`Gemini API Error: ${res.status}`);
     const data = await res.json();
-    const reply = data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
+    const reply = reading.cleanText(data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim());
     if (!reply) throw new Error('Gemini không trả về câu trả lời.');
     history.push({ role: 'rot', text: reply });
     return { reply, nudge: completed === 2, history };
@@ -1689,16 +1691,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (readingLoader) readingLoader.style.display = 'flex';
       if (readingText) readingText.innerHTML = '';
       if (oracleHeading) {
-        oracleHeading.textContent = appState.userQuestion ? `"${appState.userQuestion}"` : "Chiêm Nghiệm Hành Trình";
+        oracleHeading.textContent = appState.userQuestion || 'Chiêm nghiệm hành trình';
       }
 
       if (oracleCardsRow) {
-        oracleCardsRow.innerHTML = appState.selectedCards.map(c => `
-          <div class="mini-card-pill">
-            <img src="${BASE_IMAGE_PATH}${c.data.file}" alt="${c.data.viName}" class="${c.isReversed ? 'reversed-thumb' : ''}">
-            <span>${c.slotTitle}: ${c.data.viName} ${c.isReversed ? '<span class="slot-reversed-badge">Ngược</span>' : ''}</span>
-          </div>
-        `).join('');
+        reading.renderCards(oracleCardsRow, appState, document, BASE_IMAGE_PATH);
       }
 
       try {
@@ -1709,7 +1706,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (readingLoader) readingLoader.style.display = 'none';
 
         // A single update lets the user read immediately and avoids per-character layout work.
-        if (readingText) readingText.textContent = text;
+        if (readingText) reading.render(readingText, text, appState, document);
         const rBlock = document.getElementById('ratingBlock');
         const fBlock = document.getElementById('followupBlock');
         const dBlock = document.getElementById('donateBlock');
@@ -1786,7 +1783,7 @@ document.addEventListener('DOMContentLoaded', () => {
         invitation.textContent = persona.DONATION_NUDGE;
         const link = document.createElement('a'); link.className = 'donate-link';
         link.href = persona.DONATION_URL; link.target = '_blank'; link.rel = 'noopener noreferrer';
-        link.textContent = 'Chuyển đổi link đơn hàng ủng hộ Rót ↗';
+        link.textContent = 'Chuyển đổi link đơn hàng ủng hộ Rót';
         loading.appendChild(invitation); loading.appendChild(link);
       }
       if (followupMsgs) followupMsgs.scrollTop = followupMsgs.scrollHeight;
@@ -1914,6 +1911,8 @@ document.addEventListener('DOMContentLoaded', () => {
       mesh.rotation.set(-0.35, 0, 0);
       mesh.scale.setScalar(1);
       mesh.children[0].visible = false;
+      if (mesh.children[0].material !== edgeLineMat) mesh.children[0].material.dispose();
+      mesh.children[0].material = edgeLineMat;
     });
     // Keep a small warm cache, evicting older artwork between readings.
     for (const [key, face] of faceCache) {

@@ -21,7 +21,16 @@ test('antialiasing uses multisampling and a final screen pass at the drawing-buf
 });
 
 test('quality ratios supersample standard screens without exceeding the pixel budget', () => {
-  assert.equal(render.preferredRatio(1280, 720, 1), 1.5);
+  assert.equal(render.preferredRatio(1280, 720, 1), 2);
   assert.equal(render.preferredRatio(390, 844, 3), 2.5);
   assert.ok(3840 * 2160 * render.preferredRatio(3840, 2160, 3) ** 2 <= 3840 * 2160);
+});
+
+test('card outlines use derivative antialiasing and independently tinted materials', () => {
+  const shared = render.outlineMaterial(THREE, .8, 1.4), selected = shared.clone();
+  selected.uniforms.uColor.value.set('#91cfc7');
+  assert.equal(shared.extensions.derivatives, true);
+  assert.ok(shared.fragmentShader.includes('fwidth(d)'));
+  assert.notEqual(selected.uniforms.uColor.value.getHexString(), shared.uniforms.uColor.value.getHexString());
+  shared.dispose(); selected.dispose();
 });

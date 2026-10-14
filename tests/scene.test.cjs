@@ -57,6 +57,7 @@ function scene({ textureFailure = false, oracleDeferred = false, oracleFailure =
   const three = { ...THREE, WebGLRenderer: Renderer, TextureLoader };
   window.THREE = three;
   window.TarotPersona = require('../tarot-persona.js');
+  window.TarotReading = require('../tarot-reading.js');
   window.TarotAtmosphere = require('../tarot-atmosphere.js');
   window.TarotAudio = require('../tarot-audio.js');
   window.TarotProfile = require('../tarot-profile.js');

@@ -354,6 +354,39 @@ body[data-stage='reveal'] .slot-thumb { width: 22px; height: 38px; }
   body.intro-active .config-panel { transform: none; }
   .dob-row .glass-select { padding: 0 3px; font-size: 11px; }
 }
+/* A consistent reading palette expresses the role, never a verdict about fate. */
+[data-tone='reflection'] { --reading-accent: #c4b5e8; --reading-rgb: 196,181,232; }
+[data-tone='clarity'] { --reading-accent: #91cfc7; --reading-rgb: 145,207,199; }
+[data-tone='possibility'] { --reading-accent: #e4c38b; --reading-rgb: 228,195,139; }
+[data-tone='grounding'] { --reading-accent: #b1c7a5; --reading-rgb: 177,199,165; }
+[data-tone='caution'] { --reading-accent: #dba8a0; --reading-rgb: 219,168,160; }
+[data-tone='insight'] { --reading-accent: #a9c7e2; --reading-rgb: 169,199,226; }
+.dock-slot.current, .dock-slot.revealed { border-color: rgba(var(--reading-rgb,228,195,139),.48); background: linear-gradient(155deg, rgba(var(--reading-rgb,228,195,139),.1), rgba(18,21,42,.72)); }
+.dock-slot .slot-role { color: var(--reading-accent, var(--text-2)); }
+.card-label[data-tone] { color: var(--reading-accent); }
+.oracle-sheet { border-color: rgba(225,194,138,.2); }
+.oracle-heading { font-size: 26px; line-height: 1.5; letter-spacing: -.025em; text-wrap: balance; }
+.oracle-close svg { width: 18px; height: 18px; stroke: var(--text-2); stroke-width: 1.6; stroke-linecap: round; fill: none; }
+.oracle-cards-row { gap: 10px; padding-bottom: 20px; scrollbar-width: thin; scroll-snap-type: x proximity; }
+.reading-card { display: flex; align-items: center; gap: 12px; flex: 0 0 196px; padding: 13px; border: 1px solid rgba(var(--reading-rgb),.26); border-top: 2px solid rgba(var(--reading-rgb),.65); border-radius: 13px; background: linear-gradient(140deg, rgba(var(--reading-rgb),.075), rgba(13,17,35,.45)); scroll-snap-align: start; }
+.reading-card img { flex: 0 0 33px; width: 33px; height: 57px; object-fit: cover; border-radius: 4px; }
+.reading-card-copy { min-width: 0; }
+.reading-card-role, .reading-section-role { color: var(--reading-accent); font-size: 10px; font-weight: 600; line-height: 1.7; }
+.reading-card h4 { color: #f0eaf1; font: 500 14px/1.5 var(--font-serif); margin-top: 2px; }
+.reading-orientation { display: inline-block; margin-top: 6px; padding: 2px 7px; border: 1px solid rgba(var(--reading-rgb,196,181,232),.2); border-radius: 5px; font-size: 9px; line-height: 1.6; color: var(--text-2); background: rgba(var(--reading-rgb,196,181,232),.04); }
+.reading-card-hint { margin-top: 7px; color: var(--text-3); font-size: 9px; line-height: 1.6; }
+.reading-text { display: flex; flex-direction: column; gap: 25px; white-space: normal; color: #d8d5e4; }
+.reading-text.reading-plain { display: block; white-space: pre-wrap; }
+.reading-section { padding-left: 16px; border-left: 2px solid rgba(var(--reading-rgb,196,181,232),.36); }
+.reading-intro { padding-left: 0; border: 0; color: #e0d9e6; }
+.reading-section h4 { color: var(--reading-accent, #c4b5e8); font: 500 24px/1.5 var(--font-serif); letter-spacing: -.02em; margin: 3px 0 4px; }
+.reading-section p + p, .reading-section .reading-orientation + p { margin-top: 13px; }
+.reading-section p { font-size: 14px; line-height: 2; }
+.reading-section p.reading-section-role { font-family: var(--font-body); font-size: 10px; line-height: 1.7; margin: 0; }
+.reading-summary { --reading-accent: #e4c38b; --reading-rgb: 228,195,139; padding-top: 4px; }
+.reading-advice { --reading-accent: #91cfc7; --reading-rgb: 145,207,199; padding: 19px; border: 1px solid rgba(145,207,199,.22); border-radius: 14px; background: linear-gradient(130deg, rgba(145,207,199,.08), rgba(145,207,199,.025)); }
+.reading-advice h4 { font-size: 22px; margin-top: 0; }
+@media (max-width: 760px) { .oracle-heading { font-size: 23px; } .reading-card { flex-basis: 190px; } .reading-section h4 { font-size: 22px; } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
