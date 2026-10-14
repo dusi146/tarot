@@ -19,7 +19,7 @@ Xem [báo cáo phân tích và sửa 3D](3D_REVIEW.md) để biết nguyên nhâ
 - Tùy chỉnh thêm có màu vàng và mở/đóng bằng chuyển động có thể đảo chiều giữa chừng. Lá được chọn bay tới đúng khung ảnh ở hàng dưới; khi đủ lá, dừng nhẹ rồi bay lần lượt lên bàn.
 - Khi giữ xáo, thay phần trăm bằng những lời nhắn chậm rãi. `tarot-profile.js` nhớ tên, giới tính, ngày sinh, tông giọng và kiểu trải bài trong trình duyệt hiện tại; có nút quên thông tin. Không lưu câu hỏi hay tâm sự vào bộ nhớ này. Không đồng bộ hồ sơ giữa các thiết bị.
 
-Kiểm tra hình ảnh trực tiếp hiện bị giới hạn: trình duyệt kiểm tra không truy cập được bản xem trước; Computer Use dừng vì không xác định chắc chắn URL của Chrome. Kiểm thử mô phỏng không thay thế việc xem chuyển động trên GPU và nghe loa thật. Các phản hồi AI trong kiểm thử là mô phỏng; chất lượng văn phong thực tế còn phụ thuộc Gemini và API key khi chạy web.
+Đã kiểm tra giao diện trên web public ở khung 1280×720 và 390×844: intro, tùy chỉnh, khung nhận bài và nhóm bài bay lên; trình duyệt không báo lỗi đồ họa. Đã nhập thông tin thử và xác nhận khôi phục đúng sau khi tải lại. Trình duyệt kiểm tra không truy cập được bản xem trước tại máy, nên việc xác minh hình ảnh được thực hiện sau triển khai. Chưa kiểm tra âm thanh trên loa thật. Các phản hồi AI trong kiểm thử là mô phỏng; chất lượng văn phong thực tế còn phụ thuộc Gemini và API key khi chạy web.
 
 ## Google Sheets
 

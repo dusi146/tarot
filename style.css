@@ -325,7 +325,7 @@ body.intro-complete .config-panel > :nth-child(5) { animation-delay: .28s; }
 .personal-options summary span { color: #f6d38c; }
 .personal-options[data-expanded='false'] summary span { transform: rotate(0); }
 .options-content { padding: 0; margin: 0; }
-.options-content > * { margin-left: 15px; margin-right: 15px; }
+.options-content > * { flex-shrink: 0; margin-left: 15px; margin-right: 15px; }
 .options-content > :first-child { margin-top: 10px; }
 .options-content > :last-child { margin-bottom: 18px; }
 .profile-memory { font-size: 10px; line-height: 1.9; color: var(--text-3); }
