@@ -22,7 +22,7 @@
       .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '$1 ($2)')
       .replace(/^[ \t]{0,3}#{1,6}[ \t]+/gm, '').replace(/^[ \t]*(?:[-*•▪][ \t]+|>[ \t]?)/gm, '')
       .replace(/\*([^*\n]+)\*/g, '$1').replace(/`([^`]+)`/g, '$1')
-      .replace(/[\p{Extended_Pictographic}\uFE0F\u200D✦★☆]/gu, '')
+      .replace(/[\p{Extended_Pictographic}\uFE0F\u200D\u20E3✦★☆]/gu, '')
       .replace(/[ \t]*[—–][ \t]*/g, ', ').replace(/[↗↘]/g, '').replace(/→/g, ' đến ')
       .replace(/^[ \t]*[-_=]{3,}[ \t]*$/gm, '').replace(/^[ \t]+/gm, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
   }
@@ -37,7 +37,9 @@
       const normalized = fold(title).replace(/[:.]+$/, '');
       const index = cards.findIndex((card, i) => {
         const slot = fold(state.activeSpread.slots[i].title);
-        return title.length < 140 && (normalized === slot || normalized.startsWith(slot + ':') || normalized.startsWith(slot + ',') || normalized.startsWith(slot + ' ')) && (normalized === slot || normalized.includes(fold(card.data.viName)));
+        const candidate = normalized.replace(/[()[\]]/g, '').replace(/\s*[:,\-]\s*/g, ' ').replace(/\s+/g, ' ').trim();
+        const heading = slot + ' ' + fold(card.data.viName);
+        return candidate === slot || ['', ' xuoi', ' nguoc', ' bai xuoi', ' bai nguoc'].some(suffix => candidate === heading + suffix);
       });
       const advice = ['mot buoc nho cho ban', 'dieu ban co the lam', 'loi khuyen danh cho ban'].includes(normalized);
       const summary = ['goc nhin chung', 'tong quan', 'tong ket'].includes(normalized);
@@ -50,8 +52,49 @@
     }
     flushSection(); return list;
   }
-  function render(container, text, state, document) {
+  function assertComplete(text, state) {
     const blocks = sections(text, state);
+    const cards = blocks.filter(block => block.kind === 'card');
+    const filled = block => block && block.paragraphs.join(' ').trim().length >= 40;
+    const valid = cards.length === state.selectedCards.length && state.selectedCards.every((card, i) =>
+      cards.filter(block => block.slot === state.activeSpread.slots[i].title && block.title === card.data.viName).length === 1)
+      && cards.every(filled) && filled(blocks.find(block => block.kind === 'summary')) && filled(blocks.find(block => block.kind === 'advice'));
+    if (!valid) {
+      const error = new Error('Rót chưa nhận đủ nội dung lời giải. Bạn nhấn Thử lại lời giải nhé, các lá đã chọn vẫn được giữ.');
+      error.code = 'INCOMPLETE_READING'; throw error;
+    }
+    return text;
+  }
+  function schema(state) {
+    const properties = {}, required = [];
+    state.selectedCards.forEach((card, i) => {
+      const key = 'card_' + i; required.push(key);
+      properties[key] = { type: 'string', description: `${state.activeSpread.slots[i].title}: ${card.data.viName}, ${card.isReversed ? 'ngược' : 'xuôi'}. Viết 2 đến 3 câu phân tích gắn với câu hỏi, không tiêu đề, không bỏ trống.` };
+    });
+    return { type: 'json_schema', json_schema: { name: 'tarot_reading', strict: true, schema: {
+      type: 'object', additionalProperties: false, required: ['greeting', 'cards', 'summary', 'advice'],
+      properties: {
+        greeting: { type: 'string', description: 'Một lời chào ngắn, có thể để trống.' },
+        cards: { type: 'object', additionalProperties: false, required, properties },
+        summary: { type: 'string', description: 'Góc nhìn chung: trả lời thẳng câu hỏi ngay câu đầu, 3 câu ngắn, khoảng 45 đến 70 từ. Không kể hình ảnh lá, không chép lại từng lá, không lòng vòng.' },
+        advice: { type: 'string', description: 'Một bước nhỏ cho bạn: một hành động cụ thể, vừa sức, kèm cách bắt đầu. 2 câu ngắn, khoảng 30 đến 50 từ.' }
+      }
+    } } };
+  }
+  function fromStructured(value, state) {
+    const prose = text => typeof text === 'string' ? cleanText(text).replace(/\s+/g, ' ').trim() : '';
+    const fail = () => { const error = new Error('Lời giải chưa đủ các phần cần thiết.'); error.code = 'INCOMPLETE_READING'; throw error; };
+    if (!value || typeof value !== 'object' || !value.cards || typeof value.cards !== 'object') fail();
+    const intro = prose(value.greeting), summary = prose(value.summary), advice = prose(value.advice);
+    const body = state.selectedCards.map((card, index) => {
+      const content = prose(value.cards['card_' + index]); if (content.length < 40) fail();
+      return `${state.activeSpread.slots[index].title}: ${card.data.viName}\n${content}`;
+    });
+    if (summary.length < 40 || advice.length < 40) fail();
+    return assertComplete([intro, ...body, 'Góc nhìn chung\n' + summary, 'Một bước nhỏ cho bạn\n' + advice].filter(Boolean).join('\n\n'), state);
+  }
+  function render(container, text, state, document) {
+    const blocks = sections(text, state).filter(block => block.paragraphs.length);
     container.textContent = '';
     container.classList?.remove('reading-plain');
     if (!blocks.some(block => block.title)) { container.classList?.add('reading-plain'); container.textContent = cleanText(text); return; }
@@ -82,7 +125,7 @@
       item.appendChild(image); item.appendChild(text); container.appendChild(item);
     });
   }
-  const api = { themeFor, cleanText, sections, render, renderCards };
+  const api = { themeFor, cleanText, sections, assertComplete, schema, fromStructured, render, renderCards };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.TarotReading = api;
 })(typeof window === 'object' ? window : this);

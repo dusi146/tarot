@@ -1388,9 +1388,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // 10. ĐỌC BÀI VÀ TÂM SỰ QUA GROQ TRÊN APPS SCRIPT
   // =========================================================================
   async function requestOracleReading() {
+    const currentSpread = { activeSpread: appState.activeSpread, selectedCards: appState.selectedCards.slice() };
     const text = reading.cleanText(await ai.read(appState));
     if (!text) throw new Error('Rót chưa nhận được lời giải đầy đủ.');
-    return text;
+    return reading.assertComplete(text, currentSpread);
   }
 
   async function requestFollowUp(userMsg) {
@@ -1634,11 +1635,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const readingText = document.getElementById('readingText');
   const oracleHeading = document.getElementById('oracleHeading');
   const oracleCardsRow = document.getElementById('oracleCardsRow');
+  const retryReadingBtn = document.getElementById('retryReadingBtn');
 
   let oraclePending = false;
-  if (summonOracleBtn) {
-    summonOracleBtn.addEventListener('click', async () => {
-      if (appState.currentStage !== 'reveal' || appState.isTransitioning) return;
+  async function openOracleReading() {
+      if (!['reveal', 'oracle'].includes(appState.currentStage) || appState.isTransitioning) return;
       const unopened = appState.selectedCards.filter(card => !card.isFlipped);
       if (unopened.length) {
         summonOracleBtn.textContent = 'Đang mở…';
@@ -1661,6 +1662,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const readingSheetSession = beginSheetReading();
       sheetSession = readingSheetSession;
       oraclePending = true;
+      if (retryReadingBtn) { retryReadingBtn.hidden = true; retryReadingBtn.disabled = true; }
       if (readingLoader) readingLoader.style.display = 'flex';
       if (readingText) readingText.innerHTML = '';
       if (oracleHeading) {
@@ -1694,11 +1696,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (requestSession !== sessionVersion) return;
         if (readingLoader) readingLoader.style.display = 'none';
         if (readingText) { readingText.classList.add('reading-plain'); readingText.textContent = err.message || 'Rót chưa kết nối được. Bạn thử lại sau một chút nhé.'; }
+        if (retryReadingBtn) retryReadingBtn.hidden = false;
       } finally {
-        if (requestSession === sessionVersion) oraclePending = false;
+        if (requestSession === sessionVersion) { oraclePending = false; if (retryReadingBtn) retryReadingBtn.disabled = false; }
       }
-    });
   }
+  summonOracleBtn?.addEventListener('click', openOracleReading);
+  retryReadingBtn?.addEventListener('click', openOracleReading);
 
   function handleCloseOracle() {
     appState.currentStage = 'reveal';
@@ -1872,6 +1876,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ratingNote = document.getElementById('ratingNote');
     if (ratingNote) ratingNote.textContent = '';
     oraclePending = false;
+    if (retryReadingBtn) retryReadingBtn.hidden = true;
     window.speechSynthesis?.cancel();
     if (ttsBtnLabel) ttsBtnLabel.textContent = 'Nghe đọc';
     cardMeshes.forEach((mesh, index) => {

@@ -44,6 +44,21 @@ test('card interpretations, summary and advice form separate sections in order',
   assert.equal(result[2].reversed, true);
   assert.equal(result[5].paragraphs[0], 'Hãy viết ra điều bạn có thể chủ động hôm nay.');
 });
+test('a short prose sentence mentioning a position and card is never swallowed as a heading', () => {
+  const sentence = 'Quá Khứ: Kẻ Khờ cho thấy bạn từng bắt đầu khá vội vàng.';
+  const result = reading.sections('Quá Khứ: Kẻ Khờ\n' + sentence, state);
+  assert.equal(result.length, 1); assert.equal(result[0].paragraphs[0], sentence);
+});
+test('empty card interpretation is rejected rather than shown as a completed reading', () => {
+  const single = { activeSpread: { slots: [{ title: 'Thông Điệp' }] }, selectedCards: [{ data: { viName: 'Vua Xu' }, isReversed: false }] };
+  const incomplete = 'Thông Điệp: Vua Xu\n\nGóc nhìn chung\nVua Xu nói về sự ổn định, nhưng phần phân tích riêng đang bị bỏ trống.\n\nMột bước nhỏ cho bạn\nHãy viết ra một việc thực tế bạn có thể bắt đầu và hoàn thành trong ngày hôm nay.';
+  assert.throws(() => reading.assertComplete(incomplete, single), { code: 'INCOMPLETE_READING' });
+  const fields = { greeting: '', cards: { card_0: 'Bạn đang cần một nền tảng chắc chắn hơn, nên hãy ưu tiên điều có thể duy trì đều đặn thay vì kết quả nhanh.' },
+    summary: 'Hôm nay hãy tập trung vào việc ổn định sinh hoạt, vì nền tảng tốt giúp bạn quyết định bớt vội vàng.',
+    advice: 'Chọn một thói quen nhỏ và dành mười phút thực hiện ngay hôm nay, rồi ghi lại điều bạn đã hoàn thành.' };
+  const complete = reading.fromStructured(fields, single);
+  assert.equal(reading.assertComplete(complete, single), complete);
+});
 
 test('reading rendering never interprets model output as HTML', () => {
   class Element {

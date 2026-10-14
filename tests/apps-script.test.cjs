@@ -5,14 +5,14 @@ const fs = require('node:fs');
 const crypto = require('node:crypto');
 const persona = require('../tarot-persona.js');
 
-function server({ key = 'test-server-key', status = 200, finish = 'stop', retry = '40' } = {}) {
+function server({ key = 'test-server-key', status = 200, finish = 'stop', retry = '40', content } = {}) {
   const cache = new Map(), calls = [], rows = [];
   const sheet = { getLastRow: () => rows.length, appendRow: row => rows.push(row), setFrozenRows() {},
     getRange: (...args) => ({ setFontWeight() { return this; }, setBackground() { return this; }, setFontColor() { return this; },
       getDisplayValues: () => rows.slice(1).map(row => row.slice(0, 2).map(value => String(value).replace(/^'/, ''))),
       setValues(values) { const [row, col] = args; values[0].forEach((value, i) => { rows[row - 1][col - 1 + i] = value; }); } }) };
   let created = false;
-  const context = vm.createContext({ TarotServerPersona: persona, TarotServerCards: [{ id: '00', viName: 'Kẻ Khờ', name: 'The Fool', meaning: 'Khởi đầu', revMeaning: 'Do dự' }],
+  const context = vm.createContext({ TarotServerPersona: persona, TarotServerReading: require('../tarot-reading.js'), TarotServerCards: [{ id: '00', viName: 'Kẻ Khờ', name: 'The Fool', meaning: 'Khởi đầu', revMeaning: 'Do dự' }],
     PropertiesService: { getScriptProperties: () => ({ getProperty: () => key }) },
     CacheService: { getScriptCache: () => ({ get: name => cache.get(name), put: (name, value) => cache.set(name, value), remove: name => cache.delete(name) }) },
     LockService: { getScriptLock: () => ({ tryLock: () => true, releaseLock() {} }) },
@@ -22,8 +22,13 @@ function server({ key = 'test-server-key', status = 200, finish = 'stop', retry 
     SpreadsheetApp: { openById: () => ({ getSheetByName: () => created ? sheet : null, insertSheet: () => { created = true; return sheet; } }) },
     UrlFetchApp: { fetch: (url, options) => {
       calls.push({ url, options, payload: JSON.parse(options.payload) });
+      const payload = JSON.parse(options.payload);
+      const generated = content === undefined ? payload.response_format ? JSON.stringify({ greeting: 'Chào bạn.',
+        cards: { card_0: 'Lá bài gợi ý một khởi đầu cần cân nhắc kỹ, gắn với nhu cầu và điều bạn có thể chủ động trong công việc.' },
+        summary: 'Bạn cần chọn một hướng đi cụ thể, vì sự do dự đang khiến việc quan trọng bị trì hoãn.',
+        advice: 'Hãy viết ra một việc có thể hoàn thành hôm nay và dành mười phút bắt đầu việc đó.' }) : 'Chào bạn. Một góc nhìn mới.' : content;
       return { getResponseCode: () => status, getAllHeaders: () => ({ 'Retry-After': retry }),
-        getContentText: () => JSON.stringify({ choices: [{ finish_reason: finish, message: { content: 'Chào bạn. Một góc nhìn mới.', reasoning: 'private reasoning' } }] }) };
+        getContentText: () => JSON.stringify({ choices: [{ finish_reason: finish, message: { content: generated, reasoning: 'private reasoning' } }] }) };
     } }
   });
   vm.runInContext(fs.readFileSync(require.resolve('../apps-script/backend.js'), 'utf8'), context);
@@ -79,7 +84,16 @@ test('18-column sheet protocol survives, feedback uses exact time and IP and val
   assert.equal(app.rows[1][14], 'Hỏi'); assert.equal(app.rows[1][15], 'Đáp');
 });
 test('truncated completions are not presented as a complete reading', () => {
-  const app = server({ finish: 'length' }); assert.equal(app.post({ action: 'ai_reading', state }).code, 'PROVIDER_ERROR');
+  const app = server({ finish: 'length' }); assert.equal(app.post({ action: 'ai_reading', state }).code, 'INCOMPLETE_READING');
+});
+test('structured reading asks for every card and rejects empty content even when Groq reports stop', () => {
+  const app = server({ content: JSON.stringify({ greeting: '', cards: { card_0: '' }, summary: 'Nội dung bị dồn vào phần tổng hợp dù không có phân tích riêng cho lá bài.', advice: 'Hãy bắt đầu bằng một hành động nhỏ mà bạn có thể chủ động hoàn thành hôm nay.' }) });
+  assert.equal(app.post({ action: 'ai_reading', state }).code, 'INCOMPLETE_READING');
+  const schema = app.calls[0].payload.response_format.json_schema;
+  assert.equal(schema.strict, true); assert.deepEqual(schema.schema.properties.cards.required, ['card_0']);
+  assert.ok(![...app.cache.keys()].some(key => key.startsWith('reply:')), 'incomplete answer cannot be cached');
+  const valid = server().post({ action: 'ai_reading', state });
+  assert.match(valid.text, /Thông Điệp: Kẻ Khờ\nLá bài/); assert.match(valid.text, /Góc nhìn chung/);
 });
 test('pasteable Apps Script bundle includes all real cards and the current four tone prompts', () => {
   const app = server();

@@ -58,12 +58,12 @@ function groq_(data) {
     });
     if (history[history.length - 1].role !== 'user') throw failure_('INVALID_REQUEST', 'Thiếu câu hỏi mới.');
     payload = TarotServerPersona.conversationPayload(state, history);
-  } else payload = TarotServerPersona.readingPayload(state);
+  } else payload = TarotServerPersona.readingPayload(state, { structured: true });
   var messages = [{ role: 'system', content: payload.systemInstruction.parts[0].text }].concat(payload.contents.map(function (item) {
     return { role: item.role === 'model' ? 'assistant' : 'user', content: item.parts.map(function (part) { return part.text; }).join('\n') };
   }));
   var cache = CacheService.getScriptCache();
-  var digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, JSON.stringify({ action: data.action, messages: messages }));
+  var digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, JSON.stringify({ action: data.action, format: followup ? 1 : 2, messages: messages }));
   var cacheKey = 'reply:' + Utilities.base64EncodeWebSafe(digest);
   var lock = LockService.getScriptLock();
   if (!lock.tryLock(1500)) throw failure_('BUSY', 'Dịch vụ đang bận.', 5);
@@ -79,12 +79,14 @@ function groq_(data) {
     cache.put(countKey, String(count + 1), 120); cache.put('pending:' + cacheKey, '1', 90);
   } finally { lock.releaseLock(); }
   try {
+    var request = { model: TAROT_GROQ_MODEL, messages: messages,
+      temperature: payload.generationConfig.temperature, max_completion_tokens: followup ? 1400 : 3200,
+      reasoning_effort: 'low', include_reasoning: false };
+    if (!followup) request.response_format = TarotServerReading.schema(state);
     var response = UrlFetchApp.fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'post', contentType: 'application/json', muteHttpExceptions: true,
       headers: { Authorization: 'Bearer ' + key },
-      payload: JSON.stringify({ model: TAROT_GROQ_MODEL, messages: messages,
-        temperature: payload.generationConfig.temperature, max_completion_tokens: followup ? 1400 : 3200,
-        reasoning_effort: 'low', include_reasoning: false })
+      payload: JSON.stringify(request)
     });
     var status = response.getResponseCode();
     if (status === 429) {
@@ -98,7 +100,11 @@ function groq_(data) {
     if (status !== 200) throw failure_('PROVIDER_ERROR', 'Groq chưa phản hồi.');
     var result; try { result = JSON.parse(response.getContentText()); } catch (_) { throw failure_('PROVIDER_ERROR', 'Phản hồi không hợp lệ.'); }
     var choice = result.choices && result.choices[0], content = choice && choice.message && choice.message.content;
-    if (typeof content !== 'string' || !content.trim() || choice.finish_reason === 'length') throw failure_('PROVIDER_ERROR', 'Lời giải chưa hoàn chỉnh.');
+    if (typeof content !== 'string' || !content.trim() || choice.finish_reason === 'length') throw failure_('INCOMPLETE_READING', 'Lời giải chưa hoàn chỉnh.');
+    if (!followup) {
+      var structured; try { structured = JSON.parse(content); } catch (_) { throw failure_('INCOMPLETE_READING', 'Lời giải chưa đủ cấu trúc.'); }
+      content = TarotServerReading.fromStructured(structured, state);
+    }
     var answer = { status: 'success', text: content.trim(), model: TAROT_GROQ_MODEL };
     cache.put(cacheKey, JSON.stringify(answer), 300);
     return answer;
@@ -152,7 +158,7 @@ function doPost(e) {
 function doGet(e) {
   try {
     if (e && e.parameter && e.parameter.action === 'ai_health') return json_({ status: 'success', service: 'tarot-groq', version: 1,
-      configured: !!PropertiesService.getScriptProperties().getProperty('GROQ_API_KEY'), model: TAROT_GROQ_MODEL });
+      configured: !!PropertiesService.getScriptProperties().getProperty('GROQ_API_KEY'), model: TAROT_GROQ_MODEL, readingFormat: 2 });
     var sheet = sheet_().getSheetByName('TopDonate');
     if (!sheet) return json_({ status: 'success', data: [] });
     var last = sheet.getLastRow(), list = [];

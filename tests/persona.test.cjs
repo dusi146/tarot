@@ -53,3 +53,11 @@ test('conversation includes every card, orientation, full reading and previous t
   assert.deepEqual(payload.contents.map(item => item.role), ['user', 'model', 'user']);
   assert.equal(payload.contents[1].parts[0].text, 'Trả lời đầu');
 });
+test('general conclusion answers the question directly across all tones and structured output keeps card analysis separate', () => {
+  for (const userVibe of Object.keys(persona.TONES)) {
+    const prompt = persona.readingPayload({ ...state, userVibe }, { structured: true }).systemInstruction.parts[0].text;
+    assert.ok(prompt.includes('NGAY CÂU ĐẦU')); assert.ok(prompt.includes('45 đến 70 từ'));
+    assert.ok(prompt.includes('Không dồn phần phân tích này sang Góc nhìn chung'));
+    assert.ok(prompt.includes('đúng JSON theo schema')); assert.ok(prompt.includes('Nếu câu hỏi mơ hồ'));
+  }
+});

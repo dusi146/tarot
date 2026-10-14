@@ -35,7 +35,7 @@ class Element {
   }
 }
 
-function scene({ textureFailure = false, oracleDeferred = false, oracleFailure = false, storage = new Map() } = {}) {
+function scene({ textureFailure = false, oracleDeferred = false, oracleFailure = false, oracleIncomplete = false, storage = new Map() } = {}) {
   gsap.globalTimeline.clear();
   const elements = new Map();
   const get = id => { if (!elements.has(id)) elements.set(id, new Element()); return elements.get(id); };
@@ -85,10 +85,17 @@ function scene({ textureFailure = false, oracleDeferred = false, oracleFailure =
     fetch: async (url, options) => {
       if (options?.method === 'POST') {
         readingRequests++;
-        oraclePayloads.push(JSON.parse(options.body));
+        const request = JSON.parse(options.body); oraclePayloads.push(request);
         await oracleGate;
         if (oracleFailure) return { ok: true, json: async () => ({ status: 'error', code: 'RATE_LIMIT', retryAfter: 30 }) };
-        return { ok: true, json: async () => ({ status: 'success', text: 'Một góc nhìn mới cho bạn.' }) };
+        const paragraphs = request.state.cards.map((card, index) => {
+          const name = window.TAROT_CARDS.find(item => item.id === card.id).viName;
+          return `${api.appState.activeSpread.slots[index].title}: ${name}\n${oracleIncomplete && readingRequests === 1 ? '' : 'Lá này gợi ý bạn nhìn rõ nhu cầu của mình, cân nhắc lựa chọn và bắt đầu từ điều có thể chủ động hôm nay.'}`;
+        });
+        const text = request.action === 'ai_reading' ? 'Một góc nhìn mới cho bạn.\n\n' + paragraphs.join('\n\n')
+          + '\n\nGóc nhìn chung\nBạn cần chọn một việc quan trọng để tập trung, thay vì cố giải quyết tất cả cùng lúc.'
+          + '\n\nMột bước nhỏ cho bạn\nHãy viết ra một việc có thể hoàn thành hôm nay và dành mười phút để bắt đầu.' : 'Một góc nhìn mới cho bạn.';
+        return { ok: true, json: async () => ({ status: 'success', text }) };
       }
       if (url.includes('ai_health')) return { ok: true, json: async () => ({ service: 'tarot-groq', version: 1, configured: true }) };
       return { json: async () => ({ status: 'empty', data: [] }) };
@@ -377,14 +384,35 @@ test('large action buttons select, reveal all, and reuse an in-flight reading', 
   assert.equal(s.readingRequests(), 1, 'reopening while pending does not duplicate requests');
   s.resolveOracle();
   await s.advance(0.1);
-  assert.equal(s.get('readingText').textContent, 'Một góc nhìn mới cho bạn.');
+  assert.equal(s.get('readingText').children[0].children[0].textContent, 'Một góc nhìn mới cho bạn.');
   s.handleCloseOracle();
   action.dispatch('click');
   assert.equal(s.readingRequests(), 1, 'completed reading is reused');
   assert.equal(s.sheetRecords.length, 1, 'reopening does not append duplicate sheet rows');
   assert.equal(s.sheetRecords[0].spread, '4 lá');
   assert.equal(s.sheetRecords[0].status, 'Thành công');
-  assert.equal(s.sheetRecords[0].conclusion, 'Một góc nhìn mới cho bạn.');
+  assert.match(s.sheetRecords[0].conclusion, /Một góc nhìn mới cho bạn/);
+});
+
+test('an incomplete reading can be retried inside the modal without drawing new cards or sending duplicates', async () => {
+  const s = scene({ oracleIncomplete: true });
+  await enterDraw(s, 'single');
+  s.get('pickCenterBtn').dispatch('click'); await s.advance(2.5);
+  s.get('summonOracleBtn').dispatch('click'); await s.advance(2.5);
+  const ids = Array.from(s.appState.selectedCards, card => card.data.id);
+  s.get('summonOracleBtn').dispatch('click'); await s.advance(.2);
+  assert.equal(s.readingRequests(), 1);
+  assert.equal(s.appState.readingResult, '');
+  assert.equal(s.get('retryReadingBtn').hidden, false);
+  assert.match(s.get('readingText').textContent, /chưa nhận đủ nội dung/);
+  assert.equal(s.sheetRecords[0].status, 'Thất bại');
+  s.get('retryReadingBtn').dispatch('click'); s.get('retryReadingBtn').dispatch('click');
+  await s.advance(.2);
+  assert.equal(s.readingRequests(), 2);
+  assert.deepEqual(Array.from(s.appState.selectedCards, card => card.data.id), ids);
+  assert.equal(s.get('retryReadingBtn').hidden, true);
+  assert.ok(s.appState.readingResult.includes('Góc nhìn chung'));
+  assert.equal(s.sheetRecords[1].status, 'Thành công');
 });
 
 test('an oracle API failure is logged with profile details and failure status', async () => {

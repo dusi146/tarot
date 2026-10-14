@@ -47,6 +47,7 @@
           ? `Dịch vụ đang chạm hạn mức. Bạn chờ khoảng ${Math.ceil((retryAt - now()) / 1000)} giây rồi thử lại nhé.`
           : result.code === 'BUSY' ? 'Rót đang trả lời một lượt trước đó. Bạn thử lại sau một chút nhé.'
           : result.code === 'NOT_CONFIGURED' ? 'Rót đang hoàn tất kết nối. Bạn quay lại sau một chút nhé.'
+          : result.code === 'INCOMPLETE_READING' ? 'Rót chưa nhận đủ nội dung lời giải. Bạn nhấn Thử lại lời giải nhé, các lá đã chọn vẫn được giữ.'
           : 'Rót chưa kết nối được. Bạn thử lại sau một chút nhé.');
         error.code = result.code || 'AI_ERROR';
         throw error;

@@ -377,6 +377,9 @@ body[data-stage='reveal'] .slot-thumb { width: 22px; height: 38px; }
 .reading-card-hint { margin-top: 7px; color: var(--text-3); font-size: 9px; line-height: 1.6; }
 .reading-text { display: flex; flex-direction: column; gap: 25px; white-space: normal; color: #d8d5e4; }
 .reading-text.reading-plain { display: block; white-space: pre-wrap; }
+.reading-retry { align-self: flex-start; min-height: 46px; padding: 11px 20px; border: 1px solid var(--gold-dim); border-radius: 12px; background: rgba(225,194,138,.08); color: var(--gold); font: 500 12px/1.8 var(--font-body); }
+.reading-retry[hidden] { display: none; }
+.reading-retry:disabled { opacity: .5; cursor: wait; }
 .reading-section { padding-left: 16px; border-left: 2px solid rgba(var(--reading-rgb,196,181,232),.36); }
 .reading-intro { padding-left: 0; border: 0; color: #e0d9e6; }
 .reading-section h4 { color: var(--reading-accent, #c4b5e8); font: 500 24px/1.5 var(--font-serif); letter-spacing: -.02em; margin: 3px 0 4px; }
