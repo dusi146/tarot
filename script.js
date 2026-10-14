@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const button = document.getElementById('startRitualBtn');
     if (button) { button.disabled = true; button.textContent = message; }
   }
-  if (!window.THREE || !window.gsap || !window.TarotMotion || !window.TarotGeometry || !window.TarotPersona || !window.TarotReading || !window.TarotAtmosphere || !window.TarotAudio || !window.TarotRender || !window.TAROT_CARDS) {
+  if (!window.THREE || !window.gsap || !window.TarotMotion || !window.TarotGeometry || !window.TarotPersona || !window.TarotReading || !window.TarotAI || !window.TarotAtmosphere || !window.TarotAudio || !window.TarotRender || !window.TAROT_CARDS) {
     sceneFailure('Không tải được bàn bài. Hãy tải lại trang.');
     return;
   }
@@ -23,11 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // 1. CẤU HÌNH & DỮ LIỆU BÀI TAROT
   // =========================================================================
-  let storedAPIKey = '';
-  try { storedAPIKey = window.localStorage?.getItem('GEMINI_API_KEY') || ''; } catch {}
-  const GEMINI_API_KEY = window.GEMINI_API_KEY || storedAPIKey || "{{GEMINI_API_KEY_SECRET}}";
-  const GEMINI_MODEL = "gemini-2.5-flash";
-  const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  const ai = window.TarotAI.create({ endpoint: window.TAROT_SHEETS_CONFIG?.endpoint, fetch: (...args) => fetch(...args) });
+  const AI_SOLVER = 'Ta Văn Rót / Groq / openai/gpt-oss-120b';
 
   const BASE_IMAGE_PATH = "images/";
 
@@ -136,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
       question: appState.userQuestion || '',
       spread: `${appState.activeSpread.count} lá`,
       vibe: appState.userVibe,
-      solver: `Ta Văn Rót / ${GEMINI_MODEL}`,
+      solver: AI_SOLVER,
       source
     });
   }
@@ -1388,44 +1385,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // =========================================================================
-  // 10. CÁ NHÂN HÓA TA VĂN RÓT & GEMINI 2.5 FLASH (4096 TOKENS)
+  // 10. ĐỌC BÀI VÀ TÂM SỰ QUA GROQ TRÊN APPS SCRIPT
   // =========================================================================
-  async function requestGeminiOracleReading() {
-    const payload = persona.readingPayload(appState);
-
-    const response = await fetch(GEMINI_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      throw new Error(`Gemini API Error: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    const text = reading.cleanText(data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim());
-    if (!text) throw new Error('Gemini không trả về lời giải.');
+  async function requestOracleReading() {
+    const text = reading.cleanText(await ai.read(appState));
+    if (!text) throw new Error('Rót chưa nhận được lời giải đầy đủ.');
     return text;
   }
 
-  // Follow-up Chat
-  async function requestGeminiFollowUp(userMsg) {
+  async function requestFollowUp(userMsg) {
     const history = appState.followupHistory;
     const completed = history.filter(item => item.role === 'rot').length;
     history.push({ role: 'user', text: userMsg });
-    const payload = persona.conversationPayload(appState, history);
-
-    const res = await fetch(GEMINI_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) throw new Error(`Gemini API Error: ${res.status}`);
-    const data = await res.json();
-    const reply = reading.cleanText(data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim());
-    if (!reply) throw new Error('Gemini không trả về câu trả lời.');
+    const reply = reading.cleanText(await ai.chat(appState, history));
+    if (!reply) throw new Error('Rót chưa nhận được câu trả lời đầy đủ.');
     history.push({ role: 'rot', text: reply });
     return { reply, nudge: completed === 2, history };
   }
@@ -1699,7 +1672,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        const text = await requestGeminiOracleReading();
+        const text = await requestOracleReading();
         saveSheetReading(readingSheetSession, text, 'Thành công', requestSession);
         if (requestSession !== sessionVersion) return;
         appState.readingResult = text;
@@ -1720,7 +1693,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveSheetReading(readingSheetSession, `Lỗi API: ${err.message || 'Không có lời giải'}`, 'Thất bại', requestSession);
         if (requestSession !== sessionVersion) return;
         if (readingLoader) readingLoader.style.display = 'none';
-        if (readingText) readingText.textContent = 'Chưa kết nối được. Đóng và thử lại sau một lát.';
+        if (readingText) { readingText.classList.add('reading-plain'); readingText.textContent = err.message || 'Rót chưa kết nối được. Bạn thử lại sau một chút nhé.'; }
       } finally {
         if (requestSession === sessionVersion) oraclePending = false;
       }
@@ -1767,7 +1740,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const history = appState.followupHistory;
 
     try {
-      const result = await requestGeminiFollowUp(txt);
+      const result = await requestFollowUp(txt);
       const reply = result.reply;
       if (result.nudge) result.history[result.history.length - 1].text += `\n\n${persona.DONATION_NUDGE}\n${persona.DONATION_URL}`;
       readingSheetSession?.followup({
@@ -1790,7 +1763,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(e) {
       if (history[history.length - 1]?.role === 'user') history.pop();
       if (version !== sessionVersion) return;
-      loading.textContent = "Rót chưa kết nối được, bạn hỏi lại nha!";
+      loading.textContent = e.message || 'Rót chưa kết nối được, bạn hỏi lại nha!';
     } finally {
       if (version === sessionVersion) {
         followupPending = false;

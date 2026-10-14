@@ -58,6 +58,8 @@ function scene({ textureFailure = false, oracleDeferred = false, oracleFailure =
   window.THREE = three;
   window.TarotPersona = require('../tarot-persona.js');
   window.TarotReading = require('../tarot-reading.js');
+  window.TarotAI = require('../tarot-ai.js');
+  window.TAROT_SHEETS_CONFIG = { endpoint: 'https://script.google.com/macros/s/test/exec' };
   window.TarotAtmosphere = require('../tarot-atmosphere.js');
   window.TarotAudio = require('../tarot-audio.js');
   window.TarotProfile = require('../tarot-profile.js');
@@ -77,7 +79,7 @@ function scene({ textureFailure = false, oracleDeferred = false, oracleFailure =
   let resolveOracle;
   const oracleGate = oracleDeferred ? new Promise(resolve => { resolveOracle = resolve; }) : Promise.resolve();
   const context = vm.createContext({
-    document, window, THREE: three, gsap, console, URLSearchParams, performance: { now: () => now },
+    document, window, THREE: three, gsap, console, URLSearchParams, AbortController, performance: { now: () => now },
     requestAnimationFrame: () => 1, cancelAnimationFrame() {},
     setTimeout: () => ++timerId, clearTimeout() {}, setInterval: () => ++timerId, clearInterval() {},
     fetch: async (url, options) => {
@@ -85,9 +87,10 @@ function scene({ textureFailure = false, oracleDeferred = false, oracleFailure =
         readingRequests++;
         oraclePayloads.push(JSON.parse(options.body));
         await oracleGate;
-        if (oracleFailure) return { ok: false, statusText: 'Too Many Requests' };
-        return { ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: 'Một góc nhìn mới cho bạn.' }] } }] }) };
+        if (oracleFailure) return { ok: true, json: async () => ({ status: 'error', code: 'RATE_LIMIT', retryAfter: 30 }) };
+        return { ok: true, json: async () => ({ status: 'success', text: 'Một góc nhìn mới cho bạn.' }) };
       }
+      if (url.includes('ai_health')) return { ok: true, json: async () => ({ service: 'tarot-groq', version: 1, configured: true }) };
       return { json: async () => ({ status: 'empty', data: [] }) };
     }
   });
@@ -99,7 +102,7 @@ function scene({ textureFailure = false, oracleDeferred = false, oracleFailure =
     window.testScene = { appState, cardMeshes, camera, scene, ribbon, drawEntry,
       startChargingStage, startDrawStage, startRevealStage, pickCard, flipSelectedCard,
       onHoldStart, onHoldEnd, cancelHold, updateRibbonCardsPositions, resizeScene, hitCard,
-      SPREAD_CONFIGS, handleCloseOracle, faceCache, renderLoop, ritual, requestGeminiFollowUp, finishIntro, entrance, updateShuffleMessage, optionsAccordion, restoreProfile, layoutIdleCards };
+      SPREAD_CONFIGS, handleCloseOracle, faceCache, renderLoop, ritual, requestFollowUp, finishIntro, entrance, updateShuffleMessage, optionsAccordion, restoreProfile, layoutIdleCards };
   ` + source.slice(close);
   }
   vm.runInContext(source, context);
@@ -405,8 +408,8 @@ test('an oracle API failure is logged with profile details and failure status', 
   assert.equal(row.gender, 'Nữ');
   assert.equal(row.question, 'Công việc?');
   assert.equal(row.status, 'Thất bại');
-  assert.match(row.conclusion, /Too Many Requests/);
-  assert.match(row.solver, /gemini-2.5-flash/);
+  assert.match(row.conclusion, /chạm hạn mức/);
+  assert.match(row.solver, /Groq.*gpt-oss-120b/);
 });
 
 test('conversations retain the spread and invite support exactly once on the third successful reply', async () => {
@@ -415,7 +418,7 @@ test('conversations retain the spread and invite support exactly once on the thi
   s.get('pickCenterBtn').dispatch('click'); await s.advance(2.5);
   s.get('summonOracleBtn').dispatch('click'); await s.advance(2.5);
   s.get('summonOracleBtn').dispatch('click'); await s.advance(.2);
-  const cards = s.appState.selectedCards.map(card => card.data.viName);
+  const cards = s.appState.selectedCards.map(card => card.data.id);
   assert.equal(s.get('supportLetter').style.display, 'block');
   for (let turn = 1; turn <= 4; turn++) {
     s.get('followupInput').value = `Lời tâm sự ${turn}`;
@@ -427,8 +430,9 @@ test('conversations retain the spread and invite support exactly once on the thi
     assert.equal(history.filter(item => item.role === 'rot').length, turn);
     assert.equal(history.filter(item => item.text.includes('https://hoahong.vercel.app/')).length, turn >= 3 ? 1 : 0);
     const payload = s.oraclePayloads[s.oraclePayloads.length - 1];
-    for (const card of cards) assert.ok(payload.systemInstruction.parts[0].text.includes(card));
-    assert.equal(payload.contents.length, turn * 2 - 1);
+    assert.deepEqual(payload.state.cards.map(card => card.id), Array.from(cards));
+    assert.equal(payload.reading, s.appState.readingResult);
+    assert.equal(payload.history.length, turn * 2 - 1);
     assert.equal(s.sheetConversations.length, turn);
   }
   const invitations = s.get('followupMsgs').children.flatMap(bubble => bubble.children).filter(child => child.className === 'conversation-invitation');

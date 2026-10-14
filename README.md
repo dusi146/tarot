@@ -33,4 +33,12 @@ Mỗi lượt giải thành công hoặc lỗi API ghi một dòng gồm: Thời
 
 Chọn sao rồi nhấn **Gửi đánh giá** để ghi cả sao, ghi chú và góp ý. Phần hỏi thêm lưu toàn bộ các cặp hỏi/đáp vào cùng dòng. Các cập nhật đợi dòng gốc được ghi thành công và dùng nguyên thời gian + IP của lượt xem. Nếu tra IP thất bại, ghi `Không rõ`. Thời gian có mili giây để phân biệt các lượt xem nhanh.
 
-Không cần thay mã GS hiện có. Mã cũ chỉ tìm bản ghi trong tab của ngày hiện tại, nên giao diện chặn cập nhật sau khi sang ngày mới để tránh sửa nhầm dòng theo IP. Kết nối phải cho phép khách truy cập web app; các phản hồi JSON lỗi được hiển thị, không báo lưu thành công khi chưa có xác nhận. Tham khảo triển khai web app: https://developers.google.com/apps-script/guides/web
+Để bật Groq, cần cập nhật Apps Script theo [GROQ_SETUP.md](GROQ_SETUP.md). File `apps-script/Code.gs` gồm đầy đủ các chức năng Sheet cũ và API Groq phía máy chủ. Khóa chỉ nằm trong Script properties dưới tên `GROQ_API_KEY`; không chèn khóa vào JavaScript hay GitHub Pages. Workflow đã bỏ bước chèn Gemini key vào mã công khai. Phiên bản GS mới cập nhật theo đúng thời gian + IP, không dùng IP làm phương án sửa dòng thay thế.
+
+Giao diện vẫn chặn cập nhật sau khi sang ngày mới để tương thích và tránh sửa nhầm nếu bản GS cũ còn chạy. Kết nối phải cho phép khách truy cập web app; các phản hồi JSON lỗi được hiển thị, không báo lưu thành công khi chưa có xác nhận. Tham khảo triển khai web app: https://developers.google.com/apps-script/guides/web
+
+## Groq qua Apps Script
+
+`tarot-ai.js` gửi danh tính các lá, chiều bài, hồ sơ và câu hỏi sang Apps Script. Máy chủ dựng lại prompt bằng cùng `tarot-persona.js` và danh mục 78 lá; dùng model `openai/gpt-oss-120b`. Tâm sự giữ lời giải đầy đủ và lịch sử theo thứ tự. Trình duyệt kiểm tra `ai_health` trước khi gửi AI, nên bản GS cũ sẽ không ghi nhầm yêu cầu AI thành dòng Sheet.
+
+Mã máy chủ được đóng gói bằng `node tools/build-apps-script.cjs`. Các thay đổi prompt hoặc danh mục cần đóng gói và triển khai GS lại. Có dùng lại lời giải giống hệt trong 5 phút, giới hạn mềm 6 yêu cầu/phút toàn web và thời gian chờ chung khi Groq trả 429. Không tự gửi dồn yêu cầu hoặc đổi key để né quota. Hướng dẫn cấu hình, triển khai và cách cất khóa GitHub: [GROQ_SETUP.md](GROQ_SETUP.md).

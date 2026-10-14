@@ -24,9 +24,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Prepare runtime configuration and asset version
+      - name: Prepare public asset version
         env:
-          GEMINI_KEY: ${{ secrets.GEMINI_API_KEY }}
           ASSET_VERSION: ${{ github.sha }}
         run: |
           node -e '
@@ -34,7 +33,6 @@ jobs:
             ["script.js", "index.html"].forEach(file => {
               if (fs.existsSync(file)) {
                 let content = fs.readFileSync(file, "utf8");
-                content = content.split("{{GEMINI_API_KEY_SECRET}}").join(process.env.GEMINI_KEY || "");
                 content = content.replace(/\?v=\d{8}-\d+/g, "?v=" + process.env.ASSET_VERSION);
                 fs.writeFileSync(file, content, "utf8");
               }

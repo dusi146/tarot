@@ -1,5 +1,10 @@
 # Local credentials and secret configs
 gemini_config.json
+.env
+.env.*
+!.env.example
+groq_config.json
+.clasp.json
 
 # Operating system artifacts
 .DS_Store
