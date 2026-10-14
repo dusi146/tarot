@@ -39,6 +39,8 @@ Khử răng cưa WebGL, lọc texture theo góc nhìn, giới hạn số điểm
 
 Việc tạo mặt bài được chia thành các bước sau nhịp vẽ, tránh làm lúc lá đang bay hoặc lật. Ảnh thu nhỏ mã hóa bằng `toBlob` bất đồng bộ; các texture và shader của hai lớp vẽ được chuẩn bị trước. Không đổi kích thước bộ đệm GPU trong lúc chọn, bay hoặc mở bài. Giữ nguyên chất liệu, ánh sáng, hạt và các lớp hiệu ứng.
 
+Đã tối ưu thêm việc gom các mặt lưng và hạt mở bài vào cùng lượt dựng, lưu kích thước khung, chuyển tên lá bằng transform, dùng lại bộ nhớ và gom cập nhật khi đổi màn hình. Các mesh gốc vẫn nhận thao tác chạm. Lượt dựng lúc xáo giảm từ 141/109 xuống 16 trên hai khung đo, giữ nguyên chất liệu, hình học, số hạt và độ phân giải. Xem [phép đo và đối chiếu hình ảnh](PERFORMANCE.md).
+
 Nghiêng máy yêu cầu [ngữ cảnh bảo mật và đôi khi quyền cảm biến](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/requestPermission_static). [Rung phụ thuộc trình duyệt và phần cứng](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/vibrate). Đã kiểm tra kích hoạt bằng lần chạm đầu tiên, quyền cấp/từ chối, hiệu chỉnh, đổi hướng màn hình và giới hạn nhịp bằng mô phỏng. Đã đo tín hiệu Web Audio thật trong Chromium sau thao tác chạm; cảm giác âm thanh, rung và cảm biến trên phần cứng điện thoại vẫn cần đối chiếu trực tiếp.
 
 ## Kiểm tra
@@ -57,6 +59,8 @@ node --test tarot-v2/tests/mobile.test.cjs
 node --test tarot-v2/tests/carousel.test.cjs tarot-v2/tests/pages.test.cjs
 node tarot-v2/tests/carousel-browser.cjs
 node tarot-v2/tests/feedback-browser.cjs
+node tarot-v2/tests/render-parity-browser.cjs
+node tarot-v2/tests/performance-browser.cjs
 ```
 
 Báo cáo JSON và ảnh chụp nằm tại `artifacts/`. Các ảnh chụp không được đưa vào Git theo mặc định.

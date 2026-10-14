@@ -11,15 +11,15 @@
       0
     ],
     "cardIds": [
-      "P07",
-      "W08",
-      "C10"
+      "C14",
+      "03",
+      "15"
     ],
     "flightTiming": {
-      "max": 84,
+      "max": 33,
       "p95": 17
     },
-    "textureTaskMax": 2.6,
+    "textureTaskMax": 1.5,
     "closeOffset": 0,
     "errors": [],
     "externalRequests": 0

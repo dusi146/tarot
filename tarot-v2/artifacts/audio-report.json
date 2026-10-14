@@ -1,7 +1,7 @@
 {
   "contextState": "running",
   "masterGain": 3.200000047683716,
-  "peak": 0.17861470580101013,
+  "peak": 0.10332430154085159,
   "compressor": {
     "threshold": -8,
     "ratio": 4

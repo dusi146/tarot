@@ -9,13 +9,13 @@
       0
     ],
     "cardIds": [
-      "P14"
+      "15"
     ],
     "flightTiming": {
       "max": 17,
       "p95": 17
     },
-    "textureTaskMax": 1.7,
+    "textureTaskMax": 1.6,
     "closeOffset": 0,
     "errors": [],
     "externalRequests": 0

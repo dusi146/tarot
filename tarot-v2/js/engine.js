@@ -21,7 +21,7 @@
       const easeOutQuart = (t) => 1 - Math.pow(1 - t, 4);
 
       // Critically-damped 1D spring step for silky-smooth C2 continuous motion
-      function stepSpring1D(current, velocity, target, omega, dt) {
+      function stepSpring1D(current, velocity, target, omega, dt, out) {
         const f = 1.0 + 2.0 * dt * omega;
         const oo = omega * omega;
         const hoo = dt * oo;
@@ -29,10 +29,8 @@
         const detInv = 1.0 / (f + hhoo);
         const detX = f * current + dt * velocity + hhoo * target;
         const detV = velocity + hoo * (target - current);
-        return {
-          value: detX * detInv,
-          velocity: detV * detInv
-        };
+        out.value = detX * detInv; out.velocity = detV * detInv;
+        return out;
       }
 
       // Critically-damped 3D vector spring step
@@ -1708,12 +1706,19 @@
           shader.vertexShader = shader.vertexShader.replace(
             '#include <common>',
             `#include <common>
-             varying vec3 vLocalPos;`
+             varying vec3 vLocalPos;
+             #ifdef TAROT_INSTANCING
+             attribute vec2 instanceFoil;
+             varying vec2 vCardFoil;
+             #endif`
           );
           shader.vertexShader = shader.vertexShader.replace(
             '#include <begin_vertex>',
             `#include <begin_vertex>
-             vLocalPos = position;`
+             vLocalPos = position;
+             #ifdef TAROT_INSTANCING
+             vCardFoil = instanceFoil;
+             #endif`
           );
 
           shader.fragmentShader = shader.fragmentShader.replace(
@@ -1722,16 +1727,25 @@
              uniform float uGlintPhase;
              uniform float uRimGlow;
              uniform vec3 uRimColor;
-             varying vec3 vLocalPos;`
+             varying vec3 vLocalPos;
+             #ifdef TAROT_INSTANCING
+             varying vec2 vCardFoil;
+             #endif`
           );
 
           shader.fragmentShader = shader.fragmentShader.replace(
             '#include <dithering_fragment>',
             `
              // Dual-band anisotropic champagne foil light-sweep across embossed gold & beveled rim
+             float cardGlint = uGlintPhase;
+             float cardRim = uRimGlow;
+             #ifdef TAROT_INSTANCING
+             cardGlint = vCardFoil.x;
+             cardRim = vCardFoil.y;
+             #endif
              float diagCoord = (vLocalPos.x * 0.55 + vLocalPos.y * 0.38);
-             float streakPrimary = smoothstep(0.42, 0.0, abs(diagCoord - uGlintPhase));
-             float streakSecondary = smoothstep(0.18, 0.0, abs(diagCoord - uGlintPhase + 0.22)) * 0.55;
+             float streakPrimary = smoothstep(0.42, 0.0, abs(diagCoord - cardGlint));
+             float streakSecondary = smoothstep(0.18, 0.0, abs(diagCoord - cardGlint + 0.22)) * 0.55;
              float streak = streakPrimary + streakSecondary;
              float foilMask = metalnessFactor;
              vec3 glintContribution = vec3(1.0, 0.93, 0.74) * streak * (0.015 + foilMask * 1.05);
@@ -1739,7 +1753,7 @@
              // Soft Fresnel rim highlight when hovered or flipped
              vec3 viewDir = normalize(vViewPosition);
              float fresnel = pow(1.0 - abs(dot(normal, viewDir)), 2.3);
-             vec3 rimContribution = uRimColor * (fresnel * uRimGlow * 0.88 + uRimGlow * foilMask * 0.28);
+             vec3 rimContribution = uRimColor * (fresnel * cardRim * 0.88 + cardRim * foilMask * 0.28);
 
              gl_FragColor.rgb += glintContribution + rimContribution;
              #include <dithering_fragment>
@@ -2298,7 +2312,12 @@
       }
 
       // Cache DOM rects on resize/transition to prevent per-frame layout reflow
+      let spreadRectsDirty = true;
+      const spreadTransitions = new Map();
+      const spreadBounds = { headerBottom: 0, controlsTop: innerHeight };
       function refreshSlotDomRects() {
+        spreadBounds.headerBottom = spreadHeaderEl.getBoundingClientRect().bottom;
+        spreadBounds.controlsTop = spreadBottomEl.getBoundingClientRect().top;
         for (let i = 0; i < 4; i++) {
           const el = slotMiniFrames[i];
           if (!el) continue;
@@ -2314,6 +2333,7 @@
             };
           }
         }
+        spreadRectsDirty = false;
       }
 
       // Project a screen pixel coordinate (px, py) onto the world plane z = targetZ
@@ -2333,7 +2353,9 @@
       }
 
       function syncReceiverSlotsWithDOM(forceRefreshRects = false) {
-  if (forceRefreshRects || !receiverSlots[0].cachedRect) refreshSlotDomRects();
+  const now = performance.now();
+  for (const [element, until] of spreadTransitions) if (now > until) spreadTransitions.delete(element);
+  if (forceRefreshRects || spreadRectsDirty || spreadTransitions.size || !receiverSlots[0].cachedRect) refreshSlotDomRects();
   camera.updateMatrixWorld(true);
   const origin = camera.getWorldPosition(slotOrigin);
   const forward = camera.getWorldDirection(slotForward);
@@ -2433,6 +2455,7 @@
         cards.push({
           index: i,
           mesh,
+          haloMesh,
           frontMat,
           backMat,
           edgeMat,
@@ -2446,6 +2469,7 @@
           quat: mesh.quaternion,
           scale: 0.82,
           scaleVel: 0.0,
+          scaleStep: { value: 0, velocity: 0 },
           targetPos: mesh.position.clone(),
           targetRot: new THREE.Euler(0, Math.PI, 0),
           targetScale: 0.82,
@@ -2477,9 +2501,13 @@
       }
 
       // Helper to advance a card's transform smoothly using critically-damped springs + Quaternion slerp
+      const cardBatch = window.TarotBatch.create({ THREE, geometry: sharedCardGeometry, maps: backMaps,
+        makeMaterial: createFoilEnhancedMaterial, group: deckGroup, capacity: TOTAL_CARDS,
+        supported: renderer.capabilities.isWebGL2 || renderer.extensions.has('ANGLE_instanced_arrays') });
+
       function stepCardSpringTransform(c, dt) {
         stepSpringVec3(c.pos, c.vel, c.targetPos, c.springOmega, dt);
-        const sStep = stepSpring1D(c.scale, c.scaleVel, c.targetScale, c.springOmega * 1.15, dt);
+        const sStep = stepSpring1D(c.scale, c.scaleVel, c.targetScale, c.springOmega * 1.15, dt, c.scaleStep);
         c.scale = sStep.value;
         c.scaleVel = sStep.velocity;
         c.mesh.scale.setScalar(c.scale);
@@ -2547,6 +2575,9 @@
         }
       }
 
+      const moteBatch = window.TarotBatch.createMotes({ THREE, group: moteGroup, map: particleTex, capacity: MOTE_POOL_SIZE,
+        supported: renderer.getContext().getParameter(renderer.getContext().ALIASED_POINT_SIZE_RANGE)[1] >= 64 });
+
       /* ============================================================================
        * 7. CHOREOGRAPHY STATE MACHINE & 4-ACT DIRECTOR (NO INTRO DELAY)
        *    Acts:
@@ -2604,6 +2635,7 @@
         // Unbounded circular coordinates; wrap only when looking up an actual card.
         fanFocusIndex: 11,      // Smooth floating-point focus index
         fanFocusVel: 0,         // Spring velocity for silky carousel scrubbing
+        fanStep: { value: 0, velocity: 0 },
         fanTargetIndex: 11,     // Target focus index
         fanLastRoundedIndex: 11,
         fanVelocity: 0,
@@ -2699,7 +2731,9 @@
         slotDomBoxes.forEach((box, idx) => { box.hidden = idx >= activeCount; box.classList.toggle('active-step', idx === current); });
       }
 
+      let availableFanCards = null;
       function getAvailableFanCards() {
+        if (availableFanCards) return availableFanCards;
         const list = [];
         for (let i = 0; i < TOTAL_CARDS; i++) {
           const c = cards[i];
@@ -2707,10 +2741,11 @@
             list.push(c);
           }
         }
-        return list;
+        return availableFanCards = list;
       }
 
       function resetAllCardsTransformState() {
+        availableFanCards = null;
         state.selectedCards = [];
         state.inspectedSlot = -1;
         receiverSlots.forEach(s => {
@@ -2738,7 +2773,7 @@
           c.springOmega = 10.5;
           c.sharedUniforms.uGlintPhase.value = -1.5;
           c.sharedUniforms.uRimGlow.value = 0.0;
-          c.frontMat.map = backMaps.map; c.frontMat.needsUpdate = true; c.mesh.visible = true; c.faceReady = null; c.flipComplete = false; c.haloMat.opacity = 0;
+          Object.assign(c.frontMat, backMaps); c.mesh.visible = true; c.faceReady = null; c.flipComplete = false; c.haloMat.opacity = 0;
           c.faceMaps = null; c.faceReadyDone = false; c.faceFailed = false; c.waitingFace = false; c.image = '';
         });
       }
@@ -2880,6 +2915,7 @@
         const beforePick = getAvailableFanCards(), removedIndex = beforePick.indexOf(card);
         const slotIdx = state.selectedCards.length;
         card.slotIndex = slotIdx;
+        availableFanCards = null;
         state.selectedCards.push(card); state.picking = true; overlayScene.attach(card.mesh);
         window.TarotMobile?.feel('select');
 
@@ -3167,7 +3203,7 @@
        * - ZERO automatic selection: waits for user click on card or "Rút lá đang xem".
        * ---------------------------------------------------------------------------- */
       function updateActFan(dt, t) {
-        syncReceiverSlotsWithDOM(true);
+        syncReceiverSlotsWithDOM();
         computeFanLayout();
 
         const availCards = getAvailableFanCards();
@@ -3186,7 +3222,7 @@
         }
 
         // Critically-damped spring on fanFocusIndex for buttery-smooth carousel scrubbing
-        const focusStep = stepSpring1D(state.fanFocusIndex, state.fanFocusVel, state.fanTargetIndex, 15.5, dt);
+        const focusStep = stepSpring1D(state.fanFocusIndex, state.fanFocusVel, state.fanTargetIndex, 15.5, dt, state.fanStep);
         state.fanFocusIndex = focusStep.value;
         state.fanFocusVel = focusStep.velocity;
 
@@ -3200,8 +3236,9 @@
         }
 
         if (document.activeElement !== spreadSliderEl) {
-          spreadSliderEl.max = String(maxAvailIndex);
-          spreadSliderEl.value = String(window.TarotCarousel.wrap(state.fanFocusIndex, availCards.length));
+          const max = String(maxAvailIndex), value = window.TarotCarousel.wrap(state.fanFocusIndex, availCards.length).toFixed(2);
+          if (spreadSliderEl.max !== max) spreadSliderEl.max = max;
+          if (Math.abs(Number(spreadSliderEl.value) - Number(value)) >= .009) spreadSliderEl.value = value;
         }
         updateSpreadCounterText();
 
@@ -3300,6 +3337,7 @@
       }
 
       const _flightTargetEuler = new THREE.Euler();
+      const _flightTargetQuaternion = new THREE.Quaternion();
       function updateCardBezierFlight(c) {
         const elapsed = state.globalTime - c.flightStartTime;
         const rawT = clamp(elapsed / c.flightDuration, 0, 1);
@@ -3311,7 +3349,7 @@
           const slot = receiverSlots[c.slotIndex];
           c.p3.copy(slot.group.position);
           c.endScale = slot.targetScale;
-          _flightTargetEuler.setFromQuaternion(camera.quaternion.clone().multiply(backRotation));
+          _flightTargetEuler.setFromQuaternion(_flightTargetQuaternion.copy(camera.quaternion).multiply(backRotation));
           c.endQuat.setFromEuler(_flightTargetEuler);
         }
 
@@ -3481,6 +3519,9 @@
        * 9. INTERACTION HANDLERS (Raycasting, Spread Carousel Controls, Hold-to-Shuffle)
        * ============================================================================ */
       const raycaster = new THREE.Raycaster();
+      raycaster.layers.enable(1);
+      const rayCandidateMeshes = [], rayHits = [];
+      let hoverPending = false;
       const pointerState = {
         isDown: false,
         isDragging: false,
@@ -3507,7 +3548,7 @@
 
       function performCardRaycast() {
         raycaster.setFromCamera(state.pointerNDC, camera);
-        const candidateMeshes = [];
+        const candidateMeshes = rayCandidateMeshes; candidateMeshes.length = 0; rayHits.length = 0;
         if (state.inputBlocked) return null;
 
         if (state.act === 'FAN') {
@@ -3528,7 +3569,7 @@
           return null;
         }
 
-        const hits = raycaster.intersectObjects(candidateMeshes, false);
+        const hits = raycaster.intersectObjects(candidateMeshes, false, rayHits);
         if (hits.length > 0) {
           const hitMesh = hits[0].object;
           const found = cards.find(c => c.mesh === hitMesh);
@@ -3581,7 +3622,7 @@
           pointerState.lastX = e.clientX;
           pointerState.lastMoveTime = performance.now();
         } else if (!pointerState.isDown) {
-          performCardRaycast();
+          hoverPending = true;
         }
       });
 
@@ -3746,21 +3787,26 @@
       /* ============================================================================
        * 10. WINDOW RESIZE & MAIN DELTA-TIME RENDER LOOP
        * ============================================================================ */
-      window.addEventListener('resize', () => {
+      let viewportDirty = false;
+      window.addEventListener('resize', () => { viewportDirty = true; spreadRectsDirty = true; });
+      function applyViewportResize() {
+        viewportDirty = false;
         const w = window.innerWidth;
         const h = window.innerHeight;
         computeResponsiveMetrics();
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
-        renderer.setPixelRatio(qualityRatio());
-        renderer.setSize(w, h);
-        overlayRenderer.setPixelRatio(Math.min(renderer.getPixelRatio(), 1.5)); overlayRenderer.setSize(w, h);
+        // One drawing-buffer allocation per renderer, even during a burst of resize events.
+        renderer.setDrawingBufferSize(w, h, qualityRatio());
+        overlayRenderer.setDrawingBufferSize(w, h, Math.min(renderer.getPixelRatio(), 1.5));
+        renderer.domElement.style.width = overlayRenderer.domElement.style.width = '100%';
+        renderer.domElement.style.height = overlayRenderer.domElement.style.height = '100%';
         if (state.act === 'REVEAL' || state.act === 'ASCEND') computeRevealLayout();
         nebulaUniforms.uResolution.value.set(w, h);
         dustMat.uniforms.uPixelRatio.value = renderer.getPixelRatio();
         refreshSlotDomRects();
-        syncReceiverSlotsWithDOM(true);
-      });
+        syncReceiverSlotsWithDOM();
+      }
 
       // Application extension of the original 3D.html director.
 let generation = 0, holdPointerId = null, frameRequest = 0, contextLost = false;
@@ -3778,6 +3824,30 @@ overlayRenderer.setPixelRatio(Math.min(renderer.getPixelRatio(), 1.5)); overlayR
 document.body.appendChild(overlayRenderer.domElement);
 for (const light of [ambientLight, keyLight, fillLight, rimLight, glintLight]) overlayScene.add(light.clone());
 const diagnostics = document.getElementById('scene-status');
+// Let fades finish before pausing CSS animations that have become completely invisible.
+for (const [parent, selector, visible] of [
+  [document.getElementById('loading-veil'), '.loader-ring', element => !element.classList.contains('hidden')],
+  [holdBtnEl, '.pulse-dot', element => element.classList.contains('visible')],
+  [titlesBarEl, '.tap-to-flip-badge', element => element.classList.contains('visible')]
+]) {
+  const play = value => parent.querySelectorAll(selector).forEach(element => { element.style.animationPlayState = value ? 'running' : 'paused'; });
+  play(visible(parent));
+  new MutationObserver(() => { if (visible(parent)) play(true); else if (reducedMotion) play(false); }).observe(parent, { attributes: true, attributeFilter: ['class'] });
+  parent.addEventListener('transitionend', event => {
+    if (event.target === parent && ['opacity', 'visibility'].includes(event.propertyName) && !visible(parent)) play(false);
+  });
+}
+const spreadObserver = new ResizeObserver(() => { spreadRectsDirty = true; });
+for (const element of [spreadHeaderEl, spreadBottomEl, ...slotMiniFrames]) spreadObserver.observe(element);
+for (const element of [spreadHeaderEl, spreadBottomEl]) {
+  element.addEventListener('transitionrun', event => {
+    if (event.target === element && event.propertyName === 'transform') { spreadTransitions.set(element, performance.now() + 1000); spreadRectsDirty = true; }
+  });
+  for (const type of ['transitionend', 'transitioncancel']) element.addEventListener(type, event => {
+    if (event.target === element && event.propertyName === 'transform') { spreadTransitions.delete(element); spreadRectsDirty = true; }
+  });
+}
+window.visualViewport?.addEventListener('resize', () => { spreadRectsDirty = true; });
 let lastSignature = '', lastStage = '', frameTime = 0, frameCount = 0;
 
 function schedule(callback, milliseconds) {
@@ -3922,8 +3992,7 @@ function recordDockError(card, slotIndex) {
 }
 function computeFanLayout() {
   const w = innerWidth, h = innerHeight, landscape = h < 500 && w > 640;
-  const header = spreadHeaderEl.getBoundingClientRect(), controls = spreadBottomEl.getBoundingClientRect();
-  const top = header.bottom + 18, bottom = landscape ? h - 75 : controls.top - 20;
+  const top = spreadBounds.headerBottom + 18, bottom = landscape ? h - 75 : spreadBounds.controlsTop - 20;
   const areaWidth = landscape ? w - 300 : w;
   const units = 2 * layoutMetrics.fanCamZ * Math.tan(camera.fov * Math.PI / 360) / h;
   const size = Math.max(.18, Math.min(.98, Math.max(60, bottom - top) * units / CARD_H * .8, areaWidth * units * .40 / CARD_W));
@@ -3946,6 +4015,7 @@ homeObserver.observe(document.querySelector('.welcome-heading'));
 window.addEventListener('resize', refreshHomeBounds);
 document.getElementById('welcome-panel').addEventListener('animationend', refreshHomeBounds);
 const captionCorners = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
+const captionStyleCache = captionEls.map(() => ({ transform: '', width: '' }));
 // Three light ribbons are allocated once, alongside the original particles and astrolabe.
 const introOrbits = new THREE.Group(); scene.add(introOrbits);
 const introDepths = [-2.6, 2.6, 0];
@@ -4034,9 +4104,7 @@ function updateHome(dt) {
 }
 function projectCaptions() {
   if (state.act !== 'REVEAL') return;
-  camera.updateMatrixWorld(true);
   state.selectedCards.forEach((card, index) => {
-    card.mesh.updateMatrixWorld(true);
     let left = Infinity, right = -Infinity, bottom = -Infinity;
     for (let i = 0; i < 4; i++) {
       const point = captionCorners[i].set(i % 2 ? CARD_W / 2 : -CARD_W / 2, i < 2 ? -CARD_H / 2 : CARD_H / 2, 0).applyMatrix4(card.mesh.matrixWorld).project(camera);
@@ -4044,8 +4112,11 @@ function projectCaptions() {
       left = Math.min(left, x); right = Math.max(right, x); bottom = Math.max(bottom, y);
     }
     const caption = captionEls[index];
-    const css = { left: ((left + right) / 2).toFixed(1) + 'px', top: (bottom + 8).toFixed(1) + 'px', width: Math.max(75, Math.min(210, (right - left) * 1.2)).toFixed(1) + 'px' };
-    for (const key of ['left', 'top', 'width']) if (caption.style[key] !== css[key]) caption.style[key] = css[key];
+    const cache = captionStyleCache[index];
+    const transform = 'translate3d(' + ((left + right) / 2).toFixed(2) + 'px,' + (bottom + 8).toFixed(2) + 'px,0) translateX(-50%)';
+    const width = Math.round(Math.max(75, Math.min(210, (right - left) * 1.2))) + 'px';
+    if (cache.transform !== transform) { caption.style.transform = transform; cache.transform = transform; }
+    if (cache.width !== width) { caption.style.width = width; cache.width = width; }
   });
 }
 function publishState(dt) {
@@ -4090,7 +4161,7 @@ window.TarotExperience = {
     generation++; for (const timer of scheduled) clearTimeout(timer); scheduled.clear();
     maxFaceTask = 0;
     state.inputBlocked = false; state.picking = false; pointerState.isDown = false; pointerState.isDragging = false;
-    for (const card of cards) { deckGroup.attach(card.mesh); Object.assign(card.frontMat, backMaps); card.frontMat.needsUpdate = true; }
+    for (const card of cards) deckGroup.attach(card.mesh);
     resetAllCardsTransformState(); hideSpreadUI(); hideRevealedCaptions(); holdBtnEl.classList.remove('visible', 'holding'); setWhisper('');
     state.isHoldingShuffle = false; state.inspectedSlot = -1; state.actTime = 0; state.act = intro && !reducedMotion ? 'INTRO' : 'HOME';
     state.introSkipAt = null; state.introSkipFrom = 0; state.introBlend = intro ? 0 : 1;
@@ -4120,8 +4191,18 @@ window.TarotExperience = {
     return { phase: state.fanFocusIndex, target: state.fanTargetIndex, index, count: available.length,
       focusedId: available[index]?.data?.id, availableIds: available.map(card => card.data?.id) };
   },
+  renderStats() {
+    return { batch: cardBatch.stats(), motes: moteBatch.stats(), calls: renderer.info.render.calls + (overlayScene.children.some(item => item.isMesh) ? overlayRenderer.info.render.calls : 0),
+      triangles: renderer.info.render.triangles, cardVertices: sharedCardGeometry.attributes.position.count,
+      particles: dustCount, activeMotes: revealMotesPool.filter(mote => mote.active).length, pixelRatio: renderer.getPixelRatio() };
+  },
   mute() { return sound.toggle(); }
 };
+// Local review hooks let tests compare the same frozen frame using either drawing path.
+let profileFrozen = false;
+if (['localhost', '127.0.0.1'].includes(location.hostname) && new URLSearchParams(location.search).get('profile') === '1') {
+  window.TarotExperience.profile = { freeze: value => { profileFrozen = !!value; }, batch: value => { cardBatch.setEnabled(value); moteBatch.setEnabled(value); } };
+}
 container.tabIndex = 0; container.setAttribute('aria-label', 'Bàn bài 3D. Vuốt hoặc dùng phím mũi tên để chọn bài.');
 captionEls.forEach((caption, index) => {
   caption.tabIndex = 0; caption.setAttribute('role', 'button');
@@ -4152,9 +4233,11 @@ holdBtnEl.addEventListener('keyup', event => { if (event.key === 'Enter' || even
       function animate(now) {
         frameRequest = requestAnimationFrame(animate);
         if (document.hidden || contextLost) return;
+        if (viewportDirty) applyViewportResize();
 
         const dt = Math.min((now - lastFrameTime) * 0.001, 0.05);
         lastFrameTime = now;
+        if (profileFrozen) { cardBatch.sync(cards); moteBatch.sync(revealMotesPool, camera); renderer.render(scene, camera); if (overlayScene.children.some(item => item.isMesh)) overlayRenderer.render(overlayScene, camera); return; }
 
         state.globalTime += dt;
         state.actTime += dt;
@@ -4224,16 +4307,20 @@ holdBtnEl.addEventListener('keyup', event => { if (event.key === 'Enter' || even
           c.sharedUniforms.uRimGlow.value = c.rimGlow;
         }
 
+        if (hoverPending) { performCardRaycast(); hoverPending = false; }
+        cardBatch.sync(cards);
+        moteBatch.sync(revealMotesPool, camera);
         renderer.render(scene, camera);
         const overlayVisible = overlayScene.children.some(item => item.isMesh);
-        overlayRenderer.domElement.style.display = overlayVisible ? 'block' : 'none';
+        const overlayDisplay = overlayVisible ? 'block' : 'none';
+        if (overlayRenderer.domElement.style.display !== overlayDisplay) overlayRenderer.domElement.style.display = overlayDisplay;
         if (overlayVisible) overlayRenderer.render(overlayScene, camera);
         publishState(dt);
       }
 
       window.onload = function () {
         // Pre-compile WebGL shaders before hiding loading veil so first card flips & transitions never stutter
-        renderer.compile(scene, camera);
+        cardBatch.mesh.visible = moteBatch.mesh.visible = true; renderer.compile(scene, camera); cardBatch.mesh.visible = moteBatch.mesh.visible = false;
         // Warm both WebGL contexts under the loading veil, avoiding first-pick shader stalls.
         for (const maps of [backMaps, ...heroMaps]) for (const texture of Object.values(maps)) renderer.initTexture(texture);
         for (const texture of [...Object.values(backMaps), ...heroHaloTextures]) overlayRenderer.initTexture(texture);

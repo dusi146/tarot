@@ -4,8 +4,8 @@
     "loops": "forward + reverse + full revolution + three reverse revolutions after picking",
     "directCardTap": "passed",
     "pickedAtSeam": [
-      "P11",
-      "W05"
+      "P13",
+      "00"
     ],
     "errors": [],
     "touchFocus": "not applicable"
@@ -15,8 +15,8 @@
     "loops": "forward + reverse + full revolution + three reverse revolutions after picking",
     "directCardTap": "passed",
     "pickedAtSeam": [
-      "P13",
-      "01"
+      "P12",
+      "17"
     ],
     "errors": [],
     "touchFocus": "passed"
@@ -26,8 +26,8 @@
     "loops": "forward + reverse + full revolution + three reverse revolutions after picking",
     "directCardTap": "passed",
     "pickedAtSeam": [
-      "18",
-      "W05"
+      "W07",
+      "S13"
     ],
     "errors": [],
     "touchFocus": "passed"

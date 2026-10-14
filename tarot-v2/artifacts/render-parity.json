@@ -1,0 +1,222 @@
+[
+  {
+    "phase": "home",
+    "difference": {
+      "meanChannelDifference": 0.000023763020833333332,
+      "changedPixelRatio": 0,
+      "max": 3
+    },
+    "before": {
+      "batch": {
+        "supported": true,
+        "enabled": false,
+        "count": 0
+      },
+      "motes": {
+        "supported": true,
+        "enabled": false,
+        "count": 0
+      },
+      "calls": 22,
+      "triangles": 6120,
+      "cardVertices": 4068,
+      "particles": 260,
+      "activeMotes": 0,
+      "pixelRatio": 1.5
+    },
+    "after": {
+      "batch": {
+        "supported": true,
+        "enabled": true,
+        "count": 3
+      },
+      "motes": {
+        "supported": true,
+        "enabled": true,
+        "count": 0
+      },
+      "calls": 16,
+      "triangles": 6120,
+      "cardVertices": 4068,
+      "particles": 260,
+      "activeMotes": 0,
+      "pixelRatio": 1.5
+    }
+  },
+  {
+    "phase": "shuffle",
+    "difference": {
+      "meanChannelDifference": 0.0026328125,
+      "changedPixelRatio": 0.000048828125,
+      "max": 133
+    },
+    "before": {
+      "batch": {
+        "supported": true,
+        "enabled": false,
+        "count": 0
+      },
+      "motes": {
+        "supported": true,
+        "enabled": false,
+        "count": 0
+      },
+      "calls": 109,
+      "triangles": 45444,
+      "cardVertices": 4068,
+      "particles": 260,
+      "activeMotes": 0,
+      "pixelRatio": 1.5
+    },
+    "after": {
+      "batch": {
+        "supported": true,
+        "enabled": true,
+        "count": 32
+      },
+      "motes": {
+        "supported": true,
+        "enabled": true,
+        "count": 0
+      },
+      "calls": 16,
+      "triangles": 45444,
+      "cardVertices": 4068,
+      "particles": 260,
+      "activeMotes": 0,
+      "pixelRatio": 1.5
+    }
+  },
+  {
+    "phase": "fan",
+    "difference": {
+      "meanChannelDifference": 0.00007259114583333333,
+      "changedPixelRatio": 0.000001953125,
+      "max": 29
+    },
+    "before": {
+      "batch": {
+        "supported": true,
+        "enabled": false,
+        "count": 0
+      },
+      "motes": {
+        "supported": true,
+        "enabled": false,
+        "count": 0
+      },
+      "calls": 40,
+      "triangles": 14256,
+      "cardVertices": 4068,
+      "particles": 260,
+      "activeMotes": 0,
+      "pixelRatio": 1.5
+    },
+    "after": {
+      "batch": {
+        "supported": true,
+        "enabled": true,
+        "count": 9
+      },
+      "motes": {
+        "supported": true,
+        "enabled": true,
+        "count": 0
+      },
+      "calls": 16,
+      "triangles": 14256,
+      "cardVertices": 4068,
+      "particles": 260,
+      "activeMotes": 0,
+      "pixelRatio": 1.5
+    }
+  },
+  {
+    "phase": "flight",
+    "difference": {
+      "meanChannelDifference": 0.000064453125,
+      "changedPixelRatio": 0,
+      "max": 5
+    },
+    "before": {
+      "batch": {
+        "supported": true,
+        "enabled": false,
+        "count": 0
+      },
+      "motes": {
+        "supported": true,
+        "enabled": false,
+        "count": 0
+      },
+      "calls": 43,
+      "triangles": 14256,
+      "cardVertices": 4068,
+      "particles": 260,
+      "activeMotes": 0,
+      "pixelRatio": 1.5
+    },
+    "after": {
+      "batch": {
+        "supported": true,
+        "enabled": true,
+        "count": 9
+      },
+      "motes": {
+        "supported": true,
+        "enabled": true,
+        "count": 0
+      },
+      "calls": 19,
+      "triangles": 14256,
+      "cardVertices": 4068,
+      "particles": 260,
+      "activeMotes": 0,
+      "pixelRatio": 1.5
+    }
+  },
+  {
+    "phase": "motes",
+    "difference": {
+      "meanChannelDifference": 0.0000032552083333333335,
+      "changedPixelRatio": 0,
+      "max": 1
+    },
+    "before": {
+      "batch": {
+        "supported": true,
+        "enabled": false,
+        "count": 0
+      },
+      "motes": {
+        "supported": true,
+        "enabled": false,
+        "count": 0
+      },
+      "calls": 53,
+      "triangles": 6182,
+      "cardVertices": 4068,
+      "particles": 260,
+      "activeMotes": 28,
+      "pixelRatio": 1.5
+    },
+    "after": {
+      "batch": {
+        "supported": true,
+        "enabled": true,
+        "count": 0
+      },
+      "motes": {
+        "supported": true,
+        "enabled": true,
+        "count": 28
+      },
+      "calls": 26,
+      "triangles": 6126,
+      "cardVertices": 4068,
+      "particles": 260,
+      "activeMotes": 28,
+      "pixelRatio": 1.5
+    }
+  }
+]

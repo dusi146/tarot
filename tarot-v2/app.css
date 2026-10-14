@@ -77,7 +77,7 @@ body:not([data-act="INTRO"]) #skip-intro{display:none}
 .slot-title{white-space:nowrap;font-size:10px}
 .slot-card-box.landed{animation:landed .7s ease-out}
 #card-titles-bar{inset:0;max-width:none;width:100%;transform:none;display:block}
-.revealed-card-caption{position:fixed;transform:translate(-50%,0)!important;padding:0 4px;max-width:none}
+.revealed-card-caption{position:fixed;left:0;top:0;transform:translate3d(0,0,0);transition:opacity .65s ease;padding:0 4px;max-width:none;contain:layout style;will-change:transform}
 .revealed-name{text-transform:none;letter-spacing:.02em;font-size:clamp(16px,1.6vw,23px);line-height:1.1}
 .revealed-position-tag{letter-spacing:.05em;font-size:9px;margin-bottom:4px}
 .revealed-sub{font-size:9px}

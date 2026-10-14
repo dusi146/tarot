@@ -1,0 +1,310 @@
+[
+  {
+    "device": "desktop",
+    "phases": {
+      "home": {
+        "frames": 109,
+        "p95": 16.9,
+        "max": 17.1,
+        "averageDraws": 16,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.1402359999999998,
+          "ScriptDuration": 0.08443299999999998,
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0.002866999999999998,
+          "LayoutCount": 0,
+          "RecalcStyleCount": 28
+        }
+      },
+      "shuffle": {
+        "frames": 151,
+        "p95": 17,
+        "max": 17.3,
+        "averageDraws": 16,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.1837200000000001,
+          "ScriptDuration": 0.09920299999999993,
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0.015342000000000001,
+          "LayoutCount": 0,
+          "RecalcStyleCount": 151
+        }
+      },
+      "gather": {
+        "frames": 88,
+        "p95": 17,
+        "max": 17.1,
+        "averageDraws": 16,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.12482899999999963,
+          "ScriptDuration": 0.07216100000000014,
+          "LayoutDuration": 0.0008539999999999937,
+          "RecalcStyleDuration": 0.0063570000000000015,
+          "LayoutCount": 2,
+          "RecalcStyleCount": 43
+        }
+      },
+      "swipe": {
+        "frames": 164,
+        "p95": 17,
+        "max": 17.2,
+        "averageDraws": 16,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.266502,
+          "ScriptDuration": 0.13019500000000006,
+          "LayoutDuration": 0.02654300000000001,
+          "RecalcStyleDuration": 0.0015420000000000017,
+          "LayoutCount": 144,
+          "RecalcStyleCount": 45
+        }
+      },
+      "pick": {
+        "frames": 423,
+        "p95": 17,
+        "max": 33.5,
+        "averageDraws": 24.6,
+        "averageLayoutReads": 0.07,
+        "over33ms": 3,
+        "cpu": {
+          "TaskDuration": 0.967667,
+          "ScriptDuration": 0.4234760000000002,
+          "LayoutDuration": 0.005054000000000003,
+          "RecalcStyleDuration": 0.044723,
+          "LayoutCount": 15,
+          "RecalcStyleCount": 249
+        }
+      },
+      "flip": {
+        "frames": 120,
+        "p95": 17,
+        "max": 17.2,
+        "averageDraws": 29.6,
+        "averageLayoutReads": 0.02,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.2646479999999998,
+          "ScriptDuration": 0.11983599999999983,
+          "LayoutDuration": 0.00995399999999999,
+          "RecalcStyleDuration": 0.030369999999999994,
+          "LayoutCount": 40,
+          "RecalcStyleCount": 129
+        }
+      },
+      "reveal": {
+        "frames": 108,
+        "p95": 17.1,
+        "max": 17.2,
+        "averageDraws": 30,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.18511600000000028,
+          "ScriptDuration": 0.09240599999999999,
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0.024680000000000007,
+          "LayoutCount": 0,
+          "RecalcStyleCount": 108
+        }
+      },
+      "modal": {
+        "frames": 123,
+        "p95": 17.1,
+        "max": 17.2,
+        "averageDraws": 29.3,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.27010000000000023,
+          "ScriptDuration": 0.10619099999999992,
+          "LayoutDuration": 0.010687000000000002,
+          "RecalcStyleDuration": 0.03595099999999998,
+          "LayoutCount": 3,
+          "RecalcStyleCount": 132
+        }
+      }
+    },
+    "longTasks": [],
+    "pixelRatio": 1.5,
+    "preserved": {
+      "batch": {
+        "supported": true,
+        "enabled": true,
+        "count": 0
+      },
+      "motes": {
+        "supported": true,
+        "enabled": true,
+        "count": 0
+      },
+      "calls": 29,
+      "triangles": 7484,
+      "cardVertices": 4068,
+      "particles": 260,
+      "activeMotes": 0,
+      "pixelRatio": 1.5
+    },
+    "errors": []
+  },
+  {
+    "device": "mobile",
+    "phases": {
+      "home": {
+        "frames": 108,
+        "p95": 17,
+        "max": 17.2,
+        "averageDraws": 16,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.1372420000000001,
+          "ScriptDuration": 0.08340200000000009,
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0.0035519999999999996,
+          "LayoutCount": 0,
+          "RecalcStyleCount": 28
+        }
+      },
+      "shuffle": {
+        "frames": 151,
+        "p95": 16.9,
+        "max": 17.3,
+        "averageDraws": 16,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.201287,
+          "ScriptDuration": 0.10989499999999996,
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0.016441000000000004,
+          "LayoutCount": 0,
+          "RecalcStyleCount": 152
+        }
+      },
+      "gather": {
+        "frames": 88,
+        "p95": 16.9,
+        "max": 17,
+        "averageDraws": 16,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.12718399999999996,
+          "ScriptDuration": 0.071774,
+          "LayoutDuration": 0.0011890000000000095,
+          "RecalcStyleDuration": 0.006938,
+          "LayoutCount": 2,
+          "RecalcStyleCount": 42
+        }
+      },
+      "swipe": {
+        "frames": 161,
+        "p95": 16.9,
+        "max": 17.2,
+        "averageDraws": 16,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.2561040000000001,
+          "ScriptDuration": 0.12348300000000001,
+          "LayoutDuration": 0.025192999999999993,
+          "RecalcStyleDuration": 0.0007390000000000035,
+          "LayoutCount": 143,
+          "RecalcStyleCount": 23
+        }
+      },
+      "pick": {
+        "frames": 435,
+        "p95": 16.8,
+        "max": 33.3,
+        "averageDraws": 24.7,
+        "averageLayoutReads": 0.07,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 1.0293140000000003,
+          "ScriptDuration": 0.44938600000000006,
+          "LayoutDuration": 0.005683999999999995,
+          "RecalcStyleDuration": 0.04517600000000001,
+          "LayoutCount": 19,
+          "RecalcStyleCount": 258
+        }
+      },
+      "flip": {
+        "frames": 119,
+        "p95": 16.9,
+        "max": 17.1,
+        "averageDraws": 29.6,
+        "averageLayoutReads": 0.02,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.320055,
+          "ScriptDuration": 0.13078000000000012,
+          "LayoutDuration": 0.022954000000000016,
+          "RecalcStyleDuration": 0.036217,
+          "LayoutCount": 262,
+          "RecalcStyleCount": 558
+        }
+      },
+      "reveal": {
+        "frames": 109,
+        "p95": 16.8,
+        "max": 17,
+        "averageDraws": 30,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.19091700000000023,
+          "ScriptDuration": 0.09098299999999981,
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0.026572999999999986,
+          "LayoutCount": 0,
+          "RecalcStyleCount": 531
+        }
+      },
+      "modal": {
+        "frames": 123,
+        "p95": 17,
+        "max": 17.2,
+        "averageDraws": 29.3,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.2850389999999998,
+          "ScriptDuration": 0.11022599999999994,
+          "LayoutDuration": 0.009578000000000003,
+          "RecalcStyleDuration": 0.041247000000000006,
+          "LayoutCount": 3,
+          "RecalcStyleCount": 610
+        }
+      }
+    },
+    "longTasks": [],
+    "pixelRatio": 1.8,
+    "preserved": {
+      "batch": {
+        "supported": true,
+        "enabled": true,
+        "count": 0
+      },
+      "motes": {
+        "supported": true,
+        "enabled": true,
+        "count": 0
+      },
+      "calls": 29,
+      "triangles": 7484,
+      "cardVertices": 4068,
+      "particles": 140,
+      "activeMotes": 0,
+      "pixelRatio": 1.8
+    },
+    "errors": []
+  }
+]
