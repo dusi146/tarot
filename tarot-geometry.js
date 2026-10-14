@@ -13,7 +13,7 @@
     shape.lineTo(x, y + r); shape.quadraticCurveTo(x, y, x + r, y);
     const bevelDepth = thickness * 0.22, depth = thickness - bevelDepth * 2;
     const raw = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: true,
-      bevelThickness: bevelDepth, bevelSize: bevel, bevelSegments: 2, curveSegments: 5, steps: 1 });
+      bevelThickness: bevelDepth, bevelSize: bevel, bevelSegments: 3, curveSegments: 10, steps: 1 });
     raw.translate(0, 0, -depth / 2);
     const positions = raw.attributes.position, normals = raw.attributes.normal;
     const buckets = [[], [], []];

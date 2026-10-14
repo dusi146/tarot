@@ -11,11 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const button = document.getElementById('startRitualBtn');
     if (button) { button.disabled = true; button.textContent = message; }
   }
-  if (!window.THREE || !window.gsap || !window.TarotMotion || !window.TarotGeometry || !window.TAROT_CARDS) {
+  if (!window.THREE || !window.gsap || !window.TarotMotion || !window.TarotGeometry || !window.TarotPersona || !window.TarotAtmosphere || !window.TarotAudio || !window.TAROT_CARDS) {
     sceneFailure('Không tải được bàn bài. Hãy tải lại trang.');
     return;
   }
   const motion = window.TarotMotion;
+  const persona = window.TarotPersona;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // =========================================================================
@@ -103,6 +104,31 @@ document.addEventListener('DOMContentLoaded', () => {
     followupHistory: []
   };
   let sessionVersion = 0;
+  let sheetSession = null;
+  let currentRating = 0;
+
+  function beginSheetReading() {
+    if (!window.TarotSheets) return null;
+    const dob = appState.dob;
+    const source = new URLSearchParams(window.location?.search || '').get('ref') || 'Trực tiếp / Không rõ';
+    return window.TarotSheets?.begin({
+      name: appState.userName || 'Khách',
+      dob: dob.day && dob.month && dob.year ? `${dob.day}/${dob.month}/${dob.year}` : 'Không rõ',
+      zodiac: appState.zodiac || 'Không rõ',
+      gender: document.getElementById('genderInput')?.value || 'Không rõ',
+      question: appState.userQuestion || '',
+      spread: `${appState.activeSpread.count} lá`,
+      vibe: appState.userVibe,
+      solver: `Ta Văn Rót / ${GEMINI_MODEL}`,
+      source
+    });
+  }
+
+  function saveSheetReading(session, conclusion, status, version) {
+    session?.record(conclusion, status).catch(() => {
+      if (version === sessionVersion) showToast('Chưa xác nhận lưu lịch sử vào Google Sheets.');
+    });
+  }
 
   // Thuật toán Fisher-Yates xáo ngẫu nhiên 100% với năng lượng bài Xuôi / Ngược
   function shuffleDeckData() {
@@ -140,27 +166,18 @@ document.addEventListener('DOMContentLoaded', () => {
       dobYearSelect.innerHTML += `<option value="${y}">${y}</option>`;
     }
 
-    function calculateZodiac(day, month) {
-      if (!day || !month) return "";
-      const dates = [20, 19, 21, 20, 21, 22, 23, 23, 23, 24, 22, 22];
-      const signs = ["Ma Kết", "Bảo Bình", "Song Ngư", "Bạch Dương", "Kim Ngưu", "Song Tử", "Cự Giải", "Sư Tử", "Xử Nữ", "Thiên Bình", "Bọ Cạp", "Nhân Mã"];
-      let idx = month - 1;
-      if (day < dates[idx]) idx = (idx + 11) % 12;
-      return signs[idx];
-    }
-
     function onDateChanged() {
       const d = parseInt(dobDaySelect.value) || 0;
       const m = parseInt(dobMonthSelect.value) || 0;
       const y = parseInt(dobYearSelect.value) || 0;
       appState.dob = { day: d, month: m, year: y };
 
-      if (d && m) {
-        appState.zodiac = calculateZodiac(d, m);
+      if (d && m && persona.validDate(d, m, y || 2000)) {
+        appState.zodiac = persona.zodiac(d, m, y || 2000);
         if (zodiacBadge) zodiacBadge.textContent = appState.zodiac;
       } else {
         appState.zodiac = "";
-        if (zodiacBadge) zodiacBadge.textContent = "—";
+        if (zodiacBadge) zodiacBadge.textContent = d && m ? 'Ngày không hợp lệ' : '—';
       }
     }
 
@@ -172,192 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // 3. ÂM THANH SYNTHESIS CHÂN THẬT (CHẤT LƯỢNG CAO)
   // =========================================================================
-  class HighEndSoundEngine {
-    constructor() {
-      this.ctx = null;
-      this.muted = true;
-      this.droneOsc = null;
-      this.droneGain = null;
-      this.bowlOsc = null;
-      this.bowlGain = null;
-    }
-    init() {
-      if (!this.ctx) {
-        const AC = window.AudioContext || window.webkitAudioContext;
-        if (!AC) return;
-        try { this.ctx = new AC(); } catch (error) { return; }
-      }
-      if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
-    }
-    toggle() {
-      this.init();
-      this.muted = !this.muted;
-      if (this.muted) this.stopDrone();
-      else this.startDrone();
-      return this.muted;
-    }
-    startDrone() {
-      if (this.muted || !this.ctx || this.droneOsc) return;
-      this.droneGain = this.ctx.createGain();
-      this.droneGain.gain.setValueAtTime(0.001, this.ctx.currentTime);
-      this.droneGain.gain.exponentialRampToValueAtTime(0.03, this.ctx.currentTime + 2);
-
-      this.droneOsc = this.ctx.createOscillator();
-      this.droneOsc.type = 'sine';
-      this.droneOsc.frequency.setValueAtTime(108, this.ctx.currentTime);
-
-      const filter = this.ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(220, this.ctx.currentTime);
-
-      this.droneOsc.connect(filter);
-      filter.connect(this.droneGain);
-      this.droneGain.connect(this.ctx.destination);
-      this.droneOsc.start();
-    }
-    stopDrone() {
-      if (this.droneGain && this.ctx) {
-        const osc = this.droneOsc;
-        this.droneOsc = null;
-        this.droneGain.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.1);
-        if (osc) osc.stop(this.ctx.currentTime + 0.4);
-      }
-    }
-    setBowl(ratio) {
-      if (this.muted || !this.ctx) return;
-      if (!this.bowlOsc) {
-        this.bowlGain = this.ctx.createGain();
-        this.bowlGain.gain.setValueAtTime(0.01, this.ctx.currentTime);
-        this.bowlOsc = this.ctx.createOscillator();
-        this.bowlOsc.type = 'sine';
-        this.bowlOsc.frequency.setValueAtTime(432, this.ctx.currentTime);
-        this.bowlOsc.connect(this.bowlGain);
-        this.bowlGain.connect(this.ctx.destination);
-        this.bowlOsc.start();
-      }
-      this.bowlGain.gain.setTargetAtTime(Math.min(0.09, 0.02 + ratio * 0.07), this.ctx.currentTime, 0.08);
-      this.bowlOsc.frequency.setTargetAtTime(432 + ratio * 36, this.ctx.currentTime, 0.08);
-    }
-    stopBowl() {
-      if (this.bowlGain && this.ctx) {
-        const osc = this.bowlOsc;
-        this.bowlOsc = null;
-        this.bowlGain.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.1);
-        if (osc) osc.stop(this.ctx.currentTime + 0.5);
-      }
-    }
-
-    // 1. Tiếng cọ bài giấy lụa xào xạc chân thật
-    playSilkCardRustle() {
-      if (this.muted || !this.ctx) return;
-      // Reuse noise and let the audio clock schedule it; no burst of JS timers.
-      if (!this.rustleBuffer) {
-            const bufferSize = this.ctx.sampleRate * 0.045;
-            const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let j = 0; j < bufferSize; j++) {
-              data[j] = (Math.random() * 2 - 1) * Math.exp(-j / (bufferSize * 0.3));
-            }
-            this.rustleBuffer = buffer;
-      }
-      for (let i = 0; i < 5; i++) {
-            const start = this.ctx.currentTime + i * 0.035;
-            const noise = this.ctx.createBufferSource();
-            noise.buffer = this.rustleBuffer;
-
-            const filter = this.ctx.createBiquadFilter();
-            filter.type = 'bandpass';
-            filter.frequency.setValueAtTime(1600 + Math.random() * 1200, this.ctx.currentTime);
-            filter.Q.setValueAtTime(2.2, this.ctx.currentTime);
-
-            const gain = this.ctx.createGain();
-            gain.gain.setValueAtTime(0.035, start);
-            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.04);
-
-            noise.connect(filter);
-            filter.connect(gain);
-            gain.connect(this.ctx.destination);
-
-            noise.onended = () => { noise.disconnect(); filter.disconnect(); gain.disconnect(); };
-            noise.start(start);
-            noise.stop(start + 0.045);
-      }
-    }
-
-    // 2. Tiếng chuông pha lê Solfeggio 528Hz ngân vang thiền định (2.8s)
-    playSolfeggioBell() {
-      if (this.muted || !this.ctx) return;
-      const freqs = [528, 1056, 1584, 2112];
-      const gains = [0.08, 0.035, 0.018, 0.008];
-
-      freqs.forEach((f, idx) => {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(f, this.ctx.currentTime);
-
-        const lfo = this.ctx.createOscillator();
-        const lfoGain = this.ctx.createGain();
-        lfo.frequency.setValueAtTime(4.2, this.ctx.currentTime);
-        lfoGain.gain.setValueAtTime(2.5, this.ctx.currentTime);
-        lfo.connect(lfoGain);
-        lfoGain.connect(osc.frequency);
-        lfo.start();
-
-        gain.gain.setValueAtTime(gains[idx], this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.00005, this.ctx.currentTime + 2.8);
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-
-        osc.start();
-        osc.stop(this.ctx.currentTime + 2.9);
-        lfo.stop(this.ctx.currentTime + 2.9);
-      });
-    }
-
-    // 3. Tiếng lướt gió vũ trụ êm ái
-    playCosmicBreeze() {
-      if (this.muted || !this.ctx) return;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      const filter = this.ctx.createBiquadFilter();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(130, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(360, this.ctx.currentTime + 0.2);
-      osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.55);
-
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(550, this.ctx.currentTime);
-
-      gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.55);
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(this.ctx.destination);
-
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.58);
-    }
-
-    click() {
-      if (this.muted || !this.ctx) return;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(500, this.ctx.currentTime);
-      gain.gain.setValueAtTime(0.03, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.05);
-    }
-  }
-  const sfx = new HighEndSoundEngine();
+  const sfx = new window.TarotAudio();
 
   // =========================================================================
   // 4. THREE.JS 3D STUDIO — CHỐNG RĂNG CƯA & TONE MAPPING ĐIỆN ẢNH
@@ -408,12 +240,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // RENDERER SIÊU MỊN KHỬ RĂNG CƯA TỐI ĐA
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
   } catch (error) {
     sceneFailure('Thiết bị chưa mở được đồ họa 3D. Hãy bật tăng tốc phần cứng rồi tải lại.');
     return;
   }
-  const pixelRatioCap = window.innerWidth < 640 ? 1.5 : 2;
+  const pixelRatioCap = window.innerWidth < 640 ? 2 : 2.5;
   let renderPixelRatio = Math.min(window.devicePixelRatio || 1, pixelRatioCap);
   renderer.setPixelRatio(renderPixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight, false);
@@ -472,6 +304,8 @@ document.addEventListener('DOMContentLoaded', () => {
   starGradient.addColorStop(1, 'rgba(203,192,255,0)');
   starContext.fillStyle = starGradient; starContext.fillRect(0, 0, 32, 32);
   const starTexture = new THREE.CanvasTexture(starCanvas);
+  const atmosphere = window.TarotAtmosphere.create(THREE, scene, starTexture, reducedMotion);
+  const ritual = { energy: 0 };
   const starCount = window.innerWidth < 640 ? 500 : 850;
   const starGeo = new THREE.BufferGeometry();
   const starPos = new Float32Array(starCount * 3);
@@ -497,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const starTime = { value: 0 };
   starField.material.onBeforeCompile = shader => {
     shader.uniforms.uStarTime = starTime;
-    shader.vertexShader = 'attribute float aPhase; uniform float uStarTime; varying float vShimmer;\n' + shader.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvShimmer = 0.65 + 0.35 * sin(aPhase + uStarTime * 0.65);');
+    shader.vertexShader = 'attribute float aPhase; uniform float uStarTime; varying float vShimmer;\n' + shader.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\ntransformed.x += sin(aPhase + uStarTime * 0.10) * 0.20;\ntransformed.y += cos(aPhase + uStarTime * 0.08) * 0.14;\nvShimmer = 0.6 + 0.4 * sin(aPhase + uStarTime * 0.85);');
     shader.fragmentShader = 'varying float vShimmer;\n' + shader.fragmentShader.replace('#include <alphatest_fragment>', 'diffuseColor.a *= vShimmer;\n#include <alphatest_fragment>');
   };
   scene.add(starField);
@@ -573,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.font = '16px Georgia'; ctx.textAlign = 'center'; ctx.fillText('T  V  R', 0, 500);
     ctx.restore();
     const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding;
-    tex.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 4);
+    tex.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 16);
     tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter; tex.generateMipmaps = false;
     return tex;
   }
@@ -707,7 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }, undefined, () => finish(true));
       // Set encoding before the material's first shader compilation.
       entry.texture.encoding = THREE.sRGBEncoding;
-      entry.texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 4);
+      entry.texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 16);
       entry.texture.generateMipmaps = false;
       entry.texture.minFilter = THREE.LinearFilter;
       entry.texture.magFilter = THREE.LinearFilter;
@@ -862,11 +696,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (index < 0) return;
     ribbon.target = 38.5 - index; ribbon.velocity = 0;
     lastNavigationTime = performance.now(); hoveredCardMesh = null; hoverDirty = true;
+    document.getElementById('swipeGuide')?.classList.add('understood');
   });
+  function navigateDeck(direction) {
+    if (appState.currentStage !== 'draw' || appState.isTransitioning || appState.isPickingCard) return;
+    const center = Math.round(38.5 - ribbon.target);
+    let next = center + direction;
+    while (next >= 0 && next < 78 && cardMeshes[next].userData.isSelected) next += direction;
+    if (next < 0 || next >= 78) return;
+    ribbon.target = 38.5 - next; ribbon.velocity = 0;
+    lastNavigationTime = performance.now(); hoverDirty = true;
+    document.getElementById('swipeGuide')?.classList.add('understood');
+    sfx.playSilkCardRustle();
+  }
+  document.getElementById('previousCardBtn')?.addEventListener('click', () => navigateDeck(-1));
+  document.getElementById('nextCardBtn')?.addEventListener('click', () => navigateDeck(1));
 
   canvas.addEventListener('wheel', e => {
     if (appState.currentStage !== 'draw' || appState.isTransitioning || appState.isPickingCard) return;
     e.preventDefault();
+    document.getElementById('swipeGuide')?.classList.add('understood');
     lastNavigationTime = performance.now();
     const units = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1;
     const delta = (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) * units;
@@ -931,6 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
     animateCamera('draw');
     renderDockSlots();
     ribbon.offset = ribbon.target = -0.5; ribbon.velocity = 0;
+    document.getElementById('swipeGuide')?.classList.remove('understood');
     refreshCarouselLayout(); lastDeckPosition = -1;
     drawEntry.progress = 0;
     cardMeshes.forEach(mesh => {
@@ -990,9 +840,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (title) title.textContent = current < total ? appState.activeSpread.slots[current].title : 'Đã chọn đủ lá';
     if (pickButton) {
       pickButton.disabled = current >= total || appState.isTransitioning || appState.isPickingCard || moving;
-      pickButton.innerHTML = appState.isPickingCard ? 'Đang chọn…' : 'Chọn lá này <span aria-hidden="true">↗</span>';
+      pickButton.innerHTML = appState.isPickingCard ? 'Đang nâng lá bài…' : 'Rút lá đang xem <span aria-hidden="true">↗</span>';
     }
     const scrubber = document.getElementById('deckScrubber'); if (scrubber) scrubber.disabled = current >= total || appState.isTransitioning || appState.isPickingCard;
+    for (const id of ['previousCardBtn', 'nextCardBtn']) {
+      const button = document.getElementById(id);
+      if (button) button.disabled = current >= total || appState.isTransitioning || appState.isPickingCard;
+    }
     document.querySelectorAll('.dock-slot').forEach((slot, index) => slot.classList.toggle('current', index === current));
   }
   function pickCenterCard() {
@@ -1039,6 +893,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     sfx.playCosmicBreeze();
+    atmosphere.burst(mesh.position, mesh.scale.x);
     document.getElementById('dockSlot-' + slotIndex)?.classList.add('filled');
     const thumb = document.getElementById('dockThumb-' + slotIndex);
     const name = document.getElementById('dockName-' + slotIndex);
@@ -1057,9 +912,13 @@ document.addEventListener('DOMContentLoaded', () => {
         lastNavigationTime = performance.now(); updateDrawInstruction();
       }
     };
-    const duration = reducedMotion ? 0.12 : 0.82;
+    const duration = reducedMotion ? 0.12 : 0.92;
+    const lift = { x: mesh.position.x * 0.55 + target.x * 0.45,
+      y: Math.max(mesh.position.y, target.y) + (reducedMotion ? 0 : 0.28),
+      z: Math.max(mesh.position.z, target.z) + (reducedMotion ? 0 : 0.45) };
     card.flight = gsap.timeline({ onComplete: card.completePick });
-    card.flight.to(mesh.position, { x: target.x, y: target.y, z: target.z, duration, ease: 'power2.inOut' }, 0)
+    card.flight.to(mesh.position, { ...lift, duration: duration * 0.42, ease: 'sine.out' }, 0)
+      .to(mesh.position, { x: target.x, y: target.y, z: target.z, duration: duration * 0.58, ease: 'sine.inOut' }, duration * 0.42)
       .to(mesh.scale, { x: target.scale, y: target.scale, z: target.scale, duration, ease: 'sine.inOut' }, 0)
       .to(mesh.rotation, { x: 0, y: 0, z: 0, duration, ease: 'sine.inOut' }, 0);
     updateDrawInstruction();
@@ -1120,7 +979,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const view = motion.viewAt(getCameraConfig('reveal'), window.innerWidth / window.innerHeight, 2.0);
     const focusScale = Math.min(1.15, view.width * 0.76 / CARD_W, view.height * (window.innerHeight < 700 ? 0.32 : 0.50) / CARD_H);
     const rotZ = card.isReversed ? Math.PI : 0;
-    const duration = reducedMotion ? 0.12 : 0.52;
+    const duration = reducedMotion ? 0.12 : 0.56;
     const timeline = gsap.timeline({ onComplete: () => {
       card.isFlipping = false;
       card.isFlipped = true;
@@ -1144,6 +1003,7 @@ document.addEventListener('DOMContentLoaded', () => {
     timeline.to(card.mesh.position, { x: 0, y: view.centerY + view.height * 0.025, z: 2.0, duration, ease: 'power2.inOut' }, 0)
       .to(card.mesh.scale, { x: focusScale, y: focusScale, z: focusScale, duration }, 0)
       .to(card.mesh.rotation, { x: 0, y: Math.PI, z: rotZ, duration: duration * 1.35, ease: 'sine.inOut' }, duration * 0.2)
+      .call(() => atmosphere.burst(card.mesh.position, focusScale), null, duration * 0.85)
       .call(() => {
         const thumb = document.getElementById('dockThumb-' + card.slotIndex);
         const name = document.getElementById('dockName-' + card.slotIndex);
@@ -1225,6 +1085,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dragMovedDistance += Math.abs(deltaX);
     if (Math.hypot(event.clientX - gesture.x, event.clientY - gesture.y) > 8 || dragMovedDistance > 10) gesture.moved = true;
     if (gesture.moved && gesture.stage === 'draw') {
+      document.getElementById('swipeGuide')?.classList.add('understood');
       isDraggingRibbon = true;
       hoveredCardMesh = null;
       const sensitivity = 1 / (window.innerWidth < 640 ? 90 : 130);
@@ -1302,8 +1163,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const rawDt = clock.getDelta();
     const dt = Math.min(rawDt, 0.05);
     sceneTime += dt;
+    atmosphere.update(sceneTime, ritual.energy, dt, renderPixelRatio);
+    goldAccentLight.intensity = 3.2 + ritual.energy * 4;
+    haloMaterial.opacity = 0.28 + ritual.energy * 0.32;
+    runeMesh.material.opacity = 0.22 + ritual.energy * 0.28;
     if (!reducedMotion) {
-      starField.rotation.y = sceneTime * 0.003;
+      starField.rotation.y = Math.sin(sceneTime * 0.07) * 0.04;
+      starField.rotation.z = Math.sin(sceneTime * 0.04) * 0.025;
       starTime.value = sceneTime;
       spaceTexture.offset.set(-0.04 + Math.sin(sceneTime * 0.035) * 0.014, -0.04 + Math.cos(sceneTime * 0.027) * 0.014);
       haloA.rotation.y = -0.5 + Math.sin(sceneTime * 0.12) * 0.16;
@@ -1314,19 +1180,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (appState.currentStage === 'intent') {
       layoutIdleCards(sceneTime);
     } else if (appState.currentStage === 'charge' && appState.isHolding && !appState.isVortexSettling) {
-      deckGroup.rotation.y += dt * (reducedMotion ? 0.2 : 0.7);
-      const follow = motion.damp(6, dt);
+      const holdSeconds = Math.max(0, (performance.now() - appState.holdStartTime) / 1000);
+      ritual.energy += (motion.shuffleEnergy(holdSeconds) - ritual.energy) * motion.damp(4, dt);
+      deckGroup.rotation.y = reducedMotion ? 0 : Math.sin(holdSeconds * 0.35) * 0.12;
+      chargeOrb?.style.setProperty('--charge-energy', ritual.energy.toFixed(3));
+      if (chargePct) chargePct.textContent = `${Math.round(ritual.energy * 100)}%`;
+      sfx.setBowl(ritual.energy);
+      const follow = motion.damp(5.5, dt);
       cardMeshes.forEach((mesh, idx) => {
-        mesh.visible = idx % 7 === 0;
+        const pose = motion.shufflePose(idx, holdSeconds, window.innerWidth < 640, reducedMotion);
+        mesh.visible = pose.visible;
         if (!mesh.visible) return;
-        const rank = Math.floor(idx / 7), tier = Math.floor(rank / 4), angle = rank % 4 * Math.PI / 2 + tier * 0.36;
-        mesh.position.x += (Math.cos(angle) * 1.1 - mesh.position.x) * follow;
-        mesh.position.y += ((tier - 1) * 0.88 + Math.sin(sceneTime * 0.8 + rank) * 0.012 - mesh.position.y) * follow;
-        mesh.position.z += (Math.sin(angle) * 1.1 - mesh.position.z) * follow;
-        const targetY = -angle + Math.PI / 2;
-        const delta = Math.atan2(Math.sin(targetY - mesh.rotation.y), Math.cos(targetY - mesh.rotation.y));
-        mesh.rotation.y += delta * follow; mesh.rotation.x += (-0.08 - mesh.rotation.x) * follow;
-        mesh.scale.setScalar(mesh.scale.x + (0.58 - mesh.scale.x) * follow);
+        mesh.position.x += (pose.x - mesh.position.x) * follow;
+        mesh.position.y += (pose.y - mesh.position.y) * follow;
+        mesh.position.z += (pose.z - mesh.position.z) * follow;
+        const delta = Math.atan2(Math.sin(pose.rotY - mesh.rotation.y), Math.cos(pose.rotY - mesh.rotation.y));
+        mesh.rotation.y += delta * follow;
+        mesh.rotation.x += (pose.rotX - mesh.rotation.x) * follow;
+        mesh.rotation.z += (pose.rotZ - mesh.rotation.z) * follow;
+        mesh.scale.setScalar(mesh.scale.x + (pose.scale - mesh.scale.x) * follow);
       });
     } else if (appState.currentStage === 'draw') updateRibbonCardsPositions(dt);
     if (hoverDirty && !gesture) {
@@ -1369,7 +1241,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelGesture();
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderPixelRatio = Math.min(renderPixelRatio, window.devicePixelRatio || 1, window.innerWidth < 640 ? 1.5 : 2);
+    renderPixelRatio = Math.min(renderPixelRatio, window.devicePixelRatio || 1, window.innerWidth < 640 ? 2 : 2.5);
     renderer.setPixelRatio(renderPixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight, false);
     const stage = appState.currentStage === 'oracle' ? 'reveal' : appState.currentStage;
@@ -1402,6 +1274,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }).observe(dock);
   }
   function suspendScene() {
+    sfx.pause();
     cancelGesture();
     cancelHold();
     cancelAnimationFrame(frameId);
@@ -1409,6 +1282,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function resumeScene() {
     if (document.hidden || contextLost) return;
+    sfx.resume();
     clock.getDelta();
     gsap.globalTimeline.resume();
     cancelAnimationFrame(frameId);
@@ -1434,55 +1308,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 10. CÁ NHÂN HÓA TA VĂN RÓT & GEMINI 2.5 FLASH (4096 TOKENS)
   // =========================================================================
   async function requestGeminiOracleReading() {
-    const spreadInfo = appState.activeSpread;
-    const cards = appState.selectedCards;
-
-    const cardsDetails = cards.map((c, idx) => {
-      const slot = spreadInfo.slots[idx];
-      const isRev = c.isReversed;
-      const orientLabel = isRev ? "BÀI NGƯỢC (Reversed) — Năng lượng hướng nội, điểm nghẽn hoặc bài học cần chuyển hóa" : "BÀI XUÔI (Upright) — Năng lượng thuận dòng, biểu hiện rõ nét bên ngoài";
-      const meaningText = isRev ? (c.data.revMeaning || c.data.meaning) : c.data.meaning;
-      return `Lá ${idx + 1} [Vị trí: ${slot.title} — ${slot.desc}]: Lá "${c.data.viName} (${c.data.name})" (Hành: ${c.data.element}).
-- Chiều bài: ${orientLabel}
-- Ý nghĩa cốt lõi: ${meaningText}`;
-    }).join('\n\n');
-
-    const vibeMap = {
-      chualanh: "Chữa lành: Lắng nghe, vỗ về dịu dàng, thấu cảm sâu sắc, như người bạn thân ngồi bên tách trà ấm.",
-      tatnuoc: "Thẳng thắn: Thô nhưng thật, vạch trần ảo tưởng, chỉ rõ thực tế một cách duyên dáng và thức tỉnh.",
-      quansu: "Chiến lược: Sắc sảo, thực tế, phân tích nguyên nhân và đưa ra giải pháp từng bước hành động.",
-      phansau: "Triết lý sâu: Đào sâu tâm lý, bài học linh hồn của vũ trụ, sự liên kết giữa tiềm thức và thực tại."
-    };
-
-    const systemPrompt = `
-Bạn là TA VĂN RÓT — người bạn tri kỷ và là người đọc bài Tarot đồng hành cùng người xem.
-Bạn xưng là "Rót", gọi người xem là "bạn" (hoặc "bồ" một cách gần gũi).
-Văn phong của Rót: Trầm ấm, chân thành, có chiều sâu chiêm nghiệm, không sáo rỗng, đọc vị chuẩn xác tâm lý người xem như đang ngồi trực tiếp đối diện trải bài.
-
-THÔNG TIN QUẺ BÀI:
-- Người xem: ${appState.userName || "Người bạn hữu duyên"}
-- Ngày sinh: ${appState.dob.day ? `${appState.dob.day}/${appState.dob.month}/${appState.dob.year}` : "Chưa chia sẻ"} (Cung ${appState.zodiac || "Chưa rõ"})
-- Trăn trở / Câu hỏi: "${appState.userQuestion || "Xin thông điệp chung soi sáng hành trình hiện tại"}"
-- Kiểu trải bài: ${spreadInfo.name} (${spreadInfo.count} lá)
-- Tông giọng luận giải: ${vibeMap[appState.userVibe]}
-
-CÁC LÁ BÀI RÚT ĐƯỢC:
-${cardsDetails}
-
-YÊU CẦU LUẬN GIẢI CỦA RÓT:
-1. Mở đầu bằng lời chào thân tình của Rót và nhận định về luồng năng lượng bao quanh quẻ bài này.
-2. Phân tích từng lá bài theo đúng vị trí của kiểu trải bài (${spreadInfo.name}), nêu rõ lá bài đó là XUÔI hay NGƯỢC và ý nghĩa đặc thù của trạng thái đó, liên kết chặt chẽ với câu hỏi và tâm tư của bạn ấy.
-3. Tổng kết lời khuyên chân thành và gửi gắm thông điệp chữa lành từ Rót.
-4. ĐẶC BIỆT: Viết trọn vẹn, sâu sắc, kết bài hoàn chỉnh, TUYỆT ĐỐI KHÔNG DỪNG DỞ DANG HOẶC CẮT CHỮ.
-`;
-
-    const payload = {
-      contents: [{ parts: [{ text: systemPrompt }] }],
-      generationConfig: {
-        temperature: 0.72,
-        maxOutputTokens: 4096
-      }
-    };
+    const payload = persona.readingPayload(appState);
 
     const response = await fetch(GEMINI_ENDPOINT, {
       method: 'POST',
@@ -1495,27 +1321,17 @@ YÊU CẦU LUẬN GIẢI CỦA RÓT:
     }
 
     const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
+    const text = data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
+    if (!text) throw new Error('Gemini không trả về lời giải.');
+    return text;
   }
 
   // Follow-up Chat
   async function requestGeminiFollowUp(userMsg) {
-    const version = sessionVersion;
-    appState.followupHistory.push({ role: 'user', text: userMsg });
-
-    const prompt = `
-Bối cảnh: Bạn là Ta Văn Rót, vừa xem quẻ Tarot cho bạn ấy.
-Tóm tắt lời giải trước đó:
-${appState.readingResult.slice(0, 1000)}...
-
-Bạn ấy vừa hỏi thêm: "${userMsg}"
-Hãy trả lời với giọng điệu của Ta Văn Rót: ân cần, giải thích sâu sắc hơn dựa trên tinh thần quẻ bài:
-`;
-
-    const payload = {
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.7, maxOutputTokens: 1500 }
-    };
+    const history = appState.followupHistory;
+    const completed = history.filter(item => item.role === 'rot').length;
+    history.push({ role: 'user', text: userMsg });
+    const payload = persona.conversationPayload(appState, history);
 
     const res = await fetch(GEMINI_ENDPOINT, {
       method: 'POST',
@@ -1523,10 +1339,12 @@ Hãy trả lời với giọng điệu của Ta Văn Rót: ân cần, giải th�
       body: JSON.stringify(payload)
     });
 
+    if (!res.ok) throw new Error(`Gemini API Error: ${res.status}`);
     const data = await res.json();
-    const reply = data.candidates[0].content.parts[0].text;
-    if (version === sessionVersion) appState.followupHistory.push({ role: 'rot', text: reply });
-    return reply;
+    const reply = data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
+    if (!reply) throw new Error('Gemini không trả về câu trả lời.');
+    history.push({ role: 'rot', text: reply });
+    return { reply, nudge: completed === 2, history };
   }
 
   // =========================================================================
@@ -1567,6 +1385,8 @@ Hãy trả lời với giọng điệu của Ta Văn Rót: ân cần, giải th�
       btn.classList.add('active');
       document.querySelectorAll('.tone-chip').forEach(chip => chip.setAttribute('aria-pressed', String(chip === btn)));
       appState.userVibe = btn.dataset.vibe;
+      const description = document.getElementById('toneDescription');
+      if (description) description.textContent = persona.tone(appState.userVibe).description;
     });
   });
 
@@ -1587,6 +1407,11 @@ Hãy trả lời với giọng điệu của Ta Văn Rót: ân cần, giải th�
       sfx.click();
       appState.userName = document.getElementById('nameInput').value.trim();
       appState.userQuestion = document.getElementById('questionInput').value.trim();
+      const dob = appState.dob;
+      if (dob.day && dob.month && !persona.validDate(dob.day, dob.month, dob.year || 2000)) {
+        showToast('Bạn kiểm tra lại ngày sinh nhé, ngày này chưa hợp lệ.');
+        return;
+      }
       startChargingStage();
     });
   }
@@ -1602,10 +1427,12 @@ Hãy trả lời với giọng điệu của Ta Văn Rót: ân cần, giải th�
   function resetHoldLabels() {
     chargeOrb?.classList.remove('holding');
     if (chargeHint) chargeHint.textContent = 'Giữ để xáo';
-    if (chargeTipPill) chargeTipPill.textContent = 'Thả tay khi bạn sẵn sàng';
+    if (chargeTipPill) chargeTipPill.textContent = 'Giữ lâu hơn, bài xáo nhanh hơn · thả khi bạn sẵn sàng';
+    if (chargePct) chargePct.textContent = '✦';
   }
   function settleCharge(advance) {
     appState.isVortexSettling = true;
+    gsap.to(ritual, { energy: 0, duration: reducedMotion ? 0.1 : 1.2, ease: 'sine.out', overwrite: true });
     const timeline = gsap.timeline({ onComplete: () => {
       appState.isVortexSettling = false;
       cardMeshes.forEach(mesh => { mesh.visible = true; });
@@ -1635,11 +1462,13 @@ Hãy trả lời với giọng điệu của Ta Văn Rót: ân cần, giải th�
     cardMeshes.forEach(stopMeshMotion);
     appState.isHolding = true;
     appState.holdStartTime = performance.now();
+    gsap.killTweensOf(ritual);
+    ritual.energy = 0;
     chargeOrb?.classList.add('holding');
     if (chargeHint) chargeHint.textContent = 'Đang xáo…';
     if (chargeTipPill) chargeTipPill.textContent = 'Thả để chọn bài';
     sfx.init();
-    sfx.setBowl(0.7);
+    sfx.setBowl(0);
     clearInterval(appState.rustleInterval);
     appState.rustleInterval = setInterval(() => sfx.playSilkCardRustle(), 450);
   }
@@ -1725,6 +1554,8 @@ Hãy trả lời với giọng điệu của Ta Văn Rót: ân cần, giải th�
       if (oracleModal) oracleModal.classList.add('open');
       if (appState.readingResult || oraclePending) return;
       const requestSession = sessionVersion;
+      const readingSheetSession = beginSheetReading();
+      sheetSession = readingSheetSession;
       oraclePending = true;
       if (readingLoader) readingLoader.style.display = 'flex';
       if (readingText) readingText.innerHTML = '';
@@ -1743,6 +1574,7 @@ Hãy trả lời với giọng điệu của Ta Văn Rót: ân cần, giải th�
 
       try {
         const text = await requestGeminiOracleReading();
+        saveSheetReading(readingSheetSession, text, 'Thành công', requestSession);
         if (requestSession !== sessionVersion) return;
         appState.readingResult = text;
         if (readingLoader) readingLoader.style.display = 'none';
@@ -1752,11 +1584,14 @@ Hãy trả lời với giọng điệu của Ta Văn Rót: ân cần, giải th�
         const rBlock = document.getElementById('ratingBlock');
         const fBlock = document.getElementById('followupBlock');
         const dBlock = document.getElementById('donateBlock');
+        const supportLetter = document.getElementById('supportLetter');
         if (rBlock) rBlock.style.display = 'block';
         if (fBlock) fBlock.style.display = 'block';
         if (dBlock) dBlock.style.display = 'flex';
+        if (supportLetter) supportLetter.style.display = 'block';
 
       } catch (err) {
+        saveSheetReading(readingSheetSession, `Lỗi API: ${err.message || 'Không có lời giải'}`, 'Thất bại', requestSession);
         if (requestSession !== sessionVersion) return;
         if (readingLoader) readingLoader.style.display = 'none';
         if (readingText) readingText.textContent = 'Chưa kết nối được. Đóng và thử lại sau một lát.';
@@ -1782,29 +1617,59 @@ Hãy trả lời với giọng điệu của Ta Văn Rót: ân cần, giải th�
   const followupInput = document.getElementById('followupInput');
   const followupSendBtn = document.getElementById('followupSendBtn');
   const followupMsgs = document.getElementById('followupMsgs');
+  let followupPending = false;
+
+  function appendFollowupBubble(role, text) {
+    const bubble = document.createElement('div');
+    bubble.className = `msg-bubble ${role}`;
+    bubble.textContent = text;
+    followupMsgs?.appendChild(bubble);
+    if (followupMsgs) followupMsgs.scrollTop = followupMsgs.scrollHeight;
+    return bubble;
+  }
 
   async function sendFollowup() {
     const version = sessionVersion;
+    const readingSheetSession = sheetSession;
     const txt = followupInput ? followupInput.value.trim() : '';
-    if (!txt) return;
+    if (!txt || followupPending || !appState.readingResult) return;
+    followupPending = true;
+    if (followupSendBtn) followupSendBtn.disabled = true;
     followupInput.value = '';
-
-    if (followupMsgs) {
-      followupMsgs.innerHTML += `<div class="msg-bubble user">${txt}</div>`;
-      followupMsgs.innerHTML += `<div class="msg-bubble rot" id="rotThinking">Rót đang suy ngẫm...</div>`;
-      followupMsgs.scrollTop = followupMsgs.scrollHeight;
-    }
+    appendFollowupBubble('user', txt);
+    const loading = appendFollowupBubble('rot', 'Rót đang lắng nghe…');
+    const history = appState.followupHistory;
 
     try {
-      const reply = await requestGeminiFollowUp(txt);
+      const result = await requestGeminiFollowUp(txt);
+      const reply = result.reply;
+      if (result.nudge) result.history[result.history.length - 1].text += `\n\n${persona.DONATION_NUDGE}\n${persona.DONATION_URL}`;
+      readingSheetSession?.followup({
+        followUpQ: result.history.filter(item => item.role === 'user').map(item => `Khách: ${item.text}`).join('\n---\n'),
+        followUpA: result.history.filter(item => item.role === 'rot').map(item => `Rót: ${item.text}`).join('\n---\n')
+      }).catch(() => {
+        if (version === sessionVersion) showToast('Chưa lưu được phần hỏi thêm vào Google Sheets.');
+      });
       if (version !== sessionVersion) return;
-      const loading = document.getElementById('rotThinking');
-      if (loading) loading.outerHTML = `<div class="msg-bubble rot">${reply}</div>`;
+      loading.textContent = reply;
+      if (result.nudge) {
+        const invitation = document.createElement('p'); invitation.className = 'conversation-invitation';
+        invitation.textContent = persona.DONATION_NUDGE;
+        const link = document.createElement('a'); link.className = 'donate-link';
+        link.href = persona.DONATION_URL; link.target = '_blank'; link.rel = 'noopener noreferrer';
+        link.textContent = 'Chuyển đổi link đơn hàng ủng hộ Rót ↗';
+        loading.appendChild(invitation); loading.appendChild(link);
+      }
       if (followupMsgs) followupMsgs.scrollTop = followupMsgs.scrollHeight;
     } catch(e) {
+      if (history[history.length - 1]?.role === 'user') history.pop();
       if (version !== sessionVersion) return;
-      const loading = document.getElementById('rotThinking');
-      if (loading) loading.textContent = "Rót chưa kết nối được, bạn hỏi lại nha!";
+      loading.textContent = "Rót chưa kết nối được, bạn hỏi lại nha!";
+    } finally {
+      if (version === sessionVersion) {
+        followupPending = false;
+        if (followupSendBtn) followupSendBtn.disabled = false;
+      }
     }
   }
 
@@ -1818,9 +1683,33 @@ Hãy trả lời với giọng điệu của Ta Văn Rót: ân cần, giải th�
     btn.addEventListener('click', () => {
       document.querySelectorAll('.r-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      currentRating = Number(btn.dataset.v);
       const note = document.getElementById('ratingNote');
-      if (note) note.textContent = "Rót cảm ơn bạn rất nhiều! Rót đã lưu lại cảm nhận của bạn.";
+      if (note) note.textContent = `Bạn chọn ${currentRating} sao. Nhấn Gửi đánh giá để lưu.`;
     });
+  });
+
+  const submitFeedbackBtn = document.getElementById('submitFeedbackBtn');
+  submitFeedbackBtn?.addEventListener('click', async () => {
+    if (submitFeedbackBtn.disabled) return;
+    const note = document.getElementById('ratingNote');
+    if (!currentRating) { if (note) note.textContent = 'Bạn chọn số sao trước nhé.'; return; }
+    if (!sheetSession) { if (note) note.textContent = 'Chưa kết nối Google Sheets.'; return; }
+    const version = sessionVersion;
+    submitFeedbackBtn.disabled = true;
+    if (note) note.textContent = 'Đang lưu đánh giá…';
+    try {
+      await sheetSession.feedback({
+        rating: currentRating,
+        ratingNote: document.getElementById('ratingNoteInput')?.value.trim() || '',
+        feedback: document.getElementById('feedbackInput')?.value.trim() || ''
+      });
+      if (version === sessionVersion && note) note.textContent = 'Đã lưu đánh giá. Rót cảm ơn bạn!';
+    } catch (error) {
+      if (version === sessionVersion && note) note.textContent = `Chưa lưu được. ${error.message}`;
+    } finally {
+      if (version === sessionVersion) submitFeedbackBtn.disabled = false;
+    }
   });
 
   // TTS Web Speech đọc lời giải
@@ -1871,6 +1760,18 @@ Hãy trả lời với giọng điệu của Ta Văn Rót: ân cần, giải th�
     appState.followupHistory = [];
     appState.isReadingAloud = false;
     appState.userQuestion = '';
+    sheetSession = null;
+    ritual.energy = 0;
+    currentRating = 0;
+    followupPending = false;
+    if (followupSendBtn) followupSendBtn.disabled = false;
+    if (submitFeedbackBtn) submitFeedbackBtn.disabled = false;
+    for (const id of ['ratingNoteInput', 'feedbackInput']) {
+      const input = document.getElementById(id);
+      if (input) input.value = '';
+    }
+    const ratingNote = document.getElementById('ratingNote');
+    if (ratingNote) ratingNote.textContent = '';
     oraclePending = false;
     window.speechSynthesis?.cancel();
     if (ttsBtnLabel) ttsBtnLabel.textContent = 'Nghe đọc';
@@ -1909,7 +1810,7 @@ Hãy trả lời với giọng điệu của Ta Văn Rót: ân cần, giải th�
     if (revealSub) revealSub.textContent = 'Chạm một lá để mở';
     if (readingText) readingText.textContent = '';
     if (readingLoader) readingLoader.style.display = 'flex';
-    for (const id of ['ratingBlock', 'followupBlock', 'donateBlock']) {
+    for (const id of ['ratingBlock', 'followupBlock', 'donateBlock', 'supportLetter']) {
       const element = document.getElementById(id);
       if (element) element.style.display = 'none';
     }
@@ -1930,7 +1831,7 @@ Hãy trả lời với giọng điệu của Ta Văn Rót: ân cần, giải th�
   if (restartBtn) restartBtn.addEventListener('click', resetReading);
 
   // Webhook Lấy danh sách Donate
-  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyAuUv2_5kIjR7fYPL5m6Xzi2YjSLaobrNTVw1k9zpql-2R6ErwlZ9wFdGiq8oXFjtP/exec';
+  const WEBHOOK_URL = window.TarotSheets?.endpoint;
   async function loadTopDonates() {
     try {
       const res = await fetch(WEBHOOK_URL);

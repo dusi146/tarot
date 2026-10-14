@@ -7,14 +7,19 @@
   <meta name="description" content="Không gian chiêm nghiệm Tarot 3D cùng Ta Văn Rót. Tự tay rút bài trong vũ trụ và nhận lời giải mã sâu sắc từ Gemini AI." />
   <link rel="icon" type="image/png" href="images/logo.png">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preload" href="fonts/BeVietnamPro-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="fonts/Lora-Regular.ttf" as="font" type="font/ttf" crossorigin>
 
   <script src="vendor/three.r128.min.js" defer></script>
   <script src="vendor/gsap.3.12.5.min.js" defer></script>
   <script src="tarot-motion.js" defer></script>
   <script src="tarot-geometry.js" defer></script>
   <script src="tarot-data.js" defer></script>
+  <script src="tarot-persona.js" defer></script>
+  <script src="tarot-atmosphere.js" defer></script>
+  <script src="tarot-audio.js" defer></script>
+  <script src="sheets-config.js" defer></script>
+  <script src="tarot-sheets.js" defer></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="intro-active">
@@ -51,8 +56,8 @@
     <div class="config-panel">
       <div class="panel-header">
         <span class="panel-eyebrow">TAROT · TRỰC GIÁC · BẠN</span>
-        <h1 class="panel-title-main">Lắng nghe<br> <em>vũ trụ.</em></h1>
-        <p class="panel-desc">Một câu hỏi. Một góc nhìn mới.</p>
+        <h1 class="panel-title-main">Chậm lại,<br> <em>mình tâm sự.</em></h1>
+        <p class="panel-desc">Thế giới rộng lớn. Lúc này, có Rót ngồi đây cùng bạn.</p>
       </div>
       <div class="form-block question-block">
         <label class="sr-only" for="questionInput">Điều bạn muốn hỏi</label>
@@ -88,6 +93,15 @@
             <input class="f-input" type="text" id="nameInput" placeholder="Tên hoặc biệt danh" autocomplete="off" />
           </div>
           <div class="form-block">
+            <label class="f-label" for="genderInput">Giới tính <span class="optional-label">tùy chọn</span></label>
+            <select class="glass-select" id="genderInput">
+              <option value="">Không chia sẻ</option>
+              <option value="Nam">Nam</option>
+              <option value="Nữ">Nữ</option>
+              <option value="Khác">Khác</option>
+            </select>
+          </div>
+          <div class="form-block">
             <label class="f-label">Tông giọng</label>
             <div class="tone-row" id="toneRow">
               <button class="tone-chip active" data-vibe="chualanh" aria-pressed="true">Chữa lành</button>
@@ -95,6 +109,7 @@
               <button class="tone-chip" data-vibe="quansu" aria-pressed="false">Chiến lược</button>
               <button class="tone-chip" data-vibe="phansau" aria-pressed="false">Triết lý</button>
             </div>
+            <p class="tone-description" id="toneDescription" aria-live="polite">Dịu dàng lắng nghe, cùng bạn nhẹ lòng.</p>
           </div>
           <div class="form-block">
             <label class="f-label">Ngày sinh <span class="optional-label">tùy chọn</span></label>
@@ -127,7 +142,7 @@
           <span class="orb-hint" id="chargeHint">Giữ để xáo</span>
         </div>
       </div>
-      <div class="charge-tip-pill" id="chargeTipPill">Thả tay khi bạn sẵn sàng</div>
+      <div class="charge-tip-pill" id="chargeTipPill">Giữ lâu hơn, bài xáo nhanh hơn · thả khi bạn sẵn sàng</div>
     </div>
   </section>
 
@@ -137,14 +152,18 @@
     <div class="draw-top-hud">
       <span class="draw-step-tag" id="drawStepTag">1 / 3</span>
       <span class="draw-step-txt" id="drawStepTxt">Quá khứ</span>
-      <span class="draw-step-hint">Vuốt để đổi lá</span>
+      <span class="draw-step-hint">Vuốt sang trái hoặc phải để khám phá đủ 78 lá</span>
+      <div class="swipe-guide" id="swipeGuide" aria-hidden="true"><span>←</span><i class="swipe-hand">↔</i><span>→</span></div>
+      <span class="draw-step-detail">Lướt tìm lá bạn thích, rồi chạm lá hoặc nhấn Rút lá đang xem.</span>
     </div>
     <div class="draw-action-bar">
       <div class="deck-navigation">
+        <button class="deck-arrow" id="previousCardBtn" aria-label="Xem lá bài bên trái">‹</button>
         <input id="deckScrubber" type="range" min="0" max="77" step="1" value="39" aria-label="Vị trí trong bộ bài">
         <span id="deckPosition" aria-hidden="true">40 / 78</span>
+        <button class="deck-arrow" id="nextCardBtn" aria-label="Xem lá bài bên phải">›</button>
       </div>
-      <button class="btn-main" id="pickCenterBtn">Chọn lá này <span aria-hidden="true">↗</span></button>
+      <button class="btn-main" id="pickCenterBtn">Rút lá đang xem <span aria-hidden="true">↗</span></button>
     </div>
   </section>
 
@@ -199,24 +218,37 @@
             <button class="r-btn" data-v="4">4</button>
             <button class="r-btn" data-v="5">5</button>
           </div>
-          <div class="rating-note" id="ratingNote"></div>
+          <label class="f-label" for="ratingNoteInput">Ghi chú đánh giá <span class="optional-label">tùy chọn</span></label>
+          <input class="f-input" id="ratingNoteInput" maxlength="1000" placeholder="Bạn thấy lời giải thế nào?" />
+          <label class="f-label" for="feedbackInput">Góp ý <span class="optional-label">tùy chọn</span></label>
+          <textarea class="f-input feedback-input" id="feedbackInput" rows="3" maxlength="4000" placeholder="Điều bạn muốn Rót cải thiện…"></textarea>
+          <button class="btn-send" id="submitFeedbackBtn">Gửi đánh giá</button>
+          <div class="rating-note" id="ratingNote" role="status" aria-live="polite"></div>
         </div>
 
         <div class="followup-block" id="followupBlock" style="display:none">
-          <h4 class="followup-title">Hỏi thêm</h4>
+          <h4 class="followup-title">Tâm sự cùng Rót</h4>
+          <p class="followup-intro">Lá bài mở một góc nhìn. Còn câu chuyện của bạn, Rót vẫn đang nghe.</p>
           <div class="followup-msgs" id="followupMsgs"></div>
           <div class="followup-input-row">
-            <input type="text" id="followupInput" placeholder="Bạn muốn hỏi thêm điều gì?" autocomplete="off" />
+            <input type="text" id="followupInput" aria-label="Lời tâm sự của bạn" placeholder="Điều gì đang quanh quẩn trong lòng bạn?" autocomplete="off" maxlength="6000" />
             <button class="btn-send" id="followupSendBtn">Gửi</button>
           </div>
         </div>
 
+        <div class="support-letter" id="supportLetter" style="display:none">
+          <span class="panel-eyebrow">MỘT LỜI NHỎ TỪ RÓT</span>
+          <h4>Thế giới rộng lớn,<br><em>nhưng lúc này có tui và bạn.</em></h4>
+          <p>Trải bài không quyết định cuộc đời bạn. Rót chỉ mong cùng bạn gỡ nhẹ những suy nghĩ cứ quanh quẩn trong đầu, để những ngày sắp tới bớt nặng lòng hơn một chút.</p>
+          <p>Rót không dám nhận mình tài giỏi, chỉ xáo bài khá rành và luôn sẵn lòng lắng nghe. Nếu thấy người bạn miễn phí này có ích, bạn kể về Rót cho một người đang cần được sẻ chia nha.</p>
+          <p>Còn nếu thấy tiện, gửi sinh viên Rót chút lúa để giữ góc nhỏ này sáng đèn nhé. Có bạn ghé lại tâm sự, với Rót cũng đã là một món quà.</p>
+        </div>
         <div class="donate-block" id="donateBlock" style="display:none">
           <img src="images/bank.png" alt="QR donate" class="donate-qr" />
           <div class="donate-txt">
             <h5>Gửi Chút Lúa Cho Rót</h5>
-            <p>Nếu lời giải của Rót giúp bạn nhẹ lòng, hãy ủng hộ Rót duy trì máy chủ nhé!</p>
-            <a href="https://s.shopee.vn/6L3YFi6rMm" target="_blank" class="donate-link">Ủng hộ qua Shopee</a>
+            <p>Bạn có thể gửi chút lúa qua mã QR, hoặc chuyển đổi link đơn hàng để ủng hộ sinh viên Rót nè.</p>
+            <a href="https://hoahong.vercel.app/" target="_blank" rel="noopener noreferrer" class="donate-link">Chuyển đổi link đơn hàng ủng hộ Rót ↗</a>
           </div>
         </div>
 

@@ -56,7 +56,22 @@
     const depth = (index - (count - 1) / 2) * (thickness + 0.0005);
     return { x: 0, y: Math.sin(0.35) * depth, z: Math.cos(0.35) * depth };
   }
-  const api = { damp, advanceRibbon, viewAt, selectedLayout, screenToWorld, carouselPose, stackPose };
+  function shuffleEnergy(seconds) { return 1 - Math.exp(-Math.max(0, seconds) / 3.2); }
+  function shufflePose(index, seconds, compact = false, reduced = false) {
+    const energy = shuffleEnergy(seconds), stride = compact ? 3 : 2;
+    const rank = index / stride, perRing = compact ? 9 : 13;
+    const tier = Math.floor(rank / perRing);
+    // Integral of a smoothly increasing speed: no abrupt jumps on a long hold.
+    const phase = reduced ? seconds * 0.08 : 0.22 * seconds + 1.35 * (seconds - 4 * (1 - Math.exp(-seconds / 4)));
+    const angle = rank % perRing / perRing * Math.PI * 2 + phase * (tier === 1 ? -1 : 1) + tier * 0.42;
+    const radius = (compact ? 0.78 : 1.05) + energy * 0.22 + Math.sin(seconds * 0.7 + tier) * 0.07;
+    return { visible: index % stride === 0, x: Math.cos(angle) * radius,
+      y: (tier - 1) * 0.72 + Math.sin(angle * 2 + tier) * (reduced ? 0.03 : 0.13),
+      z: Math.sin(angle) * radius * 0.65 + tier * 0.025,
+      rotX: -0.12 + Math.sin(angle) * 0.10, rotY: -angle + Math.PI / 2,
+      rotZ: Math.cos(angle + tier) * 0.13, scale: compact ? 0.34 : 0.38, energy };
+  }
+  const api = { damp, advanceRibbon, viewAt, selectedLayout, screenToWorld, carouselPose, stackPose, shuffleEnergy, shufflePose };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.TarotMotion = api;
 })(typeof window === 'object' ? window : this);

@@ -2,6 +2,24 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const motion = require('../tarot-motion.js');
 
+test('longer shuffle holds smoothly increase energy and angular speed within bounds', () => {
+  let previousEnergy = 0, previousSpeed = 0;
+  for (let time = .1; time <= 20; time += .1) {
+    const before = motion.shufflePose(0, time - .001), after = motion.shufflePose(0, time + .001);
+    const speed = Math.abs(after.rotY - before.rotY) / .002;
+    assert.ok(after.energy >= previousEnergy && after.energy <= 1);
+    assert.ok(speed >= previousSpeed - 1e-8 && speed < 1.6);
+    previousEnergy = after.energy; previousSpeed = speed;
+    for (let i = 0; i < 78; i++) {
+      const pose = motion.shufflePose(i, time);
+      assert.ok([pose.x, pose.y, pose.z, pose.scale].every(Number.isFinite));
+      assert.ok(Math.abs(pose.x) < 1.5 && Math.abs(pose.y) < 1);
+    }
+  }
+  assert.equal(Array.from({ length: 78 }, (_, i) => motion.shufflePose(i, 4).visible).filter(Boolean).length, 39);
+  assert.equal(Array.from({ length: 78 }, (_, i) => motion.shufflePose(i, 4, true).visible).filter(Boolean).length, 26);
+});
+
 test('inertia travels the same distance at 30, 60, 120 and 144 Hz', () => {
   const results = [30, 60, 120, 144].map(hz => {
     const state = { offset: 0, target: 0, velocity: 2 };

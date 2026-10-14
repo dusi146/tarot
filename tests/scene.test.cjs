@@ -10,7 +10,7 @@ const motion = require('../tarot-motion.js');
 
 class Element {
   constructor() {
-    this.style = {}; this.dataset = {}; this.value = ''; this.innerHTML = ''; this.textContent = '';
+    this.style = { setProperty(name, value) { this[name] = value; } }; this.dataset = {}; this.value = ''; this.innerHTML = ''; this.textContent = ''; this.children = [];
     this.events = {}; this.attributes = new Map(); this.captures = new Set();
     const classes = new Set();
     this.classList = { add: (...items) => items.forEach(x => classes.add(x)), remove: (...items) => items.forEach(x => classes.delete(x)), contains: x => classes.has(x) };
@@ -21,6 +21,7 @@ class Element {
   removeAttribute(name) { this.attributes.delete(name); }
   getAttribute(name) { return this.attributes.get(name) ?? null; }
   querySelectorAll() { return []; }
+  appendChild(element) { this.children.push(element); return element; }
   focus() {}
   setPointerCapture(id) { this.captures.add(id); }
   hasPointerCapture(id) { return this.captures.has(id); }
@@ -33,7 +34,7 @@ class Element {
   }
 }
 
-function scene({ textureFailure = false, oracleDeferred = false } = {}) {
+function scene({ textureFailure = false, oracleDeferred = false, oracleFailure = false } = {}) {
   gsap.globalTimeline.clear();
   const elements = new Map();
   const get = id => { if (!elements.has(id)) elements.set(id, new Element()); return elements.get(id); };
@@ -54,19 +55,31 @@ function scene({ textureFailure = false, oracleDeferred = false } = {}) {
   }
   const three = { ...THREE, WebGLRenderer: Renderer, TextureLoader };
   window.THREE = three;
+  window.TarotPersona = require('../tarot-persona.js');
+  window.TarotAtmosphere = require('../tarot-atmosphere.js');
+  window.TarotAudio = require('../tarot-audio.js');
   let now = 0;
   let timerId = 0;
   let readingRequests = 0;
+  const sheetRecords = [];
+  const sheetConversations = [];
+  const oraclePayloads = [];
+  window.TarotSheets = { begin: profile => ({
+    record: async (conclusion, status) => { sheetRecords.push({ ...profile, conclusion, status }); },
+    followup: async value => { sheetConversations.push(value); }
+  }) };
   let resolveOracle;
   const oracleGate = oracleDeferred ? new Promise(resolve => { resolveOracle = resolve; }) : Promise.resolve();
   const context = vm.createContext({
-    document, window, THREE: three, gsap, console, performance: { now: () => now },
+    document, window, THREE: three, gsap, console, URLSearchParams, performance: { now: () => now },
     requestAnimationFrame: () => 1, cancelAnimationFrame() {},
     setTimeout: () => ++timerId, clearTimeout() {}, setInterval: () => ++timerId, clearInterval() {},
     fetch: async (url, options) => {
       if (options?.method === 'POST') {
         readingRequests++;
+        oraclePayloads.push(JSON.parse(options.body));
         await oracleGate;
+        if (oracleFailure) return { ok: false, statusText: 'Too Many Requests' };
         return { ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: 'Một góc nhìn mới cho bạn.' }] } }] }) };
       }
       return { json: async () => ({ status: 'empty', data: [] }) };
@@ -80,7 +93,7 @@ function scene({ textureFailure = false, oracleDeferred = false } = {}) {
     window.testScene = { appState, cardMeshes, camera, scene, ribbon, drawEntry,
       startChargingStage, startDrawStage, startRevealStage, pickCard, flipSelectedCard,
       onHoldStart, onHoldEnd, cancelHold, updateRibbonCardsPositions, resizeScene, hitCard,
-      SPREAD_CONFIGS, handleCloseOracle, faceCache };
+      SPREAD_CONFIGS, handleCloseOracle, faceCache, renderLoop, ritual, requestGeminiFollowUp };
   ` + source.slice(close);
   }
   vm.runInContext(source, context);
@@ -96,7 +109,7 @@ function scene({ textureFailure = false, oracleDeferred = false } = {}) {
     }
     gsap.ticker.sleep();
   };
-  return Object.assign(api, { window, document, get, advance, elapsed: () => now, setNow: value => { now = value; }, readingRequests: () => readingRequests, resolveOracle: () => resolveOracle?.() });
+  return Object.assign(api, { window, document, get, advance, sheetRecords, sheetConversations, oraclePayloads, elapsed: () => now, setNow: value => { now = value; }, readingRequests: () => readingRequests, resolveOracle: () => resolveOracle?.() });
 }
 
 async function enterDraw(s, spread = 'time') {
@@ -125,7 +138,7 @@ test('settling and entry complete before picking; fast picks produce unique card
     s.pickCard(s.cardMeshes[index]); s.pickCard(s.cardMeshes[index]);
     s.pickCard(s.cardMeshes[(index + 1) % 78]);
     assert.equal(s.appState.selectedCards.length, before + 1, 'one card flight at a time');
-    if (index !== 40) await s.advance(0.9);
+    if (index !== 40) await s.advance(1.0);
   }
   assert.equal(s.appState.selectedCards.length, 4);
   assert.equal(s.appState.usedCardIds.size, 4);
@@ -201,7 +214,7 @@ test('losing visibility cancels a hold and context restoration permits continuat
 test('rapid flip requests queue once; resize mid-flip lands at new targets', async () => {
   const s = scene();
   await enterDraw(s);
-  for (const index of [38, 39, 40]) { s.pickCard(s.cardMeshes[index]); await s.advance(0.9); }
+  for (const index of [38, 39, 40]) { s.pickCard(s.cardMeshes[index]); await s.advance(1.0); }
   await s.advance(2.1);
   const cards = s.appState.selectedCards;
   cards[0].isReversed = true;
@@ -272,6 +285,87 @@ test('large action buttons select, reveal all, and reuse an in-flight reading', 
   s.handleCloseOracle();
   action.dispatch('click');
   assert.equal(s.readingRequests(), 1, 'completed reading is reused');
+  assert.equal(s.sheetRecords.length, 1, 'reopening does not append duplicate sheet rows');
+  assert.equal(s.sheetRecords[0].spread, '4 lá');
+  assert.equal(s.sheetRecords[0].status, 'Thành công');
+  assert.equal(s.sheetRecords[0].conclusion, 'Một góc nhìn mới cho bạn.');
+});
+
+test('an oracle API failure is logged with profile details and failure status', async () => {
+  const s = scene({ oracleFailure: true });
+  s.appState.userName = 'An';
+  s.appState.userQuestion = 'Công việc?';
+  s.appState.dob = { day: 10, month: 12, year: 2007 };
+  s.appState.zodiac = 'Nhân Mã';
+  s.get('genderInput').value = 'Nữ';
+  await enterDraw(s, 'single');
+  s.get('pickCenterBtn').dispatch('click');
+  await s.advance(2);
+  s.get('summonOracleBtn').dispatch('click');
+  await s.advance(2);
+  s.get('summonOracleBtn').dispatch('click');
+  await s.advance(0.2);
+  assert.equal(s.sheetRecords.length, 1);
+  const row = s.sheetRecords[0];
+  assert.equal(row.name, 'An');
+  assert.equal(row.dob, '10/12/2007');
+  assert.equal(row.gender, 'Nữ');
+  assert.equal(row.question, 'Công việc?');
+  assert.equal(row.status, 'Thất bại');
+  assert.match(row.conclusion, /Too Many Requests/);
+  assert.match(row.solver, /gemini-2.5-flash/);
+});
+
+test('conversations retain the spread and invite support exactly once on the third successful reply', async () => {
+  const s = scene();
+  await enterDraw(s, 'single');
+  s.get('pickCenterBtn').dispatch('click'); await s.advance(2);
+  s.get('summonOracleBtn').dispatch('click'); await s.advance(2);
+  s.get('summonOracleBtn').dispatch('click'); await s.advance(.2);
+  const cards = s.appState.selectedCards.map(card => card.data.viName);
+  assert.equal(s.get('supportLetter').style.display, 'block');
+  for (let turn = 1; turn <= 4; turn++) {
+    s.get('followupInput').value = `Lời tâm sự ${turn}`;
+    s.get('followupSendBtn').dispatch('click');
+    // A second click while waiting must not add another request/turn.
+    s.get('followupSendBtn').dispatch('click');
+    await s.advance(.2);
+    const history = s.appState.followupHistory;
+    assert.equal(history.filter(item => item.role === 'rot').length, turn);
+    assert.equal(history.filter(item => item.text.includes('https://hoahong.vercel.app/')).length, turn >= 3 ? 1 : 0);
+    const payload = s.oraclePayloads[s.oraclePayloads.length - 1];
+    for (const card of cards) assert.ok(payload.systemInstruction.parts[0].text.includes(card));
+    assert.equal(payload.contents.length, turn * 2 - 1);
+    assert.equal(s.sheetConversations.length, turn);
+  }
+  const invitations = s.get('followupMsgs').children.flatMap(bubble => bubble.children).filter(child => child.className === 'conversation-invitation');
+  assert.equal(invitations.length, 1);
+  assert.match(s.sheetConversations[3].followUpA, /hoahong.vercel.app/);
+  s.get('restartBtn').dispatch('click');
+  assert.equal(s.appState.followupHistory.length, 0);
+  assert.equal(s.get('supportLetter').style.display, 'none');
+});
+
+test('visible left/right browsing controls change cards and dismiss the swipe demonstration', async () => {
+  const s = scene(); await enterDraw(s);
+  const start = s.ribbon.target;
+  s.get('nextCardBtn').dispatch('click'); await s.advance(1.4);
+  assert.ok(s.ribbon.target < start);
+  assert.equal(s.get('swipeGuide').classList.contains('understood'), true);
+  s.get('previousCardBtn').dispatch('click'); await s.advance(1.4);
+  assert.equal(s.ribbon.target, start);
+});
+
+test('holding displays more moving cards while cancellation returns to a clean stack', async () => {
+  const s = scene(); s.startChargingStage(); await s.advance(2);
+  s.onHoldStart(); s.setNow(s.elapsed() + 4000); s.renderLoop();
+  assert.equal(s.cardMeshes.filter(mesh => mesh.visible).length, 39);
+  s.window.innerWidth = 390; s.renderLoop();
+  assert.equal(s.cardMeshes.filter(mesh => mesh.visible).length, 26);
+  s.cancelHold(); await s.advance(2);
+  assert.equal(s.appState.isHolding, false);
+  assert.equal(s.cardMeshes.filter(mesh => mesh.visible).length, 78);
+  assert.equal(s.ritual.energy, 0);
 });
 
 test('restart reuses the scene, preserves choices, and cancels old card motion', async () => {
