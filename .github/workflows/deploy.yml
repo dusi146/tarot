@@ -35,7 +35,7 @@ jobs:
               if (fs.existsSync(file)) {
                 let content = fs.readFileSync(file, "utf8");
                 content = content.split("{{GEMINI_API_KEY_SECRET}}").join(process.env.GEMINI_KEY || "");
-                content = content.split("{{ASSET_VERSION}}").join(process.env.ASSET_VERSION);
+                content = content.replace(/\?v=\d{8}-\d+/g, "?v=" + process.env.ASSET_VERSION);
                 fs.writeFileSync(file, content, "utf8");
               }
             });
