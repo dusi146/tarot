@@ -1,0 +1,100 @@
+[
+  {
+    "name": "desktop",
+    "width": 1440,
+    "height": 900,
+    "spread": "time",
+    "count": 3,
+    "dockErrors": [
+      0,
+      0,
+      0
+    ],
+    "cardIds": [
+      "C07",
+      "W14",
+      "16"
+    ],
+    "flightTiming": {
+      "max": 133,
+      "p95": 50
+    },
+    "textureTaskMax": 2.2,
+    "closeOffset": 0,
+    "errors": [],
+    "externalRequests": 0
+  },
+  {
+    "name": "mobile",
+    "width": 390,
+    "height": 844,
+    "spread": "solution",
+    "count": 4,
+    "dockErrors": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "cardIds": [
+      "C08",
+      "P09",
+      "14",
+      "S14"
+    ],
+    "flightTiming": {
+      "max": 83,
+      "p95": 17
+    },
+    "textureTaskMax": 3.7,
+    "closeOffset": 0,
+    "errors": [],
+    "externalRequests": 0
+  },
+  {
+    "name": "small",
+    "width": 320,
+    "height": 568,
+    "spread": "single",
+    "count": 1,
+    "dockErrors": [
+      0
+    ],
+    "cardIds": [
+      "20"
+    ],
+    "flightTiming": {
+      "max": 33,
+      "p95": 17
+    },
+    "textureTaskMax": 1.6,
+    "closeOffset": 0,
+    "errors": [],
+    "externalRequests": 0
+  },
+  {
+    "name": "landscape",
+    "width": 844,
+    "height": 390,
+    "spread": "mind",
+    "count": 3,
+    "dockErrors": [
+      0,
+      0,
+      0
+    ],
+    "cardIds": [
+      "15",
+      "01",
+      "S06"
+    ],
+    "flightTiming": {
+      "max": 33,
+      "p95": 17
+    },
+    "textureTaskMax": 1.9,
+    "closeOffset": 0,
+    "errors": [],
+    "externalRequests": 0
+  }
+]

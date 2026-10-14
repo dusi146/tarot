@@ -1,0 +1,27 @@
+[
+  {
+    "name": "desktop",
+    "width": 1440,
+    "height": 900,
+    "spread": "time",
+    "count": 3,
+    "dockErrors": [
+      0,
+      0,
+      0
+    ],
+    "cardIds": [
+      "C07",
+      "W14",
+      "16"
+    ],
+    "flightTiming": {
+      "max": 133,
+      "p95": 50
+    },
+    "textureTaskMax": 2.2,
+    "closeOffset": 0,
+    "errors": [],
+    "externalRequests": 0
+  }
+]

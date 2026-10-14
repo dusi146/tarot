@@ -1,0 +1,3 @@
+# Local visual verification output
+/artifacts/*.png
+/images/*.txt

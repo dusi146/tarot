@@ -1,0 +1,23 @@
+[
+  {
+    "name": "small",
+    "width": 320,
+    "height": 568,
+    "spread": "single",
+    "count": 1,
+    "dockErrors": [
+      0
+    ],
+    "cardIds": [
+      "20"
+    ],
+    "flightTiming": {
+      "max": 33,
+      "p95": 17
+    },
+    "textureTaskMax": 1.6,
+    "closeOffset": 0,
+    "errors": [],
+    "externalRequests": 0
+  }
+]

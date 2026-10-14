@@ -24,20 +24,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Prepare public asset version
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check application services and circular selection
+        run: node --test tarot-v2/tests/*.test.cjs
+
+      - name: Build standalone V2 public site
         env:
           ASSET_VERSION: ${{ github.sha }}
-        run: |
-          node -e '
-            const fs = require("fs");
-            ["script.js", "index.html"].forEach(file => {
-              if (fs.existsSync(file)) {
-                let content = fs.readFileSync(file, "utf8");
-                content = content.replace(/\?v=\d{8}-\d+/g, "?v=" + process.env.ASSET_VERSION);
-                fs.writeFileSync(file, content, "utf8");
-              }
-            });
-          '
+        run: node tools/build-pages.cjs
           
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -45,7 +43,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '_site'
           
       - name: Deploy to GitHub Pages
         id: deployment

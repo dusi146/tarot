@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Ta Văn Rót — Một khoảng lặng cho bạn</title>
+<link rel="icon" href="images/logo.png">
+<meta name="description" content="Một không gian tarot 3D để chậm lại, lắng nghe và tâm sự cùng Ta Văn Rót.">
+  <link rel="stylesheet" href="fonts/atelier.css">
+  <script src="vendor/three.r128.min.js"></script>
+
+  <link rel="stylesheet" href="experience.css">
+<link rel="stylesheet" href="app.css">
+<script src="js/bootstrap.js" defer></script>
+<script src="js/tarot-data.js" defer></script>
+<script src="js/tarot-persona.js" defer></script>
+<script src="js/tarot-reading.js" defer></script>
+<script src="js/tarot-chat.js" defer></script>
+<script src="js/tarot-profile.js" defer></script>
+<script src="js/tarot-transport.js" defer></script>
+<script src="js/sheets-config.js" defer></script>
+<script src="js/tarot-sheets.js" defer></script>
+<script src="js/tarot-ai.js" defer></script>
+<script src="js/tarot-mobile.js" defer></script>
+<script src="js/tarot-carousel.js" defer></script>
+</head>
+
+<body data-act="INTRO">
+  <!-- Loading Screen while Procedural High-DPI Tarot Artworks & PBR Maps are Forged -->
+  <div id="loading-veil">
+    <div class="loader-ring"></div>
+    <div class="loader-text">Đang khơi một khoảng lặng...</div>
+  </div>
+
+  <!-- 3D WebGL Stage -->
+  <div id="stage-container"></div>
+
+  <!-- Brand Emblem & Title Overlay -->
+  <div id="brand-crest" class="visible docked">
+    <svg class="brand-emblem" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="45" stroke="#E2C285" stroke-width="1.3" opacity="0.55"/>
+      <ellipse cx="50" cy="50" rx="42" ry="22" transform="rotate(-30 50 50)" stroke="#E2C285" stroke-width="1.2" opacity="0.75"/>
+      <ellipse cx="50" cy="50" rx="42" ry="22" transform="rotate(30 50 50)" stroke="#E2C285" stroke-width="1.2" opacity="0.75"/>
+      <path d="M55 34 A17 17 0 1 0 55 66 A13 13 0 1 1 55 34 Z" fill="#F8E5B8"/>
+      <circle cx="58" cy="50" r="2.5" fill="#F8E5B8"/>
+    </svg>
+    <h1 class="brand-title">Ta Văn Rót</h1>
+    <p class="brand-subtitle">Tuyển Tập Tarot Nghệ Thuật Chế Tác Riêng</p>
+  </div>
+
+  <!-- Top Right Sanctuary Bar (Matches Reference) -->
+  <div id="top-right-bar">
+    <span class="sanctuary-tagline">Một khoảng lặng cho bạn</span>
+    <button id="btn-motion-top" class="sensor-button" type="button" aria-label="Bật nghiêng máy" aria-pressed="false" title="Nghiêng máy để ngắm ánh sáng" hidden><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8" y="3" width="9" height="17" rx="2" transform="rotate(12 12 12)"/><path d="M3 9c-1 3 0 6 2 8M20 6c2 2 2 5 1 8"/><path d="m2 16 3 1 1-3m13-7 1-3 3 1"/></svg></button>
+    <button id="btn-sound-top" type="button" title="Bật/Tắt âm thanh" aria-label="Bật hoặc tắt âm thanh">
+      <svg id="icon-sound-off" viewBox="0 0 24 24">
+        <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+        <line x1="23" y1="9" x2="17" y2="15"/>
+        <line x1="17" y1="9" x2="23" y2="15"/>
+      </svg>
+      <svg id="icon-sound-on" viewBox="0 0 24 24" style="display:none;">
+        <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Spread Header UI (Shown in Act III: FAN) -->
+  <div id="spread-header-ui">
+    <div class="spread-step-count" id="spread-step-count">1 / 3</div>
+    <h2 class="spread-step-title" id="spread-step-title">Quá Khứ</h2>
+    <p class="spread-step-sub">Vuốt thoải mái hai chiều, bộ bài luôn nối vòng</p>
+    <div class="spread-swipe-icons">
+      <span>←</span>
+      <span>↔</span>
+      <span>→</span>
+    </div>
+    <p class="spread-step-hint">Lướt tìm lá bạn thích, rồi chạm lá hoặc nhấn Rút lá đang xem.</p>
+  </div>
+
+  <!-- Spread Bottom Controls & 3 Receiver Slots (Shown in Act III: FAN) -->
+  <div id="spread-bottom-ui">
+    <div class="scrubber-row">
+      <button class="nav-arrow-btn" id="btn-fan-prev" type="button" aria-label="Lá trước">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="scrubber-track-wrap">
+        <input id="spread-slider" type="range" min="0" max="77" step="0.01" value="38" aria-label="Chuyển nhanh đến vị trí trong vòng bài" />
+      </div>
+      <span class="scrubber-counter" id="spread-counter-label">40 / 78</span>
+      <button class="nav-arrow-btn" id="btn-fan-next" type="button" aria-label="Lá tiếp theo">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+    <button id="btn-draw-current" type="button">Rút lá đang xem</button>
+
+    <div class="slots-tray">
+      <div class="slot-card-box active-step" id="slot-box-0">
+        <span class="slot-title">Quá Khứ</span>
+        <div class="slot-mini-frame" id="slot-frame-0"></div>
+      </div>
+      <div class="slot-card-box" id="slot-box-1">
+        <span class="slot-title">Hiện Tại</span>
+        <div class="slot-mini-frame" id="slot-frame-1"></div>
+      </div>
+      <div class="slot-card-box" id="slot-box-2">
+        <span class="slot-title">Tương Lai</span>
+        <div class="slot-mini-frame" id="slot-frame-2"></div>
+      </div>
+<div class="slot-card-box" id="slot-box-3" hidden><span class="slot-title">Kết Quả</span><div class="slot-mini-frame" id="slot-frame-3"></div></div>
+    </div>
+  </div>
+
+  <!-- Interactive Whisper & Hold-to-Shuffle Control -->
+  <div id="interaction-layer">
+    <div id="whisper-caption">Cứ thong thả, khi nào thấy thích hợp thì thả tay.</div>
+    <button id="hold-shuffle-btn" type="button" aria-label="Giữ để xáo bài">
+      <span class="pulse-dot"></span>
+      <span id="hold-btn-label">Giữ để xáo</span>
+    </button>
+  </div>
+
+  <!-- Manual Reveal Top Prompt & Helper Button -->
+  <div id="reveal-action-bar">
+    <div class="reveal-header-hint" id="reveal-header-hint">Chạm vào từng lá bài để lật mở</div>
+    <button id="btn-flip-next" type="button">
+      <span>✦</span>
+      <span id="btn-flip-next-label">Lật mở lá Quá Khứ</span>
+    </button>
+    <button id="flip-all" class="outline-button" type="button">Mở tất cả</button>
+  </div>
+
+  <!-- Revealed Hero Card Captions (Interactive for Manual Flip & Zoom Inspection) -->
+  <div id="card-titles-bar">
+    <div class="revealed-card-caption" id="caption-0" data-slot="0">
+      <span class="revealed-position-tag">Quá Khứ</span>
+      <span class="tap-to-flip-badge">✦ Chạm để mở</span>
+      <div class="revealed-details">
+        <span class="revealed-numeral">XVIII</span>
+        <span class="revealed-name">The Moon</span>
+        <span class="revealed-sub">Ánh Trăng Huyền Ảo</span>
+      </div>
+    </div>
+    <div class="revealed-card-caption" id="caption-1" data-slot="1">
+      <span class="revealed-position-tag">Hiện Tại</span>
+      <span class="tap-to-flip-badge">✦ Chạm để mở</span>
+      <div class="revealed-details">
+        <span class="revealed-numeral">XVII</span>
+        <span class="revealed-name">The Star</span>
+        <span class="revealed-sub">Tinh Tú Thanh Khiết</span>
+      </div>
+    </div>
+    <div class="revealed-card-caption" id="caption-2" data-slot="2">
+      <span class="revealed-position-tag">Tương Lai</span>
+      <span class="tap-to-flip-badge">✦ Chạm để mở</span>
+      <div class="revealed-details">
+        <span class="revealed-numeral">XIX</span>
+        <span class="revealed-name">The Sun</span>
+        <span class="revealed-sub">Mặt Trời Rạng Rỡ</span>
+      </div>
+    </div>
+<div class="revealed-card-caption" id="caption-3" data-slot="3" hidden><span class="revealed-position-tag">Kết Quả</span><span class="tap-to-flip-badge">Chạm để mở</span><div class="revealed-details"><span class="revealed-numeral"></span><span class="revealed-name"></span><span class="revealed-sub"></span></div></div>
+  </div>
+
+  <!-- Minimal Floating Navigation Dock -->
+<nav id="control-dock" aria-label="Điều khiển trải bài"><button class="dock-btn" id="new-reading" type="button">Trải bài mới</button><button class="dock-btn active" id="open-reading" type="button" disabled>Xem lời giải</button><button class="dock-btn" id="open-support" type="button">Ủng hộ Rót</button></nav>
+
+<output id="scene-status" hidden aria-hidden="true"></output>
+<button id="skip-intro" class="quiet-button" type="button">Vào cùng Rót</button>
+<main id="welcome-panel" class="welcome-panel" aria-labelledby="welcome-title" hidden>
+  <header class="welcome-heading">
+  <span class="eyebrow">MỘT KHOẢNG LẶNG CHO BẠN</span>
+  <h2 id="welcome-title">Chậm lại,<br><em>mình tâm sự.</em></h2>
+  <p class="welcome-description">Thế giới rộng lớn. Lúc này, có Rót ngồi đây cùng bạn. Mình thử gỡ nhẹ điều đang quanh quẩn trong lòng nhé.</p>
+  </header>
+  <form id="intent-form">
+    <label for="question">Điều bạn muốn hỏi</label>
+    <textarea id="question" rows="2" maxlength="3000" placeholder="Bạn đang băn khoăn điều gì?" required></textarea>
+    <fieldset class="spread-picker"><legend>Chọn cách trải bài</legend>
+      <label><input type="radio" name="spread" value="time" checked><span class="spread-symbol glyph-time" aria-hidden="true"><i></i><i></i><i></i></span><span class="spread-copy"><strong>Thời gian</strong><small>Quá khứ đến tương lai</small></span></label>
+      <label><input type="radio" name="spread" value="single"><span class="spread-symbol glyph-single" aria-hidden="true"><i></i></span><span class="spread-copy"><strong>Một lá</strong><small>Một điều cần nghe</small></span></label>
+      <label><input type="radio" name="spread" value="mind"><span class="spread-symbol glyph-mind" aria-hidden="true"><i></i><i></i><i></i></span><span class="spread-copy"><strong>Cân bằng</strong><small>Thân, tâm và trí</small></span></label>
+      <label><input type="radio" name="spread" value="solution"><span class="spread-symbol glyph-solution" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="spread-copy"><strong>Gỡ rối</strong><small>Nhìn rõ hướng đi</small></span></label>
+    </fieldset>
+    <button type="button" id="options-toggle" class="options-toggle" aria-expanded="false" aria-controls="personal-options">Tùy chỉnh thêm <span aria-hidden="true">+</span></button>
+    <div id="personal-options" class="personal-options" hidden>
+      <div class="field-pair"><div><label for="name">Tên bạn <small>tùy chọn</small></label><input id="name" maxlength="100" autocomplete="given-name" placeholder="Rót gọi bạn là…"></div>
+      <div><label for="gender">Giới tính <small>tùy chọn</small></label><select id="gender"><option value="">Không chia sẻ</option><option>Nam</option><option>Nữ</option><option>Khác</option></select></div></div>
+      <label>Ngày sinh <small>tùy chọn</small></label>
+      <div class="birthday-fields"><select id="birth-day" aria-label="Ngày sinh"><option value="">Ngày</option></select><select id="birth-month" aria-label="Tháng sinh"><option value="">Tháng</option></select><select id="birth-year" aria-label="Năm sinh"><option value="">Năm</option></select></div>
+      <output id="zodiac" class="zodiac" aria-live="polite"></output>
+      <fieldset class="tone-picker"><legend>Bạn muốn nghe Rót thế nào?</legend>
+        <label><input type="radio" name="vibe" value="chualanh" checked><span>Chữa lành</span></label>
+        <label><input type="radio" name="vibe" value="tatnuoc"><span>Thẳng thắn</span></label>
+        <label><input type="radio" name="vibe" value="quansu"><span>Chiến lược</span></label>
+        <label><input type="radio" name="vibe" value="phansau"><span>Triết lý</span></label>
+      </fieldset>
+      <p id="tone-description" class="field-note"></p>
+      <button id="toggle-haptics" class="sensory-toggle" type="button" aria-pressed="true" hidden>Rung nhẹ: bật</button>
+      <p class="memory-note">Rót nhớ thông tin trên trình duyệt này. <button type="button" id="forget-profile">Quên thông tin</button></p>
+    </div>
+    <p id="form-error" class="form-error" role="alert"></p>
+    <button class="gold-button" type="submit" id="begin-reading">Bắt đầu trải bài <span aria-hidden="true">→</span></button>
+  </form>
+  <p class="welcome-footnote">Trải bài mở một góc nhìn. Quyết định vẫn ở bạn.</p>
+</main>
+<dialog id="reading-modal" class="app-dialog" aria-labelledby="reading-title">
+  <div class="sheet-shell">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <header class="sheet-header"><div><span class="eyebrow">GÓC NHÌN TỪ RÓT</span><h2 id="reading-title" tabindex="-1"></h2></div><button class="close-dialog" type="button" data-close="reading-modal" aria-label="Đóng lời giải"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+    <div class="sheet-scroll">
+      <p id="preview-notice" class="preview-notice" hidden>Bản xem thử. Lời giải và tâm sự được mô phỏng; không gửi dữ liệu ra ngoài.</p>
+      <div id="reading-cards" class="reading-cards" aria-label="Các lá đã rút"></div>
+      <div id="reading-loading" class="reading-loading" role="status"><span class="loader-ring"></span><p>Rót đang đọc những lá bài…</p></div>
+      <div id="reading-text" class="reading-text" aria-live="polite"></div>
+      <button id="retry-reading" class="outline-button" type="button" hidden>Thử lại lời giải</button>
+      <p id="sheet-status" class="field-note" aria-live="polite"></p>
+      <section id="conversation" hidden><h3>Tâm sự cùng Rót</h3><p class="field-note">Lá bài mở một góc nhìn. Còn câu chuyện của bạn, Rót vẫn đang nghe.</p>
+        <div id="messages" class="messages" role="log" aria-live="polite"></div>
+        <form id="chat-form"><label class="sr-only" for="chat-input">Lời tâm sự của bạn</label><textarea id="chat-input" rows="2" maxlength="6000" placeholder="Bạn cứ kể, Rót nghe nè…" required></textarea><button class="gold-button" id="chat-send" type="submit">Gửi tâm sự</button></form>
+      </section>
+      <section id="feedback-panel" hidden><h3>Lời giải có hữu ích với bạn?</h3><form id="feedback-form">
+        <fieldset class="rating-picker"><legend class="sr-only">Đánh giá từ một đến năm sao</legend>
+          <label><input type="radio" name="rating" value="1" required><span>1</span></label><label><input type="radio" name="rating" value="2"><span>2</span></label><label><input type="radio" name="rating" value="3"><span>3</span></label><label><input type="radio" name="rating" value="4"><span>4</span></label><label><input type="radio" name="rating" value="5"><span>5</span></label>
+        </fieldset>
+        <label for="rating-note">Ghi chú đánh giá</label><input id="rating-note" maxlength="1000" placeholder="Điều bạn thấy hữu ích…">
+        <label for="feedback">Góp ý cho Rót</label><textarea id="feedback" rows="2" maxlength="4000" placeholder="Bạn muốn góc nhỏ này tốt hơn ở đâu?"></textarea>
+        <button type="submit" id="feedback-send" class="outline-button">Gửi đánh giá</button><p id="feedback-status" class="field-note" role="status"></p>
+      </form></section>
+      <section class="support-letter"><span class="eyebrow">NGỒI LẠI MỘT CHÚT NHA</span><h3>Thế giới rộng lớn,<br><em>lúc này có tui với bạn.</em></h3>
+        <p>Rót không quyết định thay bạn, chỉ mong cùng bạn gỡ nhẹ những suy nghĩ đang quanh quẩn. Chưa nhẹ lòng ngay cũng không sao, mình cứ thong thả.</p>
+        <p>Nếu góc nhỏ này giúp ích, bạn có thể kể về Rót cho một người đang cần được lắng nghe. Có chút lúa dành cho sinh viên Rót thì quý; chỉ ghé lại tâm sự thôi cũng vui rồi.</p>
+        <button type="button" class="outline-button" data-support>Cùng giữ góc nhỏ này sáng đèn <span aria-hidden="true">↗</span></button>
+      </section>
+    </div>
+    <footer class="sheet-footer"><button type="button" id="read-aloud" class="outline-button">Nghe đọc</button><button type="button" class="gold-button" data-restart>Trải bài mới</button></footer>
+  </div>
+</dialog>
+<dialog id="support-modal" class="app-dialog" aria-labelledby="support-title"><div class="sheet-shell support-shell">
+  <header class="sheet-header"><div><span class="eyebrow">MỘT LỜI NHỎ TỪ RÓT</span><h2 id="support-title" tabindex="-1">Có bạn ghé lại,<br><em>góc nhỏ này ấm hơn.</em></h2></div><button class="close-dialog" type="button" data-close="support-modal" aria-label="Đóng ủng hộ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+  <div class="sheet-scroll">
+    <div class="support-intro"><p>Rót không tài giỏi, chỉ xáo bài khá rành và thích ngồi nghe bạn kể chuyện. Mong mỗi lần ghé đây, bạn mang về được một chút nhẹ lòng.</p><p>Nếu muốn đồng hành cùng sinh viên Rót, bạn chọn cách nào thấy tiện nhất nha.</p></div>
+    <div class="support-paths">
+      <article class="support-path"><span class="path-number">01</span><h3>Kể về người bạn này</h3><p>Gửi góc nhỏ này đến một người đang cần được lắng nghe. Một lời giới thiệu cũng là cách giúp Rót đi xa hơn.</p><button id="share-rot" class="outline-button" type="button">Gửi Rót đến một người bạn</button></article>
+      <article class="support-path"><span class="path-number">02</span><h3>Mua sắm như mọi ngày</h3><p>Trước khi đặt hàng, thử chuyển đổi link đơn hàng của bạn để ủng hộ sinh viên Rót nè.</p><a class="gold-button shopee-link" href="https://hoahong.vercel.app/" target="_blank" rel="noopener noreferrer">Chuyển đổi link đơn hàng <span aria-hidden="true">↗</span></a></article>
+    </div>
+    <details class="donation-bank"><summary><span>Gửi Rót chút lúa<small>Chỉ khi bạn thấy thuận tiện</small></span><span aria-hidden="true">+</span></summary><p>Mỗi chút sẻ chia giúp Rót chăm chút góc này thêm một chút. Cảm ơn bạn nha.</p><img src="images/bank.png" alt="Mã QR ủng hộ sinh viên Rót" class="donation-qr" loading="lazy"></details>
+    <p class="support-reassurance">Không ủng hộ cũng chẳng sao. Bạn vẫn luôn có một chỗ ngồi ở đây.</p>
+    <div class="donor-note"><span class="eyebrow">NHỮNG NGƯỜI BẠN ĐỒNG HÀNH</span><div id="top-donates" class="field-note">Cảm ơn vì đã giữ góc nhỏ này sáng đèn.</div></div>
+  </div>
+</div></dialog>
+<div id="toast" class="app-toast" role="status" aria-live="polite"></div>
+<div id="modal-shade" aria-hidden="true"></div>
+
+  <script src="js/engine.js" defer></script>
+<script src="js/app.js" defer></script>
+</body>
+</html>

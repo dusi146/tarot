@@ -10,3 +10,7 @@ groq_config.json
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Generated GitHub Pages artifact
+/_site/
+/backups/

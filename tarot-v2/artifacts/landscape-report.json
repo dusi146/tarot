@@ -1,0 +1,27 @@
+[
+  {
+    "name": "landscape",
+    "width": 844,
+    "height": 390,
+    "spread": "mind",
+    "count": 3,
+    "dockErrors": [
+      0,
+      0,
+      0
+    ],
+    "cardIds": [
+      "15",
+      "01",
+      "S06"
+    ],
+    "flightTiming": {
+      "max": 33,
+      "p95": 17
+    },
+    "textureTaskMax": 1.9,
+    "closeOffset": 0,
+    "errors": [],
+    "externalRequests": 0
+  }
+]

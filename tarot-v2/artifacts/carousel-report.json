@@ -1,0 +1,32 @@
+[
+  {
+    "width": 1440,
+    "loops": "forward + reverse + full revolution",
+    "pickedAtSeam": [
+      "19",
+      "05"
+    ],
+    "errors": [],
+    "touchFocus": "not applicable"
+  },
+  {
+    "width": 390,
+    "loops": "forward + reverse + full revolution",
+    "pickedAtSeam": [
+      "C01",
+      "C13"
+    ],
+    "errors": [],
+    "touchFocus": "passed"
+  },
+  {
+    "width": 320,
+    "loops": "forward + reverse + full revolution",
+    "pickedAtSeam": [
+      "W02",
+      "16"
+    ],
+    "errors": [],
+    "touchFocus": "passed"
+  }
+]

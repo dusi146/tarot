@@ -1,0 +1,11 @@
+{
+  "realProviderCalls": 0,
+  "mockReads": 3,
+  "mockChats": 3,
+  "preservedCardIds": [
+    "P08"
+  ],
+  "matchedFeedbackToOriginalRow": true,
+  "staleReadingIgnoredAfterReset": true,
+  "errors": []
+}

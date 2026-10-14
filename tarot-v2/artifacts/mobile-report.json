@@ -1,0 +1,29 @@
+[
+  {
+    "name": "mobile",
+    "width": 390,
+    "height": 844,
+    "spread": "solution",
+    "count": 4,
+    "dockErrors": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "cardIds": [
+      "C08",
+      "P09",
+      "14",
+      "S14"
+    ],
+    "flightTiming": {
+      "max": 83,
+      "p95": 17
+    },
+    "textureTaskMax": 3.7,
+    "closeOffset": 0,
+    "errors": [],
+    "externalRequests": 0
+  }
+]
