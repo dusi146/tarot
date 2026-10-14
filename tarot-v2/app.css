@@ -82,6 +82,13 @@ body:not([data-act="INTRO"]) #skip-intro{display:none}
 .revealed-position-tag{letter-spacing:.05em;font-size:9px;margin-bottom:4px}
 .revealed-sub{font-size:9px}
 .revealed-numeral:empty{display:none}
+.revealed-card-caption{line-height:1.4}
+.revealed-card-caption .revealed-details{display:flex;width:100%;visibility:hidden;opacity:0;transform:translateY(5px);transition:opacity .6s ease,transform .6s var(--ease-out),visibility .6s}
+.revealed-card-caption.shown .revealed-details{visibility:visible;opacity:1;transform:translateY(0)}
+.revealed-card-caption .tap-to-flip-badge{position:absolute;top:18px;white-space:nowrap;transition:opacity .5s,visibility .5s,border-color .25s,background .25s}
+.revealed-card-caption.shown .tap-to-flip-badge{display:inline-flex;opacity:0;visibility:hidden;pointer-events:none}
+.revealed-card-caption .revealed-name{display:block;max-width:100%;overflow-wrap:normal;text-wrap:balance}
+.revealed-card-caption.inspection-muted{opacity:0;pointer-events:none}
 #reveal-action-bar{top:100px;gap:7px}
 #flip-all{pointer-events:auto;min-height:32px;padding:6px 16px;border-radius:24px;font-size:10px}
 #btn-flip-next{letter-spacing:.03em;text-transform:none;min-height:37px}
@@ -317,9 +324,9 @@ body:not([data-act="INTRO"]) #skip-intro{display:none}
  .spread-picker small{font-size:9px}
  .options-toggle{min-height:44px;font-size:12px}
  .welcome-panel .gold-button{backdrop-filter:none;min-height:48px;font-size:13px;position:sticky;bottom:-1px;z-index:2;background:linear-gradient(135deg,rgba(110,91,62,.95),rgba(40,39,45,.96));box-shadow:inset 0 1px 0 rgba(255,246,217,.25),0 -8px 24px rgba(9,15,33,.65)}
- body[data-act="REVEAL"] #control-dock:has(.reading-ready){display:grid;grid-template-columns:1fr 1fr;width:min(330px,calc(100vw - 32px));border-radius:22px;gap:4px}
- #control-dock .reading-ready{grid-column:1/-1;grid-row:1;border-radius:16px;width:100%;padding:12px;min-height:45px;font-size:12px}
- #control-dock:has(.reading-ready) .dock-btn:not(.reading-ready){min-height:32px;font-size:10px}
+ body[data-act="REVEAL"] #control-dock{display:grid;grid-template-columns:1fr 1fr;width:min(330px,calc(100vw - 32px));border-radius:22px;gap:4px}
+ body[data-act="REVEAL"] #control-dock #open-reading{grid-column:1/-1;grid-row:1;border-radius:16px;width:100%;padding:12px;min-height:45px;font-size:12px}
+ body[data-act="REVEAL"] #control-dock .dock-btn:not(#open-reading){min-height:32px;font-size:10px}
  .support-paths{grid-template-columns:1fr;gap:12px;margin-top:20px}
  .support-path{padding:18px 20px}
  .support-path h3{font-size:26px;margin:9px 0 8px}
@@ -328,6 +335,10 @@ body:not([data-act="INTRO"]) #skip-intro{display:none}
  .support-letter h3{font-size:29px}
 }
 @media(max-height:680px) and (max-width:767px) and (orientation:portrait){
+ #reveal-action-bar{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+ #reveal-action-bar .reveal-header-hint{grid-column:1/-1;font-size:17px}
+ #reveal-action-bar #btn-flip-next{min-height:32px;font-size:9px;padding:6px 8px}
+ #reveal-action-bar #flip-all{min-height:32px;font-size:9px;padding:6px 10px}
  .welcome-panel{top:77px}
  .welcome-panel h2{font-size:28px}
  .welcome-panel form{max-height:calc(100dvh - 205px);padding:14px 16px calc(15px + env(safe-area-inset-bottom,0px));gap:7px}

@@ -1,0 +1,319 @@
+[
+  {
+    "device": "desktop",
+    "phases": {
+      "home": {
+        "frames": 85,
+        "p95": 24.7,
+        "max": 25.7,
+        "averageDraws": 15,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.12801899999999988,
+          "ScriptDuration": 0.07548399999999988,
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0.002574,
+          "LayoutCount": 0,
+          "RecalcStyleCount": 22
+        }
+      },
+      "shuffle": {
+        "frames": 115,
+        "p95": 25.1,
+        "max": 25.6,
+        "averageDraws": 15,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.24132500000000023,
+          "ScriptDuration": 0.12503599999999992,
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0.019113999999999992,
+          "LayoutCount": 0,
+          "RecalcStyleCount": 116
+        }
+      },
+      "gather": {
+        "frames": 66,
+        "p95": 25.5,
+        "max": 26.4,
+        "averageDraws": 15,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.17588300000000023,
+          "ScriptDuration": 0.09400000000000008,
+          "LayoutDuration": 0.0015070000000000083,
+          "RecalcStyleDuration": 0.010626999999999998,
+          "LayoutCount": 2,
+          "RecalcStyleCount": 34
+        }
+      },
+      "swipe": {
+        "frames": 139,
+        "p95": 25.2,
+        "max": 25.5,
+        "averageDraws": 15,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.42977299999999996,
+          "ScriptDuration": 0.18883800000000006,
+          "LayoutDuration": 0.052068,
+          "RecalcStyleDuration": 0.003709999999999991,
+          "LayoutCount": 124,
+          "RecalcStyleCount": 45
+        }
+      },
+      "pick": {
+        "frames": 327,
+        "p95": 25.2,
+        "max": 47,
+        "averageDraws": 23.6,
+        "averageLayoutReads": 0.09,
+        "over33ms": 3,
+        "cpu": {
+          "TaskDuration": 1.29507,
+          "ScriptDuration": 0.6081920000000001,
+          "LayoutDuration": 0.013812999999999992,
+          "RecalcStyleDuration": 0.055791999999999994,
+          "LayoutCount": 19,
+          "RecalcStyleCount": 203
+        }
+      },
+      "flip": {
+        "frames": 92,
+        "p95": 25.2,
+        "max": 25.7,
+        "averageDraws": 29.6,
+        "averageLayoutReads": 0.02,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.2894260000000006,
+          "ScriptDuration": 0.13363199999999997,
+          "LayoutDuration": 0.005935999999999997,
+          "RecalcStyleDuration": 0.033476000000000006,
+          "LayoutCount": 8,
+          "RecalcStyleCount": 101
+        }
+      },
+      "reveal": {
+        "frames": 80,
+        "p95": 25,
+        "max": 25.3,
+        "averageDraws": 30,
+        "averageLayoutReads": 0.01,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.18708800000000014,
+          "ScriptDuration": 0.08253699999999986,
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0.029257000000000005,
+          "LayoutCount": 0,
+          "RecalcStyleCount": 81
+        }
+      },
+      "modal": {
+        "frames": 95,
+        "p95": 25.2,
+        "max": 49.9,
+        "averageDraws": 29.3,
+        "averageLayoutReads": 0,
+        "over33ms": 1,
+        "cpu": {
+          "TaskDuration": 0.3137030000000003,
+          "ScriptDuration": 0.12085800000000013,
+          "LayoutDuration": 0.018185000000000007,
+          "RecalcStyleDuration": 0.037132000000000026,
+          "LayoutCount": 3,
+          "RecalcStyleCount": 103
+        }
+      }
+    },
+    "longTasks": [
+      {
+        "phase": "pick",
+        "ms": 62
+      },
+      {
+        "phase": "pick",
+        "ms": 58
+      }
+    ],
+    "pixelRatio": 1.5,
+    "preserved": {
+      "batch": {
+        "supported": true,
+        "enabled": true,
+        "count": 0
+      },
+      "motes": {
+        "supported": true,
+        "enabled": true,
+        "count": 0
+      },
+      "calls": 29,
+      "triangles": 7484,
+      "cardVertices": 4068,
+      "particles": 260,
+      "activeMotes": 0,
+      "pixelRatio": 1.5
+    },
+    "errors": []
+  },
+  {
+    "device": "mobile",
+    "phases": {
+      "home": {
+        "frames": 82,
+        "p95": 25.4,
+        "max": 25.8,
+        "averageDraws": 15,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.1283439999999998,
+          "ScriptDuration": 0.07968900000000001,
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0.0028509999999999994,
+          "LayoutCount": 0,
+          "RecalcStyleCount": 20
+        }
+      },
+      "shuffle": {
+        "frames": 115,
+        "p95": 25.4,
+        "max": 25.8,
+        "averageDraws": 15,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.23564499999999988,
+          "ScriptDuration": 0.131324,
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0.017176999999999998,
+          "LayoutCount": 0,
+          "RecalcStyleCount": 116
+        }
+      },
+      "gather": {
+        "frames": 67,
+        "p95": 25.3,
+        "max": 25.9,
+        "averageDraws": 15,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.16535100000000025,
+          "ScriptDuration": 0.0927389999999999,
+          "LayoutDuration": 0.001473000000000002,
+          "RecalcStyleDuration": 0.008782000000000012,
+          "LayoutCount": 2,
+          "RecalcStyleCount": 33
+        }
+      },
+      "swipe": {
+        "frames": 142,
+        "p95": 25.2,
+        "max": 25.7,
+        "averageDraws": 15,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.4034709999999997,
+          "ScriptDuration": 0.19283300000000003,
+          "LayoutDuration": 0.03964999999999999,
+          "RecalcStyleDuration": 0.0014220000000000066,
+          "LayoutCount": 129,
+          "RecalcStyleCount": 25
+        }
+      },
+      "pick": {
+        "frames": 331,
+        "p95": 25.2,
+        "max": 26.2,
+        "averageDraws": 23.7,
+        "averageLayoutReads": 0.09,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 1.1942989999999996,
+          "ScriptDuration": 0.534726,
+          "LayoutDuration": 0.014727999999999991,
+          "RecalcStyleDuration": 0.054926,
+          "LayoutCount": 21,
+          "RecalcStyleCount": 213
+        }
+      },
+      "flip": {
+        "frames": 94,
+        "p95": 25.1,
+        "max": 26.3,
+        "averageDraws": 29.6,
+        "averageLayoutReads": 0.04,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.33821300000000054,
+          "ScriptDuration": 0.1582779999999997,
+          "LayoutDuration": 0.005693000000000004,
+          "RecalcStyleDuration": 0.03875999999999999,
+          "LayoutCount": 8,
+          "RecalcStyleCount": 149
+        }
+      },
+      "reveal": {
+        "frames": 85,
+        "p95": 25.3,
+        "max": 25.5,
+        "averageDraws": 30,
+        "averageLayoutReads": 0.01,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.2583259999999994,
+          "ScriptDuration": 0.12130000000000019,
+          "LayoutDuration": 0,
+          "RecalcStyleDuration": 0.034808000000000006,
+          "LayoutCount": 0,
+          "RecalcStyleCount": 180
+        }
+      },
+      "modal": {
+        "frames": 96,
+        "p95": 25.3,
+        "max": 26.2,
+        "averageDraws": 29.3,
+        "averageLayoutReads": 0,
+        "over33ms": 0,
+        "cpu": {
+          "TaskDuration": 0.3622070000000006,
+          "ScriptDuration": 0.14024800000000015,
+          "LayoutDuration": 0.016906000000000004,
+          "RecalcStyleDuration": 0.052209000000000005,
+          "LayoutCount": 3,
+          "RecalcStyleCount": 235
+        }
+      }
+    },
+    "longTasks": [],
+    "pixelRatio": 1.8,
+    "preserved": {
+      "batch": {
+        "supported": true,
+        "enabled": true,
+        "count": 0
+      },
+      "motes": {
+        "supported": true,
+        "enabled": true,
+        "count": 0
+      },
+      "calls": 29,
+      "triangles": 7484,
+      "cardVertices": 4068,
+      "particles": 140,
+      "activeMotes": 0,
+      "pixelRatio": 1.8
+    },
+    "errors": []
+  }
+]

@@ -11,15 +11,15 @@
       0
     ],
     "cardIds": [
-      "C14",
-      "03",
-      "15"
+      "14",
+      "17",
+      "C01"
     ],
     "flightTiming": {
-      "max": 33,
-      "p95": 17
+      "max": 83,
+      "p95": 33
     },
-    "textureTaskMax": 1.5,
+    "textureTaskMax": 2.7,
     "closeOffset": 0,
     "errors": [],
     "externalRequests": 0
@@ -37,16 +37,16 @@
       0
     ],
     "cardIds": [
-      "W03",
-      "C08",
-      "P03",
-      "C10"
+      "S02",
+      "C12",
+      "12",
+      "W08"
     ],
     "flightTiming": {
-      "max": 17,
+      "max": 34,
       "p95": 17
     },
-    "textureTaskMax": 1.1,
+    "textureTaskMax": 2.4,
     "closeOffset": 0,
     "errors": [],
     "externalRequests": 0
@@ -61,13 +61,13 @@
       0
     ],
     "cardIds": [
-      "15"
+      "C11"
     ],
     "flightTiming": {
       "max": 17,
       "p95": 17
     },
-    "textureTaskMax": 1.6,
+    "textureTaskMax": 2,
     "closeOffset": 0,
     "errors": [],
     "externalRequests": 0
@@ -84,15 +84,15 @@
       0
     ],
     "cardIds": [
-      "W05",
-      "W06",
+      "03",
+      "C14",
       "S04"
     ],
     "flightTiming": {
-      "max": 17,
+      "max": 34,
       "p95": 17
     },
-    "textureTaskMax": 1.1,
+    "textureTaskMax": 4.6,
     "closeOffset": 0,
     "errors": [],
     "externalRequests": 0

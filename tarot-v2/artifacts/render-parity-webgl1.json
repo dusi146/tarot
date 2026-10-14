@@ -2,9 +2,9 @@
   {
     "phase": "home",
     "difference": {
-      "meanChannelDifference": 0.0000859375,
-      "changedPixelRatio": 9.765625e-7,
-      "max": 30
+      "meanChannelDifference": 0.00004817708333333333,
+      "changedPixelRatio": 0,
+      "max": 5
     },
     "before": {
       "batch": {
@@ -35,7 +35,7 @@
         "enabled": true,
         "count": 0
       },
-      "calls": 16,
+      "calls": 15,
       "triangles": 6120,
       "cardVertices": 4068,
       "particles": 260,
@@ -46,9 +46,9 @@
   {
     "phase": "shuffle",
     "difference": {
-      "meanChannelDifference": 0.0014381510416666666,
-      "changedPixelRatio": 0.00004296875,
-      "max": 67
+      "meanChannelDifference": 0.0009475911458333334,
+      "changedPixelRatio": 0.0000146484375,
+      "max": 37
     },
     "before": {
       "batch": {
@@ -79,7 +79,7 @@
         "enabled": true,
         "count": 0
       },
-      "calls": 16,
+      "calls": 15,
       "triangles": 45444,
       "cardVertices": 4068,
       "particles": 260,
@@ -90,9 +90,9 @@
   {
     "phase": "fan",
     "difference": {
-      "meanChannelDifference": 0.00012923177083333333,
+      "meanChannelDifference": 0.00013020833333333333,
       "changedPixelRatio": 0,
-      "max": 7
+      "max": 8
     },
     "before": {
       "batch": {
@@ -123,7 +123,7 @@
         "enabled": true,
         "count": 0
       },
-      "calls": 16,
+      "calls": 15,
       "triangles": 14256,
       "cardVertices": 4068,
       "particles": 260,
@@ -134,7 +134,7 @@
   {
     "phase": "flight",
     "difference": {
-      "meanChannelDifference": 0.00015885416666666665,
+      "meanChannelDifference": 0.000021158854166666667,
       "changedPixelRatio": 0,
       "max": 1
     },
@@ -167,7 +167,7 @@
         "enabled": true,
         "count": 0
       },
-      "calls": 19,
+      "calls": 18,
       "triangles": 14256,
       "cardVertices": 4068,
       "particles": 260,
@@ -178,9 +178,9 @@
   {
     "phase": "motes",
     "difference": {
-      "meanChannelDifference": 0,
+      "meanChannelDifference": 0.0000016276041666666668,
       "changedPixelRatio": 0,
-      "max": 0
+      "max": 1
     },
     "before": {
       "batch": {

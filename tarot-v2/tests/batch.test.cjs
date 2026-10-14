@@ -34,10 +34,38 @@ test('selected, flying and hidden cards are never duplicated; nonzero halos rema
   batch.setEnabled(false); batch.sync(cards); assert.equal(batch.mesh.visible, false);
   for (const card of cards) assert.equal(card.mesh.layers.mask, 1);
 });
+
+test('identical front and back surfaces share one draw without losing any triangles or edge material', () => {
+  const geometry = new THREE.BoxGeometry(1.5, 2.55, .028); geometry.clearGroups();
+  geometry.addGroup(0, 12, 0); geometry.addGroup(12, 12, 1); geometry.addGroup(24, 12, 2);
+  const requests = [];
+  const batch = create({ THREE, geometry, group: new THREE.Group(), capacity: 78,
+    maps: { map: 'same-back' }, makeMaterial: (maps, edge) => { requests.push({ maps, edge }); return new THREE.MeshStandardMaterial(); } });
+  assert.deepEqual(batch.mesh.geometry.groups, [{ start: 0, count: 24, materialIndex: 0 }, { start: 24, count: 12, materialIndex: 1 }]);
+  assert.equal(batch.mesh.geometry.index, geometry.index);
+  assert.equal(batch.mesh.geometry.attributes.normal, geometry.attributes.normal);
+  assert.equal(batch.mesh.geometry.attributes.uv, geometry.attributes.uv);
+  assert.equal(batch.mesh.material.length, 2); assert.equal(requests[0].maps.map, 'same-back'); assert.equal(requests[1].edge, true);
+});
 test('a device without instancing keeps the original renderer with the same cards and effects', () => {
   const { batch, cards } = fixture(false); batch.sync(cards);
   assert.equal(batch.stats().enabled, false); assert.equal(batch.mesh.count, 0);
   assert.ok(cards.every(card => card.mesh.layers.mask === 1));
+});
+
+test('front-to-back ordering retains each instance transform and its own foil lighting', () => {
+  const { batch, cards, group } = fixture();
+  const camera = new THREE.PerspectiveCamera(); camera.position.set(0, 0, 9); camera.lookAt(0, 0, 0); camera.updateMatrixWorld();
+  group.rotation.y = .4; group.updateMatrixWorld();
+  batch.sync(cards, camera);
+  const matrix = new THREE.Matrix4(), point = new THREE.Vector3(); let previousDepth = -Infinity;
+  for (let i = 0; i < cards.length; i++) {
+    batch.mesh.getMatrixAt(i, matrix);
+    point.setFromMatrixPosition(matrix).applyMatrix4(group.matrixWorld).applyMatrix4(camera.matrixWorldInverse);
+    assert.ok(-point.z >= previousDepth - 1e-5); previousDepth = -point.z;
+    const matching = cards.find(card => Math.abs(card.mesh.matrix.elements[12] - matrix.elements[12]) < 1e-5);
+    assert.ok(Math.abs(batch.mesh.geometry.getAttribute('instanceFoil').getX(i) - matching.glintPhase) < 1e-6);
+  }
 });
 test('motes retain every active particle, its color, world size, position and lifetime opacity', () => {
   const group = new THREE.Group(), camera = new THREE.PerspectiveCamera(38, 1, .1, 100);

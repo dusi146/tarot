@@ -107,6 +107,7 @@
           this.lastRustleTime = 0;
           this.lastTickTime = 0;
           this.lastHoverTime = 0;
+          this.voiceOutputs = new WeakMap();
         }
 
         initContext() {
@@ -200,6 +201,20 @@
           return this.masterGain;
         }
 
+        releaseVoice(source, nodes, output) {
+          if (output !== this.masterGain) this.voiceOutputs.set(output, (this.voiceOutputs.get(output) || 0) + 1);
+          // Release the graph only after the native source finishes its full scheduled envelope.
+          source.addEventListener('ended', () => {
+            source.disconnect();
+            for (const node of nodes) node.disconnect();
+            if (output !== this.masterGain) {
+              const remaining = this.voiceOutputs.get(output) - 1;
+              if (remaining) this.voiceOutputs.set(output, remaining);
+              else { output.disconnect(); this.voiceOutputs.delete(output); }
+            }
+          }, { once: true });
+        }
+
         // Crisp, realistic cardstock tick when scrubbing past each card in the Fan carousel
         playCardTick(pan = 0, pitchMultiplier = 1.0) {
           if (!this.enabled || !this.ctx || !this.whiteNoiseBuffer) return;
@@ -227,6 +242,7 @@
           snapSrc.connect(bp);
           bp.connect(snapGain);
           snapGain.connect(out);
+          this.releaseVoice(snapSrc, [bp, snapGain], out);
           snapSrc.start(now, Math.random() * 0.8, 0.055);
 
           // Layer 2: Soft cardstock body tap (low-mid woody paper resonance ~260Hz)
@@ -241,6 +257,7 @@
 
           bodyOsc.connect(bodyGain);
           bodyGain.connect(out);
+          this.releaseVoice(bodyOsc, [bodyGain], out);
           bodyOsc.start(now);
           bodyOsc.stop(now + 0.045);
         }
@@ -271,6 +288,7 @@
           src.connect(filter);
           filter.connect(gain);
           gain.connect(out);
+          this.releaseVoice(src, [filter, gain], out);
           src.start(now, Math.random() * 1.0, 0.11);
         }
 
@@ -310,6 +328,7 @@
           f1.connect(gain);
           f2.connect(gain);
           gain.connect(out);
+          this.releaseVoice(src, [f1, f2, gain], out);
           src.start(now, Math.random() * 1.2, 0.20);
         }
 
@@ -340,6 +359,7 @@
           src.connect(filter);
           filter.connect(gain);
           gain.connect(out);
+          this.releaseVoice(src, [filter, gain], out);
           src.start(now, 0, duration + 0.05);
         }
 
@@ -362,6 +382,7 @@
 
           thudOsc.connect(thudGain);
           thudGain.connect(out);
+          this.releaseVoice(thudOsc, [thudGain], out);
           thudOsc.start(now);
           thudOsc.stop(now + 0.09);
 
@@ -381,6 +402,7 @@
             g.gain.exponentialRampToValueAtTime(0.0001, now + 0.95);
             osc.connect(g);
             g.connect(out);
+            this.releaseVoice(osc, [g], out);
             osc.start(now + i * 0.045);
             osc.stop(now + 1.0);
           });
@@ -414,6 +436,7 @@
           src.connect(bp);
           bp.connect(g);
           g.connect(out);
+          this.releaseVoice(src, [bp, g], out);
           src.start(now + 0.08, 0, 0.85);
         }
 
@@ -452,6 +475,7 @@
             osc.connect(filter);
             filter.connect(gain);
             gain.connect(out);
+            this.releaseVoice(osc, [filter, gain], out);
             osc.start(now + delay);
             osc.stop(now + delay + 3.4);
           });
@@ -469,6 +493,7 @@
           gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
           osc.connect(gain);
           gain.connect(this.masterGain);
+          this.releaseVoice(osc, [gain], this.masterGain);
           osc.start(now);
           osc.stop(now + 0.055);
         }
@@ -485,6 +510,7 @@
           gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
           osc.connect(gain);
           gain.connect(this.masterGain);
+          this.releaseVoice(osc, [gain], this.masterGain);
           osc.start(now);
           osc.stop(now + duration + 0.05);
         }
@@ -589,7 +615,7 @@
         }
 
         // Convert the color + foil mask into Three.js textures with anisotropic filtering
-        function compileMaps(renderer) {
+        function compileMaps(renderer, step) {
           const maxAniso = renderer ? Math.min(renderer.capabilities.getMaxAnisotropy(), 8) : 4;
 
           // Build Roughness, Metalness, and Bump canvases from Foil Mask + Paper Grain
@@ -599,35 +625,40 @@
           roughCanvas.width = metalCanvas.width = bumpCanvas.width = 512;
           roughCanvas.height = metalCanvas.height = bumpCanvas.height = 870;
 
-          const rCtx = roughCanvas.getContext('2d');
-          const mCtx = metalCanvas.getContext('2d');
-          const bCtx = bumpCanvas.getContext('2d');
-
-          // Base paper roughness (~0.80 = 204), paper metalness (~0.03 = 8), paper bump
-          rCtx.fillStyle = '#cfcfcf';
-          rCtx.fillRect(0, 0, 512, 870);
-          rCtx.globalAlpha = 0.18;
-          rCtx.drawImage(sharedPaperGrain, 0, 0, 512, 870);
-          rCtx.globalAlpha = 1.0;
-
-          // Where foil is white, roughness drops to ~0.20 (shiny burnished foil)
-          rCtx.globalCompositeOperation = 'difference';
-          rCtx.globalAlpha = 0.72;
-          rCtx.drawImage(foilCanvas, 0, 0, 512, 870);
-          rCtx.globalCompositeOperation = 'source-over';
-          rCtx.globalAlpha = 1.0;
-
-          // Metalness map: foil areas are ~0.92 metallic
-          mCtx.fillStyle = '#080808';
-          mCtx.fillRect(0, 0, 512, 870);
-          mCtx.globalAlpha = 0.92;
-          mCtx.drawImage(foilCanvas, 0, 0, 512, 870);
-
-          // Bump map: paper grain + raised foil emboss
-          bCtx.drawImage(sharedPaperGrain, 0, 0, 512, 870);
-          bCtx.globalCompositeOperation = 'lighten';
-          bCtx.globalAlpha = 0.85;
-          bCtx.drawImage(foilCanvas, 0, 0, 512, 870);
+          function roughness() {
+            const rCtx = roughCanvas.getContext('2d');
+            // Base paper roughness (~0.80 = 204), paper metalness (~0.03 = 8), paper bump
+            rCtx.fillStyle = '#cfcfcf';
+            rCtx.fillRect(0, 0, 512, 870);
+            rCtx.globalAlpha = 0.18;
+            rCtx.drawImage(sharedPaperGrain, 0, 0, 512, 870);
+            rCtx.globalAlpha = 1.0;
+            // Where foil is white, roughness drops to ~0.20 (shiny burnished foil)
+            rCtx.globalCompositeOperation = 'difference';
+            rCtx.globalAlpha = 0.72;
+            rCtx.drawImage(foilCanvas, 0, 0, 512, 870);
+            rCtx.globalCompositeOperation = 'source-over';
+            rCtx.globalAlpha = 1.0;
+            return roughCanvas;
+          }
+          function metalness() {
+            const mCtx = metalCanvas.getContext('2d');
+            // Metalness map: foil areas are ~0.92 metallic
+            mCtx.fillStyle = '#080808';
+            mCtx.fillRect(0, 0, 512, 870);
+            mCtx.globalAlpha = 0.92;
+            mCtx.drawImage(foilCanvas, 0, 0, 512, 870);
+            return metalCanvas;
+          }
+          function bump() {
+            const bCtx = bumpCanvas.getContext('2d');
+            // Bump map: paper grain + raised foil emboss
+            bCtx.drawImage(sharedPaperGrain, 0, 0, 512, 870);
+            bCtx.globalCompositeOperation = 'lighten';
+            bCtx.globalAlpha = 0.85;
+            bCtx.drawImage(foilCanvas, 0, 0, 512, 870);
+            return bumpCanvas;
+          }
 
           const makeTex = (canvas, isSRGB) => {
             const tex = new THREE.CanvasTexture(canvas);
@@ -639,12 +670,17 @@
             return tex;
           };
 
-          return {
+          const textures = () => ({
             map: makeTex(colorCanvas, true),
             roughnessMap: makeTex(roughCanvas, false),
             metalnessMap: makeTex(metalCanvas, false),
             bumpMap: makeTex(bumpCanvas, false)
-          };
+          });
+          if (step) return (async () => {
+            for (const draw of [roughness, metalness, bump]) if (await step(draw) === null) return null;
+            return step(textures);
+          })();
+          roughness(); metalness(); bump(); return textures();
         }
 
         return { cCtx, fCtx, goldGrad, drawFoil, applyPaperTextureOverlay, compileMaps };
@@ -2008,6 +2044,8 @@
       });
 
       const nebulaPlane = new THREE.Mesh(new THREE.PlaneGeometry(110, 68), nebulaMat);
+      // Opaque cards fill depth first: the same nebula shader need not shade pixels hidden by them.
+      nebulaPlane.renderOrder = 1;
       nebulaPlane.position.set(0, 0, -28);
       bgGroup.add(nebulaPlane);
 
@@ -2390,6 +2428,8 @@
       ];
 
       const sharedCardGeometry = createBeveledCardGeometry();
+      // Three's exact triangle raycast can reject empty space using the tight local box first.
+      sharedCardGeometry.computeBoundingBox();
 
       // Create soft radial halo texture for behind the 3 revealed Hero cards
       function createHaloCanvasTexture(r, g, b) {
@@ -3408,8 +3448,11 @@
 
         if (state.inspectedSlot !== -1) {
           const focusX = heroXs[state.inspectedSlot];
-          state.camTargetPos.set(focusX * 0.85, layoutMetrics.revealHeroYs[state.inspectedSlot] + 0.02, layoutMetrics.revealInspectCamZ);
-          state.camTargetLookAt.set(focusX * 0.96, layoutMetrics.revealHeroYs[state.inspectedSlot] + 0.02, 0.25);
+          const focusY = layoutMetrics.revealHeroYs[state.inspectedSlot] + 0.02;
+          const offsetY = (revealLayout.top + revealLayout.bottom - revealLayout.captionHeight - 14 - innerHeight) / 2
+            * (2 * layoutMetrics.revealInspectCamZ * Math.tan(camera.fov * Math.PI / 360) / innerHeight);
+          state.camTargetPos.set(focusX * 0.85, focusY + offsetY, layoutMetrics.revealInspectCamZ);
+          state.camTargetLookAt.set(focusX * 0.96, focusY + offsetY, 0.25);
         } else {
           state.camTargetPos.set(
             state.smoothPointer.x * 0.24,
@@ -3932,7 +3975,7 @@ function prepareFace(card) {
         if (!builder) return null;
         await faceStep(() => { builder.applyPaperTextureOverlay(.045);
           drawOrnateTarotFrame(builder.drawFoil, true, data.id.toUpperCase(), data.viName.toUpperCase()); }, version);
-        maps = await faceStep(() => builder.compileMaps(renderer), version);
+        maps = await builder.compileMaps(renderer, work => faceStep(work, version));
         if (!maps) return null;
       }
       entry.maps = maps; thumbnail(entry, maps.map.image);
@@ -3964,23 +4007,29 @@ function prepareFace(card) {
 }
 function computeRevealLayout() {
   const w = innerWidth, h = innerHeight, landscape = h < 500 && w > 640;
-  const columns = activeCount === 4 && w < 768 && h > w ? 2 : activeCount;
-  const rows = Math.ceil(activeCount / columns), areaWidth = landscape ? w - 285 : w;
-  const top = landscape ? 125 : Math.max(170, document.getElementById('reveal-action-bar').getBoundingClientRect().bottom + 26);
-  const bottom = landscape ? h - 20 : h - 130;
-  const cellHeight = Math.max(100, bottom - top) / rows;
-  const pixelHeight = Math.max(42, Math.min(340, cellHeight - 66, (areaWidth * .9 / columns - 18) * CARD_H / CARD_W));
+  const action = revealActionBarEl, dock = document.getElementById('control-dock');
+  const measuredTop = landscape ? 125 : Math.max(170, action.offsetTop + action.offsetHeight + 22);
+  const measuredBottom = landscape ? h - 20 : Math.min(h - 112, dock.getBoundingClientRect().top - 16);
+  // Retain the largest header reservation through the flip, so controls disappearing never resize cards.
+  if (revealLayoutViewport !== w + ':' + h) { revealLayoutViewport = w + ':' + h; revealReservedTop = 0; }
+  revealReservedTop = Math.max(revealReservedTop, measuredTop);
+  revealLayout = window.TarotLayout.reveal({ width: w, height: h, count: activeCount,
+    top: revealReservedTop, bottom: measuredBottom, captionHeight: Math.max(76, ...captionHeights) });
+  const pixelHeight = revealLayout.cardHeight;
   const depth = layoutMetrics.revealCamZ;
   const units = 2 * depth * Math.tan(camera.fov * Math.PI / 360) / h;
-  const spacing = pixelHeight * CARD_W / CARD_H + (w < 768 ? 14 : 28);
   layoutMetrics.revealHeroScale = pixelHeight * units / CARD_H;
   layoutMetrics.revealHeroXs = []; layoutMetrics.revealHeroYs = [];
   for (let i = 0; i < activeCount; i++) {
-    const sx = (landscape ? 12 : 0) + areaWidth / 2 + (i % columns - (columns - 1) / 2) * spacing;
-    const sy = top + Math.floor(i / columns) * cellHeight + (cellHeight - 62) / 2;
+    const { centerX: sx, centerY: sy, width } = revealLayout.cells[i];
     layoutMetrics.revealHeroXs.push((sx - w / 2) * units);
     layoutMetrics.revealHeroYs.push((h / 2 - sy) * units + .12);
+    const caption = captionEls[i], cache = captionStyleCache[i], cssWidth = width.toFixed(1) + 'px';
+    if (cache.width !== cssWidth) { caption.style.width = cssWidth; cache.width = cssWidth; }
   }
+  const inspectHeight = Math.min(460, revealLayout.bottom - revealLayout.top - revealLayout.captionHeight - 42);
+  layoutMetrics.revealInspectCamZ = Math.max(layoutMetrics.revealInspectCamZ, .55 + depth * pixelHeight / Math.max(60, inspectHeight));
+  revealLayoutDirty = false;
 }
 function recordDockError(card, slotIndex) {
   camera.updateMatrixWorld(true); const r = slotMiniFrames[slotIndex].getBoundingClientRect();
@@ -4014,8 +4063,35 @@ homeObserver.observe(document.getElementById('intent-form'));
 homeObserver.observe(document.querySelector('.welcome-heading'));
 window.addEventListener('resize', refreshHomeBounds);
 document.getElementById('welcome-panel').addEventListener('animationend', refreshHomeBounds);
-const captionCorners = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
+const captionCorners = Array.from({ length: 8 }, () => new THREE.Vector3());
 const captionStyleCache = captionEls.map(() => ({ transform: '', width: '' }));
+const captionHeights = captionEls.map(() => 0);
+let revealLayout = null, revealLayoutDirty = false, revealLayoutViewport = '', revealReservedTop = 0;
+const revealLayoutObserver = new ResizeObserver(entries => {
+  let changed = false;
+  for (const entry of entries) {
+    const index = captionEls.indexOf(entry.target);
+    if (index !== -1) {
+      const height = Math.ceil(entry.borderBoxSize?.[0]?.blockSize || entry.contentRect.height);
+      if (captionHeights[index] !== height) { captionHeights[index] = height; changed ||= height > (revealLayout?.captionHeight || 76); }
+    } else changed = true;
+  }
+  if (changed) revealLayoutDirty = true;
+});
+for (const element of [...captionEls, revealActionBarEl, document.getElementById('control-dock')]) revealLayoutObserver.observe(element);
+document.fonts?.ready.then(() => { revealLayoutDirty = true; });
+function projectedCardBounds(card, out) {
+  out.left = out.top = Infinity; out.right = out.bottom = -Infinity;
+  for (let i = 0; i < 8; i++) {
+    const point = captionCorners[i].set(i % 2 ? CARD_W / 2 : -CARD_W / 2, i % 4 < 2 ? -CARD_H / 2 : CARD_H / 2,
+      i < 4 ? -CARD_DEPTH / 2 : CARD_DEPTH / 2).applyMatrix4(card.mesh.matrixWorld).project(camera);
+    const x = (point.x + 1) * innerWidth / 2, y = (1 - point.y) * innerHeight / 2;
+    out.left = Math.min(out.left, x); out.right = Math.max(out.right, x);
+    out.top = Math.min(out.top, y); out.bottom = Math.max(out.bottom, y);
+  }
+  return out;
+}
+const captionCardBounds = captionEls.map(() => ({}));
 // Three light ribbons are allocated once, alongside the original particles and astrolabe.
 const introOrbits = new THREE.Group(); scene.add(introOrbits);
 const introDepths = [-2.6, 2.6, 0];
@@ -4103,27 +4179,28 @@ function updateHome(dt) {
   if (intro && blend >= 1) { state.act = 'HOME'; state.actTime = 0; introOrbits.visible = false; }
 }
 function projectCaptions() {
-  if (state.act !== 'REVEAL') return;
+  if (state.act !== 'REVEAL' || !revealLayout) return;
   state.selectedCards.forEach((card, index) => {
-    let left = Infinity, right = -Infinity, bottom = -Infinity;
-    for (let i = 0; i < 4; i++) {
-      const point = captionCorners[i].set(i % 2 ? CARD_W / 2 : -CARD_W / 2, i < 2 ? -CARD_H / 2 : CARD_H / 2, 0).applyMatrix4(card.mesh.matrixWorld).project(camera);
-      const x = (point.x + 1) * innerWidth / 2, y = (1 - point.y) * innerHeight / 2;
-      left = Math.min(left, x); right = Math.max(right, x); bottom = Math.max(bottom, y);
-    }
     const caption = captionEls[index];
+    const muted = state.inspectedSlot !== -1 && state.inspectedSlot !== index;
+    if (caption.classList.contains('inspection-muted') !== muted) caption.classList.toggle('inspection-muted', muted);
+    if (caption.inert !== muted) caption.inert = muted;
+    if (muted) return;
+    const bounds = projectedCardBounds(card, captionCardBounds[index]), cell = revealLayout.cells[index];
     const cache = captionStyleCache[index];
-    const transform = 'translate3d(' + ((left + right) / 2).toFixed(2) + 'px,' + (bottom + 8).toFixed(2) + 'px,0) translateX(-50%)';
-    const width = Math.round(Math.max(75, Math.min(210, (right - left) * 1.2))) + 'px';
+    // Width belongs to the layout cell, never to the temporary narrow edge of a turning card.
+    const x = state.inspectedSlot === index ? (bounds.left + bounds.right) / 2 : cell.centerX;
+    const y = Math.max(state.inspectedSlot === index ? 0 : cell.captionY, bounds.bottom + 12);
+    const transform = 'translate3d(' + x.toFixed(2) + 'px,' + y.toFixed(2) + 'px,0) translateX(-50%)';
     if (cache.transform !== transform) { caption.style.transform = transform; cache.transform = transform; }
-    if (cache.width !== width) { caption.style.width = width; cache.width = width; }
   });
 }
 function publishState(dt) {
   projectCaptions();
   const drawDisabled = state.picking || state.selectedCards.length >= activeCount || state.actTime < .8;
   if (btnDrawCurrentEl.disabled !== drawDisabled) btnDrawCurrentEl.disabled = drawDisabled;
-  const completed = state.selectedCards.filter(c => c.flipComplete).length;
+  let completed = 0;
+  for (const card of state.selectedCards) if (card.flipComplete) completed++;
   const signature = [state.act, state.selectedCards.length, completed, !!state.picking, state.inspectedSlot].join(':');
   if (lastStage !== state.act) {
     lastStage = state.act; document.body.dataset.act = state.act;
@@ -4159,7 +4236,8 @@ window.TarotExperience = {
   },
   home(intro = false) {
     generation++; for (const timer of scheduled) clearTimeout(timer); scheduled.clear();
-    maxFaceTask = 0;
+    maxFaceTask = 0; revealLayoutViewport = ''; revealReservedTop = 0;
+    captionEls.forEach(caption => { caption.classList.remove('inspection-muted'); caption.inert = false; });
     state.inputBlocked = false; state.picking = false; pointerState.isDown = false; pointerState.isDragging = false;
     for (const card of cards) deckGroup.attach(card.mesh);
     resetAllCardsTransformState(); hideSpreadUI(); hideRevealedCaptions(); holdBtnEl.classList.remove('visible', 'holding'); setWhisper('');
@@ -4183,7 +4261,7 @@ window.TarotExperience = {
       const box = card.mesh.geometry.boundingBox.clone().applyMatrix4(card.mesh.matrixWorld);
       const point = card.mesh.getWorldPosition(new THREE.Vector3()).project(camera);
       return { index: card.index, id: card.data?.id, min: box.min.toArray(), max: box.max.toArray(), flying: card.flightActive,
-        screen: [(point.x + 1) * innerWidth / 2, (1 - point.y) * innerHeight / 2] };
+        screen: [(point.x + 1) * innerWidth / 2, (1 - point.y) * innerHeight / 2], bounds: projectedCardBounds(card, {}) };
     });
   },
   fanSnapshot() {
@@ -4201,7 +4279,9 @@ window.TarotExperience = {
 // Local review hooks let tests compare the same frozen frame using either drawing path.
 let profileFrozen = false;
 if (['localhost', '127.0.0.1'].includes(location.hostname) && new URLSearchParams(location.search).get('profile') === '1') {
-  window.TarotExperience.profile = { freeze: value => { profileFrozen = !!value; }, batch: value => { cardBatch.setEnabled(value); moteBatch.setEnabled(value); } };
+  window.TarotExperience.profile = { freeze: value => { profileFrozen = !!value; },
+    batch: value => { cardBatch.setEnabled(value); moteBatch.setEnabled(value); },
+    occlusion: value => { nebulaPlane.renderOrder = value ? 1 : 0; } };
 }
 container.tabIndex = 0; container.setAttribute('aria-label', 'Bàn bài 3D. Vuốt hoặc dùng phím mũi tên để chọn bài.');
 captionEls.forEach((caption, index) => {
@@ -4234,10 +4314,11 @@ holdBtnEl.addEventListener('keyup', event => { if (event.key === 'Enter' || even
         frameRequest = requestAnimationFrame(animate);
         if (document.hidden || contextLost) return;
         if (viewportDirty) applyViewportResize();
+        if (revealLayoutDirty && (state.act === 'REVEAL' || state.act === 'ASCEND')) computeRevealLayout();
 
         const dt = Math.min((now - lastFrameTime) * 0.001, 0.05);
         lastFrameTime = now;
-        if (profileFrozen) { cardBatch.sync(cards); moteBatch.sync(revealMotesPool, camera); renderer.render(scene, camera); if (overlayScene.children.some(item => item.isMesh)) overlayRenderer.render(overlayScene, camera); return; }
+        if (profileFrozen) { cardBatch.sync(cards, camera); moteBatch.sync(revealMotesPool, camera); renderer.render(scene, camera); if (overlayScene.children.some(item => item.isMesh)) overlayRenderer.render(overlayScene, camera); return; }
 
         state.globalTime += dt;
         state.actTime += dt;
@@ -4308,7 +4389,7 @@ holdBtnEl.addEventListener('keyup', event => { if (event.key === 'Enter' || even
         }
 
         if (hoverPending) { performCardRaycast(); hoverPending = false; }
-        cardBatch.sync(cards);
+        cardBatch.sync(cards, camera);
         moteBatch.sync(revealMotesPool, camera);
         renderer.render(scene, camera);
         const overlayVisible = overlayScene.children.some(item => item.isMesh);

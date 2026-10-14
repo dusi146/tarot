@@ -17,10 +17,10 @@ const root = path.resolve(__dirname, '..'), base = 'http://127.0.0.1:4182', wait
     await page.setRequestInterception(true);
     page.on('request', r => /^https?:/.test(r.url()) && !r.url().startsWith(base) ? r.abort() : r.continue());
     async function compare(phase) {
-      await page.evaluate(() => { TarotExperience.profile.freeze(true); document.getAnimations().forEach(animation => animation.pause()); TarotExperience.profile.batch(false); });
+      await page.evaluate(() => { TarotExperience.profile.freeze(true); document.getAnimations().forEach(animation => animation.pause()); TarotExperience.profile.batch(false); TarotExperience.profile.occlusion(false); });
       await wait(80); const original = await page.screenshot();
       const before = await page.evaluate(() => TarotExperience.renderStats());
-      await page.evaluate(() => TarotExperience.profile.batch(true)); await wait(80); const optimized = await page.screenshot();
+      await page.evaluate(() => { TarotExperience.profile.batch(true); TarotExperience.profile.occlusion(true); }); await wait(80); const optimized = await page.screenshot();
       const after = await page.evaluate(() => TarotExperience.renderStats());
       const difference = await page.evaluate(async sources => {
         const load = src => new Promise((resolve, reject) => { const image = new Image(); image.onload = () => resolve(image); image.onerror = () => reject(new Error('Cannot decode comparison frame')); image.src = src; });

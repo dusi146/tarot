@@ -12,16 +12,16 @@
       0
     ],
     "cardIds": [
-      "W03",
-      "C08",
-      "P03",
-      "C10"
+      "S02",
+      "C12",
+      "12",
+      "W08"
     ],
     "flightTiming": {
-      "max": 17,
+      "max": 34,
       "p95": 17
     },
-    "textureTaskMax": 1.1,
+    "textureTaskMax": 2.4,
     "closeOffset": 0,
     "errors": [],
     "externalRequests": 0

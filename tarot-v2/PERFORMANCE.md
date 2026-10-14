@@ -42,3 +42,15 @@ node tarot-v2/tests/render-parity-browser.cjs
 ```
 
 Báo cáo gốc ở `artifacts/performance-before.json`, `artifacts/performance-after.json` và `artifacts/render-parity.json`. Công cụ đóng băng/đổi cách vẽ chỉ được mở khi chạy trên localhost với `?profile=1`; không có trong luồng sử dụng website công khai.
+
+## Tối ưu tiếp và sửa tên lá trên điện thoại
+
+- Hai nhóm mặt lưng giống nhau dùng chung một lượt dựng; vẫn giữ toàn bộ hình học, UV, cạnh vát và nhũ riêng cho từng lá. Khung xáo/chọn còn 15 lượt dựng thay cho 16 ở bản tối ưu trước.
+- Sắp xếp các lá đục theo khoảng cách tới camera, dựng lá gần trước. Nền tinh vân dựng sau các bề mặt đục để GPU có thể bỏ qua điểm ảnh bị che kín. Giữ nguyên shader, chuyển động, chất lượng phân giải, số lá và số hạt. Đối chiếu ảnh bật/tắt cả hai tối ưu trên cùng khung hình ở WebGL 1/2 có sai lệch trung bình mỗi kênh dưới 0,002 trên thang 0–255 trong các mẫu đã thử.
+- Tạo bounding box một lần để loại nhanh các cú chạm vào khoảng trống; cú chạm vào lá vẫn kiểm tra đúng toàn bộ tam giác gốc. Vuốt qua nhiều vòng vẫn chọn đúng danh tính lá.
+- Chia việc chuẩn bị roughness, metalness và bump thành các công việc riêng, nhường thời gian giữa chúng. Độ phân giải, phép vẽ, lọc texture và ảnh kết quả giữ nguyên; vẫn không chuẩn bị texture trong chuyến bay hoặc khi đang lật.
+- Ngắt các nhánh âm thanh khi nguồn đã phát hết, và chỉ ngắt panner chung khi lớp âm cuối cùng kết thúc. Không đổi âm lượng, lớp âm, âm sắc, độ vang hoặc lịch phát; master vẫn được giữ cho lần tương tác kế tiếp.
+
+Tên lá có chiều rộng ổn định theo ô bố cục, chừa hàng riêng theo chiều cao chữ thực và không co lại khi lá quay cạnh về phía người xem. Khung nút dưới ổn định ngay từ lúc vào phần mở bài. Trải bốn lá dùng hai hàng khi đủ chiều cao, chuyển sang một hàng ở màn hình rất thấp để tránh đè chữ hàng kế tiếp. Khi ngắm gần, giữ tên lá đang xem và chuyển mờ các nhãn còn lại; trở về trải bài sẽ hiện đủ nhãn. Camera chừa chỗ cho tên và thanh nút.
+
+`tests/layout-browser.cjs` kiểm tra tên dài, va chạm với mọi lá bài/thanh nút và thao tác ngắm gần rồi trở về ở bảy bố cục từ 320×568 đến 844×390. `tests/resources.test.cjs` kiểm tra phép vẽ PBR đồng bộ/chia bước giống nhau, hủy công việc cũ và giải phóng đủ nhánh âm thanh sau khi phát hết. Báo cáo bố cục nằm ở `artifacts/layout-report.json`; phép đo lượt tối ưu này nằm ở `artifacts/performance-mobile-layout.json`.
