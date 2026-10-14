@@ -2,6 +2,7 @@
 (function (root) {
   'use strict';
   const config = root.TAROT_SHEETS_CONFIG;
+  const transport = root.TarotTransport.create({ fetch: (...args) => fetch(...args) });
   const zone = 'Asia/Ho_Chi_Minh';
   const parts = date => Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
     timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit',
@@ -30,20 +31,9 @@
 
   async function post(payload) {
     if (!config?.endpoint) throw new Error('Chưa cấu hình Google Sheets.');
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 20000);
-    try {
-      // A simple CORS request avoids the preflight unsupported by Apps Script.
-      // Read its JSON acknowledgement; an opaque response cannot confirm a save.
-      const response = await fetch(config.endpoint, {
-        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-        body: JSON.stringify(payload), signal: controller.signal, redirect: 'follow'
-      });
-      if (!response.ok) throw new Error('Google Sheets chưa phản hồi.');
-      const result = await response.json();
-      if (result.status !== 'success') throw new Error(result.message || 'Google Sheets chưa lưu dữ liệu.');
-      return result;
-    } finally { clearTimeout(timer); }
+    const result = await transport.request(config.endpoint, { payload, timeout: 20000 });
+    if (result.status !== 'success') throw new Error(result.message || 'Google Sheets chưa lưu dữ liệu.');
+    return result;
   }
 
   function begin(profile) {
@@ -90,5 +80,6 @@
     };
   }
 
-  root.TarotSheets = { begin, endpoint: config?.endpoint };
+  root.TarotSheets = { begin, endpoint: config?.endpoint,
+    topDonates: () => transport.request(config.endpoint, { timeout: 20000 }) };
 })(window);

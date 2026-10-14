@@ -1,29 +1,16 @@
 /* The browser sends tarot data to Apps Script. Provider keys stay on the server. */
 (function (root) {
   'use strict';
+  const network = typeof module === 'object' && module.exports ? require('./tarot-transport.js') : root.TarotTransport;
   function snapshot(state) {
     return { name: state.userName, question: state.userQuestion, vibe: state.userVibe,
       dob: { ...state.dob }, spreadId: state.activeSpread.id,
       cards: state.selectedCards.map(card => ({ id: card.data.id, reversed: card.isReversed })) };
   }
   function create(options = {}) {
-    const transport = options.fetch || fetch, now = options.now || Date.now;
+    const transport = network.create({ fetch: options.fetch, now: options.now, sleep: options.sleep }), now = options.now || Date.now;
     let health, retryAt = 0;
-    async function exchange(url, payload) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 85000);
-      try {
-        const response = await transport(url, payload ? {
-          method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-          body: JSON.stringify(payload), redirect: 'follow', credentials: 'omit', signal: controller.signal
-        } : { redirect: 'follow', credentials: 'omit', signal: controller.signal });
-        if (!response.ok) throw new Error('Rót chưa kết nối được. Bạn thử lại sau một chút nhé.');
-        return await response.json();
-      } catch (error) {
-        if (error.name === 'AbortError') throw new Error('Rót đang phản hồi chậm. Bạn chờ một chút rồi thử lại nhé.');
-        throw error;
-      } finally { clearTimeout(timer); }
-    }
+    const exchange = (url, payload) => transport.request(url, { payload, timeout: 85000 });
     async function ready() {
       if (!options.endpoint) throw new Error('Rót đang hoàn tất kết nối. Bạn quay lại sau một chút nhé.');
       if (!health) health = exchange(options.endpoint + '?action=ai_health').then(result => {

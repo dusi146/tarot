@@ -3,8 +3,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-function sheets({ failIP = false, rejectLog = false, gateLog = null } = {}) {
+function sheets({ failIP = false, rejectLog = false, gateLog = null, delayedReply = false } = {}) {
   const calls = [];
+  let responseReads = 0;
   let clock = Date.parse('2026-10-14T16:59:50.123Z');
   class Clock extends Date {
     constructor(...args) { super(...(args.length ? args : [clock])); }
@@ -14,6 +15,9 @@ function sheets({ failIP = false, rejectLog = false, gateLog = null } = {}) {
   const context = vm.createContext({
     window, Intl, Date: Clock, AbortController, setTimeout, clearTimeout,
     fetch: async (url, options) => {
+      if (url.startsWith('https://script.googleusercontent.com/')) {
+        responseReads++; return { ok: true, json: async () => ({ status: 'success' }) };
+      }
       if (url.includes('ipify')) {
         if (failIP) throw new Error('offline');
         return { ok: true, json: async () => ({ ip: '203.0.113.7' }) };
@@ -21,15 +25,25 @@ function sheets({ failIP = false, rejectLog = false, gateLog = null } = {}) {
       const payload = JSON.parse(options.body);
       calls.push({ url, options, payload });
       if (payload.action === 'log_reading') await gateLog;
+      if (delayedReply && payload.action === 'log_reading') return { ok: false, status: 404, url: 'https://script.googleusercontent.com/macros/echo?user_content_key=sheet-result' };
       return { ok: true, json: async () => rejectLog && payload.action === 'log_reading'
         ? { status: 'error', message: 'Không tìm thấy' } : { status: 'success' } };
     }
   });
-  for (const file of ['sheets-config.js', 'tarot-sheets.js']) {
+  for (const file of ['sheets-config.js', 'tarot-transport.js', 'tarot-sheets.js']) {
     vm.runInContext(fs.readFileSync(require.resolve(`../${file}`), 'utf8'), context);
   }
-  return { api: window.TarotSheets, calls, setClock: value => { clock = Date.parse(value); } };
+  return { api: window.TarotSheets, calls, responseReads: () => responseReads, setClock: value => { clock = Date.parse(value); } };
 }
+
+test('a delayed Sheet acknowledgement is recovered without appending a duplicate row', async () => {
+  const app = sheets({ delayedReply: true }), session = app.api.begin({ name: 'Kiểm tra' });
+  await session.record('Lời giải', 'Thành công'); await session.record('Lời giải', 'Thành công');
+  await session.feedback({ rating: 5 });
+  assert.equal(app.calls.filter(call => call.payload.action === 'log_reading').length, 1);
+  assert.equal(app.calls.filter(call => call.payload.action === 'update_feedback').length, 1);
+  assert.equal(app.responseReads(), 1);
+});
 
 test('existing Apps Script receives the full 18-column protocol and confirms feedback', async () => {
   const app = sheets();

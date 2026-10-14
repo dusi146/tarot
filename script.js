@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const button = document.getElementById('startRitualBtn');
     if (button) { button.disabled = true; button.textContent = message; }
   }
-  if (!window.THREE || !window.gsap || !window.TarotMotion || !window.TarotGeometry || !window.TarotPersona || !window.TarotReading || !window.TarotAI || !window.TarotAtmosphere || !window.TarotAudio || !window.TarotRender || !window.TAROT_CARDS) {
+  if (!window.THREE || !window.gsap || !window.TarotMotion || !window.TarotGeometry || !window.TarotPersona || !window.TarotReading || !window.TarotTransport || !window.TarotAI || !window.TarotAtmosphere || !window.TarotAudio || !window.TarotRender || !window.TAROT_CARDS) {
     sceneFailure('Không tải được bàn bài. Hãy tải lại trang.');
     return;
   }
@@ -1938,12 +1938,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (restartBtn) restartBtn.addEventListener('click', resetReading);
 
   // Webhook Lấy danh sách Donate
-  const WEBHOOK_URL = window.TarotSheets?.endpoint;
   async function loadTopDonates() {
     try {
-      const res = await fetch(WEBHOOK_URL);
-      const json = await res.json();
-      if (json.status === 'success' && json.data.length > 0) {
+      const json = await window.TarotSheets?.topDonates?.();
+      if (json?.status === 'success' && Array.isArray(json.data) && json.data.length > 0) {
         const track = document.getElementById('donateContent');
         if (track) {
           track.innerHTML = json.data.map(item => `

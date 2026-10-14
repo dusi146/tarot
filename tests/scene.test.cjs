@@ -59,6 +59,7 @@ function scene({ textureFailure = false, oracleDeferred = false, oracleFailure =
   window.TarotPersona = require('../tarot-persona.js');
   window.TarotReading = require('../tarot-reading.js');
   window.TarotAI = require('../tarot-ai.js');
+  window.TarotTransport = require('../tarot-transport.js');
   window.TAROT_SHEETS_CONFIG = { endpoint: 'https://script.google.com/macros/s/test/exec' };
   window.TarotAtmosphere = require('../tarot-atmosphere.js');
   window.TarotAudio = require('../tarot-audio.js');

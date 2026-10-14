@@ -10,7 +10,7 @@ test('AI refuses legacy Apps Script before any POST can accidentally append a sh
     calls.push({ url, options }); return response({ status: 'success', data: [] });
   } });
   await assert.rejects(ai.read(state), /hoàn tất kết nối/);
-  assert.equal(calls.length, 1); assert.equal(calls[0].options.method, undefined);
+  assert.equal(calls.length, 1); assert.equal(calls[0].options.method, 'GET');
 });
 test('browser sends card identities and conversation context without API keys or arbitrary instructions', async () => {
   const bodies = [], ai = create({ endpoint: 'https://example.test/exec', fetch: async (url, options) => {
@@ -47,4 +47,15 @@ test('a new spread while health is loading cannot change the original request sn
   current.userQuestion = 'Câu hỏi khác'; current.selectedCards = [];
   release(); await pending;
   assert.equal(sent.state.question, 'Công việc?'); assert.equal(sent.state.cards.length, 1);
+});
+test('AI recovers a transient ContentService 404 without generating another reading', async () => {
+  let posts = 0, reads = 0;
+  const finalUrl = 'https://script.googleusercontent.com/macros/echo?user_content_key=reading-result';
+  const ai = create({ endpoint: 'https://script.google.com/macros/s/test/exec', sleep: async () => {}, fetch: async (url, options) => {
+    if (url === finalUrl) { reads++; return response({ status: 'success', text: 'Lời giải đã được tạo một lần.' }); }
+    if (options.method === 'POST') { posts++; return { ok: false, status: 404, url: finalUrl }; }
+    return response({ service: 'tarot-groq', version: 1, configured: true });
+  } });
+  assert.equal(await ai.read(state), 'Lời giải đã được tạo một lần.');
+  assert.equal(posts, 1); assert.equal(reads, 1);
 });
