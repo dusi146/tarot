@@ -304,6 +304,55 @@ button:disabled { cursor: wait; opacity: .55; }
 }
 @media (max-height: 680px) { .draw-step-detail { display: none; } .swipe-guide { height: 22px; } }
 @media (max-height: 500px) and (orientation: landscape) { .swipe-guide, .draw-step-detail { display: none; } }
+/* Intro hands the same three cards and brand over to the main scene. */
+#intro-screen { background: radial-gradient(ellipse at 50% 20%, rgba(12,13,31,.25), transparent 70%); }
+.intro-brand { position: fixed; display: flex; align-items: center; gap: 14px; left: 50%; top: 24%; transform: translate(-50%, -50%); white-space: nowrap; }
+.brand-logo { flex: 0 0 32px; width: 32px; height: 32px; object-fit: contain; border-radius: 50%; filter: drop-shadow(0 0 10px rgba(225,194,138,.2)); }
+.intro-sub { position: fixed; top: calc(24% + 47px); left: 50%; transform: translateX(-50%); color: var(--text-2); font-size: 12px; letter-spacing: .04em; white-space: nowrap; }
+.intro-skip { position: fixed; bottom: max(34px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); border: 1px solid var(--gold-dim); color: var(--gold); padding: 12px 20px; border-radius: 30px; background: rgba(14,17,36,.7); font-size: 11px; }
+.hud-nav { transition: opacity .6s ease; }
+.config-panel { transition: opacity .75s ease, transform .85s cubic-bezier(.16,1,.3,1); }
+body.intro-active .hud-nav, body.intro-active .config-panel, body.intro-active .scene-caption { opacity: 0; pointer-events: none; }
+body.intro-active .config-panel { transform: translateY(22px); }
+body.intro-complete .config-panel > * { animation: menu-arrive .7s cubic-bezier(.16,1,.3,1) backwards; }
+body.intro-complete .config-panel > :nth-child(2) { animation-delay: .07s; }
+body.intro-complete .config-panel > :nth-child(3) { animation-delay: .14s; }
+body.intro-complete .config-panel > :nth-child(4) { animation-delay: .21s; }
+body.intro-complete .config-panel > :nth-child(5) { animation-delay: .28s; }
+@keyframes menu-arrive { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+.personal-options { border: 1px solid rgba(236,196,115,.42); border-radius: 14px; background: linear-gradient(120deg, rgba(223,174,77,.14), rgba(150,108,42,.05)); box-shadow: inset 0 1px rgba(255,224,166,.08), 0 4px 22px rgba(212,163,69,.08); }
+.personal-options summary { color: #f2d08b; font-weight: 600; padding: 0 15px; min-height: 48px; border: 0; }
+.personal-options summary span { color: #f6d38c; }
+.personal-options[data-expanded='false'] summary span { transform: rotate(0); }
+.options-content { padding: 0; margin: 0; }
+.options-content > * { margin-left: 15px; margin-right: 15px; }
+.options-content > :first-child { margin-top: 10px; }
+.options-content > :last-child { margin-bottom: 18px; }
+.profile-memory { font-size: 10px; line-height: 1.9; color: var(--text-3); }
+.profile-memory button { margin-top: 8px; padding: 5px 0; border: 0; background: transparent; color: var(--gold); font-size: 10px; text-decoration: underline; text-underline-offset: 3px; }
+.orb-symbol { font-size: 25px; color: var(--gold); }
+.holding .orb-symbol { animation: gentle-star 3s ease-in-out infinite; }
+@keyframes gentle-star { 50% { transform: rotate(35deg) scale(1.12); filter: drop-shadow(0 0 10px rgba(238,195,126,.5)); } }
+.charge-tip-pill { min-height: 42px; max-width: min(340px, 86vw); text-align: center; line-height: 1.9; color: #c7bfd4; }
+/* The thumbnail is the landing target, then hands the card back to WebGL. */
+.dock-slot { height: 90px; flex-direction: column; gap: 7px; padding: 8px 5px; background: rgba(18,21,42,.58); }
+.slot-thumb { flex: 0 0 auto; width: 27px; height: 47px; border-radius: 4px; border: 1px solid rgba(225,194,138,.32); opacity: 1; overflow: hidden; background: rgba(225,194,138,.025); }
+.slot-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 3px; transition: opacity .2s; }
+.slot-empty-icon { display: grid; place-items: center; height: 100%; color: var(--gold-dim); font-size: 12px; }
+.dock-slot.filled .slot-thumb::after, .dock-slot.revealed .slot-thumb::after { content: none; }
+.dock-slot.incoming { border-color: rgba(244,205,134,.65); box-shadow: 0 0 20px rgba(225,194,138,.15); }
+.dock-slot.arrived { animation: dock-arrive .5s ease-out; }
+@keyframes dock-arrive { 35% { box-shadow: 0 0 25px rgba(225,194,138,.25); border-color: #e1c28a; } }
+.dock-slot.departing .slot-thumb img { opacity: 0; }
+.dock-slot.revealed .slot-thumb img { opacity: 1; }
+body[data-stage='reveal'] .dock-slot, body[data-stage='oracle'] .dock-slot { height: 76px; }
+body[data-stage='reveal'] .slot-thumb { width: 22px; height: 38px; }
+@media (max-height: 680px) { .dock-slot { height: 80px; } .slot-thumb { width: 23px; height: 40px; } }
+@media (max-height: 500px) and (orientation: landscape) { body[data-stage='draw'] .dock-slot { flex-direction: row; height: 52px; } body[data-stage='draw'] .slot-thumb { width: 20px; height: 35px; } }
+@media (max-width: 760px) {
+  .config-panel { transition: opacity .75s ease; }
+  body.intro-active .config-panel { transform: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }

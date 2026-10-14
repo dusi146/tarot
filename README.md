@@ -10,11 +10,14 @@ Xem [báo cáo phân tích và sửa 3D](3D_REVIEW.md) để biết nguyên nhâ
 
 - Chữ Lora và Be Vietnam Pro được lưu tại `fonts/`, có đầy đủ ký tự tiếng Việt và giấy phép OFL kèm theo. Không cần gọi Google Fonts khi mở trang.
 - Nền cực quang và sao chuyển động bằng shader. Lúc giữ xáo bài, có 39 lá trên màn hình rộng và 26 lá trên điện thoại; tốc độ và ánh sáng tăng dần theo thời gian giữ. Thả tay sẽ gom bài lại trước khi chọn.
-- Khử răng cưa phần cứng, độ phân giải tối đa 2× trên điện thoại / 2,5× trên màn hình rộng, lọc texture đến 16× và góc bài mịn hơn. Độ phân giải tự hạ trên thiết bị chậm. Chế độ giảm chuyển động của thiết bị vẫn được tôn trọng.
+- Khử răng cưa nhiều lớp trong `tarot-render.js`: MSAA theo khả năng GPU, lọc cạnh sau khi dựng hình và độ phân giải tối đa 2,5× trên điện thoại / 3× trên màn hình rộng. Giới hạn tổng số điểm ảnh và tự giảm chất lượng khi thiết bị chậm; chữ và menu không đi qua bộ lọc 3D. Lọc texture đến 16×. Chế độ giảm chuyển động của thiết bị vẫn được tôn trọng.
 - Phần chọn có minh họa vuốt, nút trái/phải và thanh duyệt. Rút và lật bài có đường nâng/hạ mềm, hạt sáng và quầng sáng.
 - `tarot-persona.js` quản lý mốc ngày của 12 cung hoàng đạo theo quy ước phổ biến, kiểm tra ngày hợp lệ/năm nhuận và bốn prompt riêng cho các tông giọng. Ngày giáp ranh được xác định theo ngày/tháng, không tính bản đồ sao theo giờ/nơi sinh.
 - Tâm sự dùng đầy đủ các lá, vị trí, chiều bài, lời giải và lịch sử hội thoại. Sau lượt trả lời thành công thứ ba, giao diện thêm đúng một lời mời ủng hộ và link `https://hoahong.vercel.app/`. Khi lỗi kết nối, lượt đó không được tính. Tâm sự tiếp tục được lưu vào Sheet cũ.
 - `tarot-audio.js` tạo tiếng giấy, gỗ và chuông với âm lượng thấp, đầu âm mềm, vang nhẹ; tắt âm sẽ giảm toàn bộ âm đang phát. Nền sáng sử dụng `tarot-atmosphere.js`.
+- Intro dùng đúng ba lá của cảnh chính: bay quanh nhau, về vị trí chính, logo/tên đi lên góc rồi menu xuất hiện. Có nút bỏ qua và tự rút gọn khi bật giảm chuyển động.
+- Tùy chỉnh thêm có màu vàng và mở/đóng bằng chuyển động có thể đảo chiều giữa chừng. Lá được chọn bay tới đúng khung ảnh ở hàng dưới; khi đủ lá, dừng nhẹ rồi bay lần lượt lên bàn.
+- Khi giữ xáo, thay phần trăm bằng những lời nhắn chậm rãi. `tarot-profile.js` nhớ tên, giới tính, ngày sinh, tông giọng và kiểu trải bài trong trình duyệt hiện tại; có nút quên thông tin. Không lưu câu hỏi hay tâm sự vào bộ nhớ này. Không đồng bộ hồ sơ giữa các thiết bị.
 
 Kiểm tra hình ảnh trực tiếp hiện bị giới hạn: trình duyệt kiểm tra không truy cập được bản xem trước; Computer Use dừng vì không xác định chắc chắn URL của Chrome. Kiểm thử mô phỏng không thay thế việc xem chuyển động trên GPU và nghe loa thật. Các phản hồi AI trong kiểm thử là mô phỏng; chất lượng văn phong thực tế còn phụ thuộc Gemini và API key khi chạy web.
 

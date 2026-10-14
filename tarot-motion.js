@@ -57,6 +57,14 @@
     return { x: 0, y: Math.sin(0.35) * depth, z: Math.cos(0.35) * depth };
   }
   function shuffleEnergy(seconds) { return 1 - Math.exp(-Math.max(0, seconds) / 3.2); }
+  function introPose(rank, seconds, blend) {
+    const home = [[-.62, .06, -.12, -.32, .17], [.60, .02, -.08, .34, -.16], [0, -.015, .40, .04, -.025]][rank];
+    const angle = rank * Math.PI * 2 / 3 + seconds * 1.05;
+    const mix = (a, b) => blend >= 1 ? b : a + (b - a) * blend;
+    return { x: mix(Math.cos(angle) * .88, home[0]), y: mix(Math.sin(angle * 2) * .24, home[1]),
+      z: mix(Math.sin(angle) * .62, home[2]), rotX: mix(-.12 + Math.sin(angle) * .10, -.10),
+      rotY: mix(Math.sin(angle) * .65, home[3]), rotZ: mix(Math.cos(angle) * .16, home[4]) };
+  }
   function shufflePose(index, seconds, compact = false, reduced = false) {
     const energy = shuffleEnergy(seconds), stride = compact ? 3 : 2;
     const rank = index / stride, perRing = compact ? 9 : 13;
@@ -71,7 +79,7 @@
       rotX: -0.12 + Math.sin(angle) * 0.10, rotY: -angle + Math.PI / 2,
       rotZ: Math.cos(angle + tier) * 0.13, scale: compact ? 0.34 : 0.38, energy };
   }
-  const api = { damp, advanceRibbon, viewAt, selectedLayout, screenToWorld, carouselPose, stackPose, shuffleEnergy, shufflePose };
+  const api = { damp, advanceRibbon, viewAt, selectedLayout, screenToWorld, carouselPose, stackPose, shuffleEnergy, shufflePose, introPose };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.TarotMotion = api;
 })(typeof window === 'object' ? window : this);

@@ -2,6 +2,15 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const motion = require('../tarot-motion.js');
 
+test('intro paths meet the home layout continuously with no residual orbit', () => {
+  for (let rank = 0; rank < 3; rank++) {
+    const home = motion.introPose(rank, 0, 1);
+    assert.deepEqual(motion.introPose(rank, 9, 1), home);
+    const near = motion.introPose(rank, 2, .9999);
+    assert.ok(Math.abs(near.x - home.x) + Math.abs(near.y - home.y) + Math.abs(near.z - home.z) < .001);
+  }
+});
+
 test('longer shuffle holds smoothly increase energy and angular speed within bounds', () => {
   let previousEnergy = 0, previousSpeed = 0;
   for (let time = .1; time <= 20; time += .1) {

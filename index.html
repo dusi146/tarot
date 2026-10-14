@@ -18,6 +18,9 @@
   <script src="tarot-persona.js" defer></script>
   <script src="tarot-atmosphere.js" defer></script>
   <script src="tarot-audio.js" defer></script>
+  <script src="tarot-profile.js" defer></script>
+  <script src="tarot-ui.js" defer></script>
+  <script src="tarot-render.js" defer></script>
   <script src="sheets-config.js" defer></script>
   <script src="tarot-sheets.js" defer></script>
   <link rel="stylesheet" href="style.css">
@@ -29,19 +32,19 @@
   <output id="sceneDiagnostics" hidden aria-hidden="true"></output>
 
   <!-- Intro -->
-  <div id="intro-screen">
-    <div class="intro-brand">
-      <div class="intro-monogram">TVR</div>
-      <h1 class="intro-title">TA VĂN RÓT</h1>
-      <p class="intro-sub">Một khoảng lặng cho bạn</p>
-      <div class="intro-loader"></div>
+  <div id="intro-screen" aria-label="Chào bạn đến với Ta Văn Rót">
+    <div class="intro-brand" id="introBrand">
+      <img src="images/logo.png" class="brand-logo" alt="" width="32" height="32">
+      <span class="brand-name">Ta Văn Rót</span>
     </div>
+    <p class="intro-sub" id="introSubtitle">Một khoảng lặng. Một người bạn.</p>
+    <button class="intro-skip" id="skipIntroBtn" type="button">Vào cùng Rót ↗</button>
   </div>
 
   <!-- HUD Nav (mỏng, dính đỉnh) -->
   <header class="hud-nav">
-    <a class="nav-brand" href="index.html" aria-label="Ta Văn Rót — trang chủ">
-      <svg class="brand-symbol" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 19.2 12.8 30 16 19.2 19.2 16 30 12.8 19.2 2 16 12.8 12.8Z"/><circle cx="16" cy="16" r="11.5"/></svg>
+    <a class="nav-brand" id="navBrand" href="index.html" aria-label="Ta Văn Rót — trang chủ">
+      <img src="images/logo.png" class="brand-logo" alt="" width="32" height="32">
       <span class="brand-name">Ta Văn Rót</span>
     </a>
     <div class="nav-tools">
@@ -86,8 +89,8 @@
         <p class="spread-guide" id="spreadGuideText">Quá khứ · Hiện tại · Tương lai</p>
       </div>
       <details class="personal-options" id="personalOptions">
-        <summary>Tùy chỉnh thêm <span aria-hidden="true">+</span></summary>
-        <div class="options-content">
+        <summary id="personalOptionsToggle" aria-controls="personalOptionsContent">Tùy chỉnh thêm <span aria-hidden="true">+</span></summary>
+        <div class="options-content" id="personalOptionsContent">
           <div class="form-block">
             <label class="f-label" for="nameInput">Tên của bạn</label>
             <input class="f-input" type="text" id="nameInput" placeholder="Tên hoặc biệt danh" autocomplete="off" />
@@ -119,6 +122,10 @@
               <select class="glass-select" id="dobYear" aria-label="Năm"><option value="">Năm</option></select>
             </div><div class="zodiac-badge-inline" id="zodiacBadge">—</div></div>
           </div>
+          <div class="profile-memory">
+            <p id="profileMemoryNote" role="status">Rót nhớ thông tin của bạn trên trình duyệt này cho lần sau.</p>
+            <button id="forgetProfileBtn" type="button">Quên thông tin đã nhớ</button>
+          </div>
         </div>
       </details>
       <button class="btn-main" id="startRitualBtn">Bắt đầu trải bài <span aria-hidden="true">↗</span></button>
@@ -138,11 +145,11 @@
       <div class="charge-orb" id="chargeOrb" role="button" tabindex="0" aria-label="Giữ để xáo bài; nhấn Enter để xáo bằng bàn phím">
         <div class="orb-ring"></div>
         <div class="orb-core">
-          <span class="orb-pct" id="chargePct">✦</span>
+          <span class="orb-symbol" aria-hidden="true">✦</span>
           <span class="orb-hint" id="chargeHint">Giữ để xáo</span>
         </div>
       </div>
-      <div class="charge-tip-pill" id="chargeTipPill">Giữ lâu hơn, bài xáo nhanh hơn · thả khi bạn sẵn sàng</div>
+      <div class="charge-tip-pill" id="chargeTipPill" role="status" aria-live="polite">Thả tay khi bạn thấy sẵn sàng.</div>
     </div>
   </section>
 

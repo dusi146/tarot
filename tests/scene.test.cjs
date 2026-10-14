@@ -11,6 +11,7 @@ const motion = require('../tarot-motion.js');
 class Element {
   constructor() {
     this.style = { setProperty(name, value) { this[name] = value; } }; this.dataset = {}; this.value = ''; this.innerHTML = ''; this.textContent = ''; this.children = [];
+    Object.assign(this, { x: 0, y: 0, xPercent: 0, yPercent: 0, scale: 1, opacity: 1, clearProps: '', overflow: '', height: 0 });
     this.events = {}; this.attributes = new Map(); this.captures = new Set();
     const classes = new Set();
     this.classList = { add: (...items) => items.forEach(x => classes.add(x)), remove: (...items) => items.forEach(x => classes.delete(x)), contains: x => classes.has(x) };
@@ -34,7 +35,7 @@ class Element {
   }
 }
 
-function scene({ textureFailure = false, oracleDeferred = false, oracleFailure = false } = {}) {
+function scene({ textureFailure = false, oracleDeferred = false, oracleFailure = false, storage = new Map() } = {}) {
   gsap.globalTimeline.clear();
   const elements = new Map();
   const get = id => { if (!elements.has(id)) elements.set(id, new Element()); return elements.get(id); };
@@ -58,6 +59,10 @@ function scene({ textureFailure = false, oracleDeferred = false, oracleFailure =
   window.TarotPersona = require('../tarot-persona.js');
   window.TarotAtmosphere = require('../tarot-atmosphere.js');
   window.TarotAudio = require('../tarot-audio.js');
+  window.TarotProfile = require('../tarot-profile.js');
+  window.TarotUI = require('../tarot-ui.js');
+  window.TarotRender = require('../tarot-render.js');
+  window.localStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) };
   let now = 0;
   let timerId = 0;
   let readingRequests = 0;
@@ -93,7 +98,7 @@ function scene({ textureFailure = false, oracleDeferred = false, oracleFailure =
     window.testScene = { appState, cardMeshes, camera, scene, ribbon, drawEntry,
       startChargingStage, startDrawStage, startRevealStage, pickCard, flipSelectedCard,
       onHoldStart, onHoldEnd, cancelHold, updateRibbonCardsPositions, resizeScene, hitCard,
-      SPREAD_CONFIGS, handleCloseOracle, faceCache, renderLoop, ritual, requestGeminiFollowUp };
+      SPREAD_CONFIGS, handleCloseOracle, faceCache, renderLoop, ritual, requestGeminiFollowUp, finishIntro, entrance, updateShuffleMessage, optionsAccordion, restoreProfile, layoutIdleCards };
   ` + source.slice(close);
   }
   vm.runInContext(source, context);
@@ -109,7 +114,7 @@ function scene({ textureFailure = false, oracleDeferred = false, oracleFailure =
     }
     gsap.ticker.sleep();
   };
-  return Object.assign(api, { window, document, get, advance, sheetRecords, sheetConversations, oraclePayloads, elapsed: () => now, setNow: value => { now = value; }, readingRequests: () => readingRequests, resolveOracle: () => resolveOracle?.() });
+  return Object.assign(api, { window, document, get, advance, storage, sheetRecords, sheetConversations, oraclePayloads, elapsed: () => now, setNow: value => { now = value; }, readingRequests: () => readingRequests, resolveOracle: () => resolveOracle?.() });
 }
 
 async function enterDraw(s, spread = 'time') {
@@ -130,6 +135,93 @@ async function enterDraw(s, spread = 'time') {
   assert.equal(s.appState.isTransitioning, false);
 }
 
+test('intro orbits three cards, hands them to the idle scene and enables the menu', async () => {
+  const s = scene();
+  assert.equal(s.entrance.active, true);
+  assert.equal(s.get('stageIntent').getAttribute('inert'), '');
+  s.layoutIdleCards(.3);
+  const first = s.cardMeshes[77].position.clone();
+  s.layoutIdleCards(1.1);
+  assert.ok(first.distanceTo(s.cardMeshes[77].position) > .1);
+  assert.equal(s.cardMeshes.filter(mesh => mesh.visible).length, 3);
+  await s.advance(3);
+  assert.equal(s.entrance.active, false);
+  assert.equal(s.entrance.blend, 1);
+  assert.equal(s.get('stageIntent').getAttribute('inert'), null);
+  assert.equal(s.document.body.classList.contains('intro-complete'), true);
+  s.get('skipIntroBtn').dispatch('click');
+  assert.equal(s.appState.currentStage, 'intent');
+});
+
+test('chosen cards land in the measured dock frames before the group rises', async () => {
+  const s = scene(); await enterDraw(s);
+  const rects = [0, 1, 2].map(index => ({ left: 470 + index * 100, top: 648, width: 27, height: 47 }));
+  rects.forEach((rect, index) => { s.get('dockThumb-' + index).getBoundingClientRect = () => rect; });
+  for (let index = 0; index < 3; index++) {
+    s.pickCard(s.cardMeshes[38 + index]);
+    assert.equal(s.get('dockSlot-' + index).classList.contains('filled'), false);
+    await s.advance(1);
+    const card = s.appState.selectedCards[index];
+    assert.equal(card.isPlaced, true);
+    assert.equal(s.get('dockSlot-' + index).classList.contains('filled'), true);
+    assert.match(s.get('dockThumb-' + index).innerHTML, /<img/);
+    assert.equal(card.mesh.visible, false);
+    s.camera.updateMatrixWorld(true);
+    const point = card.mesh.position.clone().project(s.camera);
+    const x = (point.x * .5 + .5) * s.window.innerWidth;
+    const y = (-point.y * .5 + .5) * s.window.innerHeight;
+    assert.ok(Math.abs(x - rects[index].left - 13.5) < 1);
+    assert.ok(Math.abs(y - rects[index].top - 23.5) < 1);
+  }
+  assert.equal(s.appState.currentStage, 'draw', 'hold the completed group in its frames briefly');
+  await s.advance(1.6);
+  assert.equal(s.appState.currentStage, 'reveal');
+  assert.equal(s.appState.isTransitioning, false);
+  assert.ok(s.appState.selectedCards.every(card => card.mesh.visible));
+  assert.ok([0, 1, 2].every(index => s.get('dockSlot-' + index).classList.contains('departing')));
+});
+
+test('options opening can reverse repeatedly without stale closing callbacks', async () => {
+  const s = scene(); s.finishIntro();
+  const toggle = s.get('personalOptionsToggle'), details = s.get('personalOptions');
+  toggle.dispatch('click'); await s.advance(.1);
+  toggle.dispatch('click'); await s.advance(.1);
+  toggle.dispatch('click'); await s.advance(1);
+  assert.equal(details.open, true);
+  assert.equal(toggle.getAttribute('aria-expanded'), 'true');
+  s.optionsAccordion.close(true); await s.advance(1);
+  assert.equal(details.open, false);
+  assert.equal(toggle.getAttribute('aria-expanded'), 'false');
+});
+
+test('personal fields restore on return and the forget control clears them', () => {
+  const key = require('../tarot-profile.js').KEY;
+  const storage = new Map([[key, JSON.stringify({ name: 'An', gender: 'Nữ', dob: { day: 8, month: 10, year: 2003 }, vibe: 'quansu', spread: 'solution' })]]);
+  const s = scene({ storage });
+  assert.equal(s.get('nameInput').value, 'An');
+  assert.equal(s.get('genderInput').value, 'Nữ');
+  assert.equal(s.appState.zodiac, 'Thiên Bình');
+  assert.equal(s.appState.userVibe, 'quansu');
+  assert.equal(s.appState.activeSpread.id, 'solution');
+  s.get('nameInput').value = 'Bình'; s.get('nameInput').dispatch('input');
+  assert.equal(JSON.parse(storage.get(key)).name, 'Bình');
+  s.get('forgetProfileBtn').dispatch('click');
+  assert.equal(storage.has(key), false);
+  assert.equal(s.get('nameInput').value, '');
+  assert.equal(s.appState.zodiac, '');
+});
+
+test('long shuffle holds show calm rotating messages and cancellation restores the hint', async () => {
+  const s = scene(); s.startChargingStage(); s.onHoldStart();
+  s.updateShuffleMessage(5); await s.advance(1);
+  assert.match(s.get('chargeTipPill').textContent, /sâu sắc/);
+  s.updateShuffleMessage(10); await s.advance(1);
+  assert.match(s.get('chargeTipPill').textContent, /vừa lòng/);
+  assert.ok(!s.get('chargeTipPill').textContent.includes('%'));
+  s.cancelHold(); await s.advance(2);
+  assert.match(s.get('chargeTipPill').textContent, /sẵn sàng/);
+});
+
 test('settling and entry complete before picking; fast picks produce unique cards', async () => {
   const s = scene();
   await enterDraw(s, 'solution');
@@ -144,9 +236,9 @@ test('settling and entry complete before picking; fast picks produce unique card
   assert.equal(s.appState.usedCardIds.size, 4);
   await s.advance(0.55);
   assert.equal(s.appState.currentStage, 'draw', 'do not interrupt the last flight');
-  await s.advance(0.4);
+  await s.advance(0.75);
   assert.equal(s.appState.currentStage, 'reveal');
-  await s.advance(1);
+  await s.advance(1.3);
   assert.equal(s.appState.isTransitioning, false);
   assert.equal(s.cardMeshes.filter(m => m.visible).length, 4);
 });
@@ -215,7 +307,7 @@ test('rapid flip requests queue once; resize mid-flip lands at new targets', asy
   const s = scene();
   await enterDraw(s);
   for (const index of [38, 39, 40]) { s.pickCard(s.cardMeshes[index]); await s.advance(1.0); }
-  await s.advance(2.1);
+  await s.advance(2.5);
   const cards = s.appState.selectedCards;
   cards[0].isReversed = true;
   await s.flipSelectedCard(cards[0]);
@@ -240,7 +332,7 @@ test('failed artwork still permits reveal and completion', async () => {
   const s = scene({ textureFailure: true });
   await enterDraw(s, 'single');
   s.pickCard(s.cardMeshes[39]);
-  await s.advance(2.1);
+  await s.advance(2.5);
   const card = s.appState.selectedCards[0];
   await s.flipSelectedCard(card);
   await s.advance(3);
@@ -257,7 +349,7 @@ test('large action buttons select, reveal all, and reuse an in-flight reading', 
   for (let i = 0; i < 4; i++) { pick.dispatch('click'); if (i < 3) await s.advance(1.2); }
   assert.equal(s.appState.selectedCards.length, 4);
   assert.equal(pick.disabled, true);
-  await s.advance(2);
+  await s.advance(2.5);
   const action = s.get('summonOracleBtn');
   assert.equal(action.disabled, false);
   action.dispatch('click');
@@ -300,9 +392,9 @@ test('an oracle API failure is logged with profile details and failure status', 
   s.get('genderInput').value = 'Nữ';
   await enterDraw(s, 'single');
   s.get('pickCenterBtn').dispatch('click');
-  await s.advance(2);
+  await s.advance(2.5);
   s.get('summonOracleBtn').dispatch('click');
-  await s.advance(2);
+  await s.advance(2.5);
   s.get('summonOracleBtn').dispatch('click');
   await s.advance(0.2);
   assert.equal(s.sheetRecords.length, 1);
@@ -319,8 +411,8 @@ test('an oracle API failure is logged with profile details and failure status', 
 test('conversations retain the spread and invite support exactly once on the third successful reply', async () => {
   const s = scene();
   await enterDraw(s, 'single');
-  s.get('pickCenterBtn').dispatch('click'); await s.advance(2);
-  s.get('summonOracleBtn').dispatch('click'); await s.advance(2);
+  s.get('pickCenterBtn').dispatch('click'); await s.advance(2.5);
+  s.get('summonOracleBtn').dispatch('click'); await s.advance(2.5);
   s.get('summonOracleBtn').dispatch('click'); await s.advance(.2);
   const cards = s.appState.selectedCards.map(card => card.data.viName);
   assert.equal(s.get('supportLetter').style.display, 'block');
@@ -357,12 +449,12 @@ test('visible left/right browsing controls change cards and dismiss the swipe de
 });
 
 test('holding displays more moving cards while cancellation returns to a clean stack', async () => {
-  const s = scene(); s.startChargingStage(); await s.advance(2);
+  const s = scene(); s.startChargingStage(); await s.advance(2.5);
   s.onHoldStart(); s.setNow(s.elapsed() + 4000); s.renderLoop();
   assert.equal(s.cardMeshes.filter(mesh => mesh.visible).length, 39);
   s.window.innerWidth = 390; s.renderLoop();
   assert.equal(s.cardMeshes.filter(mesh => mesh.visible).length, 26);
-  s.cancelHold(); await s.advance(2);
+  s.cancelHold(); await s.advance(2.5);
   assert.equal(s.appState.isHolding, false);
   assert.equal(s.cardMeshes.filter(mesh => mesh.visible).length, 78);
   assert.equal(s.ritual.energy, 0);
@@ -372,7 +464,7 @@ test('restart reuses the scene, preserves choices, and cancels old card motion',
   const s = scene();
   await enterDraw(s, 'solution');
   for (let i = 0; i < 4; i++) { s.get('pickCenterBtn').dispatch('click'); await s.advance(1.2); }
-  await s.advance(2);
+  await s.advance(2.5);
   s.get('summonOracleBtn').dispatch('click');
   await s.advance(0.3);
   s.get('restartBtn').dispatch('click');
@@ -392,9 +484,9 @@ test('a reading from a previous session cannot overwrite a new spread', async ()
   const s = scene({ oracleDeferred: true });
   await enterDraw(s, 'single');
   s.get('pickCenterBtn').dispatch('click');
-  await s.advance(2);
+  await s.advance(2.5);
   s.get('summonOracleBtn').dispatch('click');
-  await s.advance(2);
+  await s.advance(2.5);
   s.get('summonOracleBtn').dispatch('click');
   await s.advance(0.1);
   assert.equal(s.readingRequests(), 1);

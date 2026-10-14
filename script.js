@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const button = document.getElementById('startRitualBtn');
     if (button) { button.disabled = true; button.textContent = message; }
   }
-  if (!window.THREE || !window.gsap || !window.TarotMotion || !window.TarotGeometry || !window.TarotPersona || !window.TarotAtmosphere || !window.TarotAudio || !window.TAROT_CARDS) {
+  if (!window.THREE || !window.gsap || !window.TarotMotion || !window.TarotGeometry || !window.TarotPersona || !window.TarotAtmosphere || !window.TarotAudio || !window.TarotRender || !window.TAROT_CARDS) {
     sceneFailure('Không tải được bàn bài. Hãy tải lại trang.');
     return;
   }
@@ -22,7 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // 1. CẤU HÌNH & DỮ LIỆU BÀI TAROT
   // =========================================================================
-  const GEMINI_API_KEY = window.GEMINI_API_KEY || (typeof localStorage !== 'undefined' && localStorage.getItem('GEMINI_API_KEY')) || "{{GEMINI_API_KEY_SECRET}}";
+  let storedAPIKey = '';
+  try { storedAPIKey = window.localStorage?.getItem('GEMINI_API_KEY') || ''; } catch {}
+  const GEMINI_API_KEY = window.GEMINI_API_KEY || storedAPIKey || "{{GEMINI_API_KEY_SECRET}}";
   const GEMINI_MODEL = "gemini-2.5-flash";
   const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -106,6 +108,20 @@ document.addEventListener('DOMContentLoaded', () => {
   let sessionVersion = 0;
   let sheetSession = null;
   let currentRating = 0;
+  const entrance = { active: !reducedMotion, blend: reducedMotion ? 1 : 0 };
+  let introTimeline = null;
+  const profileStore = window.TarotProfile?.create(() => window.localStorage);
+  let updateBirthDate = () => {};
+
+  function rememberProfile() {
+    const saved = profileStore?.save({
+      name: document.getElementById('nameInput')?.value || '',
+      gender: document.getElementById('genderInput')?.value || '',
+      dob: appState.dob, vibe: appState.userVibe, spread: appState.activeSpread.id
+    });
+    const note = document.getElementById('profileMemoryNote');
+    if (note && saved === false) note.textContent = 'Trình duyệt này chưa cho phép nhớ thông tin.';
+  }
 
   function beginSheetReading() {
     if (!window.TarotSheets) return null;
@@ -179,12 +195,52 @@ document.addEventListener('DOMContentLoaded', () => {
         appState.zodiac = "";
         if (zodiacBadge) zodiacBadge.textContent = d && m ? 'Ngày không hợp lệ' : '—';
       }
+      rememberProfile();
     }
+    updateBirthDate = onDateChanged;
 
     dobDaySelect.addEventListener('change', onDateChanged);
     dobMonthSelect.addEventListener('change', onDateChanged);
     dobYearSelect.addEventListener('change', onDateChanged);
   }
+
+  function restoreProfile(profile) {
+    document.getElementById('nameInput').value = profile.name;
+    document.getElementById('genderInput').value = profile.gender;
+    dobDaySelect.value = profile.dob.day;
+    dobMonthSelect.value = profile.dob.month;
+    dobYearSelect.value = profile.dob.year;
+    appState.userName = profile.name;
+    appState.userVibe = profile.vibe;
+    appState.activeSpread = SPREAD_CONFIGS[profile.spread] || SPREAD_CONFIGS.time;
+    document.querySelectorAll('.tone-chip').forEach(button => {
+      const active = button.dataset.vibe === appState.userVibe;
+      button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active));
+    });
+    document.querySelectorAll('.spread-tile').forEach(button => {
+      const active = button.dataset.spread === appState.activeSpread.id;
+      button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active));
+    });
+    const description = document.getElementById('toneDescription');
+    if (description) description.textContent = persona.tone(appState.userVibe).description;
+    const guide = document.getElementById('spreadGuideText');
+    if (guide) guide.textContent = appState.activeSpread.slots.map(slot => slot.title).join(' · ');
+    updateBirthDate();
+  }
+  if (profileStore) restoreProfile(profileStore.load());
+  for (const id of ['nameInput', 'genderInput']) {
+    document.getElementById(id)?.addEventListener('input', rememberProfile);
+    document.getElementById(id)?.addEventListener('change', rememberProfile);
+  }
+  document.getElementById('forgetProfileBtn')?.addEventListener('click', () => {
+    restoreProfile(window.TarotProfile.clean());
+    profileStore?.clear();
+    const note = document.getElementById('profileMemoryNote');
+    if (note) note.textContent = 'Rót đã quên thông tin cũ. Bạn có thể nhập lại bất cứ lúc nào.';
+  });
+  const optionsAccordion = window.TarotUI?.accordion(
+    document.getElementById('personalOptions'), document.getElementById('personalOptionsToggle'),
+    document.getElementById('personalOptionsContent'), gsap, reducedMotion);
 
   // =========================================================================
   // 3. ÂM THANH SYNTHESIS CHÂN THẬT (CHẤT LƯỢNG CAO)
@@ -245,14 +301,15 @@ document.addEventListener('DOMContentLoaded', () => {
     sceneFailure('Thiết bị chưa mở được đồ họa 3D. Hãy bật tăng tốc phần cứng rồi tải lại.');
     return;
   }
-  const pixelRatioCap = window.innerWidth < 640 ? 2 : 2.5;
-  let renderPixelRatio = Math.min(window.devicePixelRatio || 1, pixelRatioCap);
+  let renderPixelRatio = window.TarotRender.preferredRatio(window.innerWidth, window.innerHeight, window.devicePixelRatio || 1);
   renderer.setPixelRatio(renderPixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.shadowMap.enabled = false;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.15;
+  const renderPipeline = window.TarotRender.create(THREE, renderer);
+  renderPipeline.resize(window.innerWidth, window.innerHeight, renderPixelRatio);
 
   // Ánh sáng điện ảnh
   const ambientLight = new THREE.AmbientLight(0x2d1f4d, 2.2);
@@ -413,6 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const sacredBackTex = createSacredTarotBackTexture();
+  const backPreviewURL = sacredBackTex.image?.toDataURL?.('image/png') || 'images/CardBacks.png';
 
   // VIỀN VÀNG KIM LOẠI LẤP LÁNH CAO CẤP
   const goldRimMat = new THREE.MeshStandardMaterial({
@@ -495,16 +553,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   function layoutIdleCards(time = 0) {
-    deckGroup.position.set(idleLayout.x, idleLayout.y + (reducedMotion ? 0 : Math.sin(time * 0.8) * 0.025), 0);
-    deckGroup.scale.setScalar(idleLayout.scale);
+    const blend = entrance.active ? entrance.blend : 1;
+    const center = motion.viewAt(getCameraConfig('intent'), window.innerWidth / window.innerHeight, .25).centerY;
+    deckGroup.position.set(idleLayout.x * blend, center + (idleLayout.y - center) * blend + (reducedMotion ? 0 : Math.sin(time * 0.8) * 0.025), 0);
+    deckGroup.scale.setScalar((window.innerWidth < 640 ? 1 : 1.4) * (1 - blend) + idleLayout.scale * blend);
     deckGroup.rotation.set(0, reducedMotion ? 0 : Math.sin(time * 0.35) * 0.045, 0);
     cardMeshes.forEach((mesh, index) => {
       mesh.visible = index >= TOTAL_DECK_DISPLAY - 3;
       if (!mesh.visible) return;
       const rank = index - (TOTAL_DECK_DISPLAY - 3);
-      const positions = [[-0.62, 0.06, -0.12], [0.60, 0.02, -0.08], [0, -0.015, 0.40]];
-      mesh.position.set(...positions[rank]);
-      mesh.rotation.set(-0.10, rank === 0 ? -0.32 : rank === 1 ? 0.34 : 0.04, rank === 0 ? 0.17 : rank === 1 ? -0.16 : -0.025);
+      const pose = motion.introPose(rank, time, blend);
+      mesh.position.set(pose.x, pose.y, pose.z);
+      mesh.rotation.set(pose.rotX, pose.rotY, pose.rotZ);
+      mesh.scale.setScalar(1);
     });
     const cam = getCameraConfig('intent');
     const backgroundScale = (cam.z + 9) / (cam.z + 0.5);
@@ -562,13 +623,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let layout = motion.selectedLayout(appState.activeSpread.count, card.slotIndex,
       window.innerWidth, window.innerHeight, getCameraConfig(preview ? 'draw' : 'reveal'), CARD_W, CARD_H, preview);
     if (preview) {
-      const rect = document.getElementById('dockSlot-' + card.slotIndex)?.getBoundingClientRect();
+      const rect = document.getElementById('dockThumb-' + card.slotIndex)?.getBoundingClientRect();
       const width = window.innerWidth, height = window.innerHeight, cam = getCameraConfig('draw');
-      const valid = rect && rect.width < width * 0.6;
+      const valid = rect && rect.width > 0 && rect.width < width * 0.3 && rect.height < 120;
       const sx = valid ? rect.left + rect.width / 2 : width * (0.25 + card.slotIndex / Math.max(1, appState.activeSpread.count - 1) * 0.5);
-      const sy = valid ? rect.top + rect.height / 2 : height - 44;
+      const sy = valid ? rect.top + rect.height / 2 : height - 54;
       const point = motion.screenToWorld(cam, width, height, sx, sy, 1.35);
-      const above = motion.screenToWorld(cam, width, height, sx, sy - 12, 1.35);
+      const above = motion.screenToWorld(cam, width, height, sx, sy - (valid ? rect.height / 2 : 23), 1.35);
       layout = { ...point, scale: Math.abs(above.y - point.y) * 2 / CARD_H };
     }
     card.mesh.userData.targetPos = new THREE.Vector3(layout.x, layout.y, layout.z);
@@ -748,6 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // GIAI ĐOẠN 2: TỤ KHÍ
   function startChargingStage() {
     if (appState.currentStage !== 'intent') return;
+    if (entrance.active) finishIntro();
     appState.currentStage = 'charge';
     switchStage('stageCharge');
     cardMeshes.forEach((mesh, index) => {
@@ -894,18 +956,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     sfx.playCosmicBreeze();
     atmosphere.burst(mesh.position, mesh.scale.x);
-    document.getElementById('dockSlot-' + slotIndex)?.classList.add('filled');
+    const slot = document.getElementById('dockSlot-' + slotIndex);
+    slot?.classList.add('incoming');
     const thumb = document.getElementById('dockThumb-' + slotIndex);
     const name = document.getElementById('dockName-' + slotIndex);
-    if (thumb) thumb.innerHTML = '<img src="images/CardBacks.png" alt="Lá bài chưa lật">';
     if (name) name.textContent = 'Lá ' + (slotIndex + 1);
     document.getElementById('dockSlot-' + slotIndex)?.setAttribute('aria-label', card.slotTitle + ': lá bài chưa lật');
     const target = setCardTarget(card, true);
     card.completePick = () => {
       if (pickSession !== sessionVersion || card.isPlaced) return;
       card.isPlaced = true; mesh.visible = false; mesh.children[0].visible = false;
+      slot?.classList.remove('incoming');
+      slot?.classList.add('filled', 'arrived');
+      if (thumb) thumb.innerHTML = `<img src="${backPreviewURL}" alt="Lá bài đã chọn, chưa lật">`;
       appState.isPickingCard = false;
-      if (appState.selectedCards.length === appState.activeSpread.count && appState.selectedCards.every(c => c.isPlaced)) startRevealStage();
+      if (appState.selectedCards.length === appState.activeSpread.count && appState.selectedCards.every(c => c.isPlaced)) {
+        appState.isTransitioning = true;
+        gsap.delayedCall(reducedMotion ? 0 : .28, startRevealStage);
+      }
       else {
         const next = nearestAvailable(mesh.userData.deckIndex + 0.6);
         if (next >= 0) ribbon.target = 38.5 - next;
@@ -920,7 +988,7 @@ document.addEventListener('DOMContentLoaded', () => {
     card.flight.to(mesh.position, { ...lift, duration: duration * 0.42, ease: 'sine.out' }, 0)
       .to(mesh.position, { x: target.x, y: target.y, z: target.z, duration: duration * 0.58, ease: 'sine.inOut' }, duration * 0.42)
       .to(mesh.scale, { x: target.scale, y: target.scale, z: target.scale, duration, ease: 'sine.inOut' }, 0)
-      .to(mesh.rotation, { x: 0, y: 0, z: 0, duration, ease: 'sine.inOut' }, 0);
+      .to(mesh.rotation, { x: getCameraConfig('draw').rotX, y: 0, z: 0, duration, ease: 'sine.inOut' }, 0);
     updateDrawInstruction();
   }
 
@@ -946,9 +1014,19 @@ document.addEventListener('DOMContentLoaded', () => {
       gsap.to(mesh.position, { y: mesh.position.y - 0.5, duration: 0.4, ease: 'power2.in' });
     });
     animateCamera('reveal');
-    appState.selectedCards.forEach(card => { card.mesh.visible = true; });
-    placeSelectedCards(false, reducedMotion ? 0.15 : 0.85);
-    gsap.delayedCall(0.9, () => {
+    const riseDuration = reducedMotion ? .12 : .82;
+    appState.selectedCards.forEach((card, index) => {
+      const delay = reducedMotion ? 0 : .08 + index * .07;
+      gsap.delayedCall(delay, () => {
+        card.mesh.visible = true;
+        document.getElementById('dockSlot-' + card.slotIndex)?.classList.add('departing');
+        const target = setCardTarget(card, false);
+        gsap.to(card.mesh.position, { x: target.x, y: target.y, z: target.z, duration: riseDuration, ease: 'power3.inOut', overwrite: true });
+        gsap.to(card.mesh.scale, { x: target.scale, y: target.scale, z: target.scale, duration: riseDuration, ease: 'power2.inOut', overwrite: true });
+        gsap.to(card.mesh.rotation, { x: -.15, y: 0, z: 0, duration: riseDuration, ease: 'sine.inOut', overwrite: true });
+      });
+    });
+    gsap.delayedCall(reducedMotion ? .15 : riseDuration + .12 + (appState.selectedCards.length - 1) * .07, () => {
       appState.isTransitioning = false;
       const revealAction = document.getElementById('summonOracleBtn');
       if (revealAction) revealAction.disabled = false;
@@ -1184,7 +1262,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ritual.energy += (motion.shuffleEnergy(holdSeconds) - ritual.energy) * motion.damp(4, dt);
       deckGroup.rotation.y = reducedMotion ? 0 : Math.sin(holdSeconds * 0.35) * 0.12;
       chargeOrb?.style.setProperty('--charge-energy', ritual.energy.toFixed(3));
-      if (chargePct) chargePct.textContent = `${Math.round(ritual.energy * 100)}%`;
+      updateShuffleMessage(holdSeconds);
       sfx.setBowl(ritual.energy);
       const follow = motion.damp(5.5, dt);
       cardMeshes.forEach((mesh, idx) => {
@@ -1206,7 +1284,7 @@ document.addEventListener('DOMContentLoaded', () => {
       canvas.style.cursor = isDraggingRibbon ? 'grabbing' : hoveredCardMesh ? 'pointer' : appState.currentStage === 'draw' ? 'grab' : 'default';
       hoverDirty = false;
     }
-    renderer.render(scene, camera);
+    renderPipeline.render(scene, camera);
     if (diagnostics) {
       const flipped = appState.selectedCards.filter(card => card.isFlipped).length;
       const signature = [appState.currentStage, appState.isTransitioning, appState.selectedCards.length, flipped].join(':');
@@ -1224,6 +1302,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (averageMs > 23 && renderPixelRatio > 1) {
         renderPixelRatio = Math.max(1, renderPixelRatio * 0.85);
         renderer.setPixelRatio(renderPixelRatio);
+        renderPipeline.resize(window.innerWidth, window.innerHeight, renderPixelRatio);
       }
       if (diagnostics) {
         diagnostics.dataset.frameMs = averageMs.toFixed(1);
@@ -1238,12 +1317,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let resizeQueued = false;
   function resizeScene() {
     resizeQueued = false;
+    if (entrance.active) finishIntro();
     cancelGesture();
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderPixelRatio = Math.min(renderPixelRatio, window.devicePixelRatio || 1, window.innerWidth < 640 ? 2 : 2.5);
+    renderPixelRatio = window.TarotRender.preferredRatio(window.innerWidth, window.innerHeight, window.devicePixelRatio || 1);
     renderer.setPixelRatio(renderPixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight, false);
+    renderPipeline.resize(window.innerWidth, window.innerHeight, renderPixelRatio);
     const stage = appState.currentStage === 'oracle' ? 'reveal' : appState.currentStage;
     if (stage === 'intent') { updateIdleLayout(); layoutIdleCards(sceneTime); }
     refreshCarouselLayout();
@@ -1353,13 +1434,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.body.dataset.stage = 'intent';
 
-  // Tắt Intro
-  // The scene is ready; optional fonts or remote requests must not block entry.
-  setTimeout(() => {
-      const intro = document.getElementById('intro-screen');
-      if (intro) intro.classList.add('hidden');
-      document.body.classList.remove('intro-active');
-  }, reducedMotion ? 0 : 600);
+  function finishIntro() {
+    introTimeline?.kill();
+    entrance.active = false; entrance.blend = 1;
+    document.getElementById('intro-screen')?.classList.add('hidden');
+    document.body.classList.remove('intro-active');
+    document.body.classList.add('intro-complete');
+    document.getElementById('stageIntent')?.removeAttribute('inert');
+    updateIdleLayout(); layoutIdleCards(sceneTime);
+  }
+  function playIntro() {
+    if (reducedMotion) { finishIntro(); return; }
+    const brand = document.getElementById('introBrand');
+    const subtitle = document.getElementById('introSubtitle');
+    const rect = document.getElementById('navBrand')?.getBoundingClientRect();
+    const valid = rect && rect.width < window.innerWidth * .7;
+    const target = valid ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 } : { x: 130, y: 46 };
+    document.getElementById('stageIntent')?.setAttribute('inert', '');
+    if (brand) gsap.set(brand, { xPercent: -50, yPercent: -50, scale: 1.5 });
+    introTimeline = gsap.timeline({ onComplete: finishIntro });
+    introTimeline.to(entrance, { blend: 1, duration: 1.3, ease: 'power3.inOut' }, 1.15);
+    if (brand) introTimeline.to(brand, {
+      x: target.x - window.innerWidth / 2, y: target.y - window.innerHeight * .24,
+      scale: 1, duration: 1.05, ease: 'power3.inOut'
+    }, 1.45);
+    if (subtitle) introTimeline.to(subtitle, { opacity: 0, y: -8, duration: .5 }, 1.4);
+  }
+  document.getElementById('skipIntroBtn')?.addEventListener('click', finishIntro);
+  playIntro();
 
   // Chọn kiểu trải bài
   document.querySelectorAll('.spread-tile').forEach(btn => {
@@ -1374,6 +1476,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const guideText = document.getElementById('spreadGuideText');
       if (guideText) guideText.textContent = appState.activeSpread.slots.map(slot => slot.title).join(' · ');
+      rememberProfile();
     });
   });
 
@@ -1387,6 +1490,7 @@ document.addEventListener('DOMContentLoaded', () => {
       appState.userVibe = btn.dataset.vibe;
       const description = document.getElementById('toneDescription');
       if (description) description.textContent = persona.tone(appState.userVibe).description;
+      rememberProfile();
     });
   });
 
@@ -1407,6 +1511,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sfx.click();
       appState.userName = document.getElementById('nameInput').value.trim();
       appState.userQuestion = document.getElementById('questionInput').value.trim();
+      rememberProfile();
       const dob = appState.dob;
       if (dob.day && dob.month && !persona.validDate(dob.day, dob.month, dob.year || 2000)) {
         showToast('Bạn kiểm tra lại ngày sinh nhé, ngày này chưa hợp lệ.');
@@ -1418,17 +1523,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Tụ khí & xáo bài: Nhấn giữ liên tục (Hold to continuously spin & shuffle)
   const chargeOrb = document.getElementById('chargeOrb');
-  const chargePct = document.getElementById('chargePct');
   const chargeHint = document.getElementById('chargeHint');
   const chargeTipPill = document.getElementById('chargeTipPill');
+  const shuffleMessages = [
+    'Hít thở một chút. Rót đang ở đây cùng bạn.',
+    'Chà, câu hỏi này thật sâu sắc…',
+    'Cứ xáo tiếp đến khi bạn thấy vừa lòng nha.',
+    'Không cần vội. Cứ để những suy nghĩ lắng xuống một chút.',
+    'Khi thấy thích hợp, bạn chỉ cần nhẹ nhàng thả tay.',
+    'Rót vẫn đang nghe. Bạn cứ thong thả thôi.'
+  ];
+  let shuffleMessageIndex = -1;
+  function updateShuffleMessage(seconds) {
+    const index = Math.floor(seconds / 4.8) % shuffleMessages.length;
+    if (index === shuffleMessageIndex || !chargeTipPill) return;
+    shuffleMessageIndex = index;
+    gsap.killTweensOf(chargeTipPill);
+    if (reducedMotion || seconds < .1) { chargeTipPill.textContent = shuffleMessages[index]; return; }
+    gsap.to(chargeTipPill, { opacity: 0, y: -5, duration: .3, onComplete: () => {
+      if (!appState.isHolding) return;
+      chargeTipPill.textContent = shuffleMessages[index];
+      gsap.fromTo(chargeTipPill, { y: 5 }, { y: 0, opacity: 1, duration: .55, ease: 'sine.out' });
+    } });
+  }
 
   let holdPointerId = null;
   let keyboardHoldTimer = null;
   function resetHoldLabels() {
     chargeOrb?.classList.remove('holding');
     if (chargeHint) chargeHint.textContent = 'Giữ để xáo';
-    if (chargeTipPill) chargeTipPill.textContent = 'Giữ lâu hơn, bài xáo nhanh hơn · thả khi bạn sẵn sàng';
-    if (chargePct) chargePct.textContent = '✦';
+    if (chargeTipPill) chargeTipPill.textContent = 'Thả tay khi bạn thấy sẵn sàng.';
   }
   function settleCharge(advance) {
     appState.isVortexSettling = true;
@@ -1462,17 +1586,22 @@ document.addEventListener('DOMContentLoaded', () => {
     cardMeshes.forEach(stopMeshMotion);
     appState.isHolding = true;
     appState.holdStartTime = performance.now();
+    shuffleMessageIndex = -1;
     gsap.killTweensOf(ritual);
     ritual.energy = 0;
     chargeOrb?.classList.add('holding');
     if (chargeHint) chargeHint.textContent = 'Đang xáo…';
-    if (chargeTipPill) chargeTipPill.textContent = 'Thả để chọn bài';
+    updateShuffleMessage(0);
     sfx.init();
     sfx.setBowl(0);
     clearInterval(appState.rustleInterval);
     appState.rustleInterval = setInterval(() => sfx.playSilkCardRustle(), 450);
   }
   function releaseHold() {
+    if (chargeTipPill) {
+      gsap.killTweensOf(chargeTipPill);
+      gsap.set(chargeTipPill, { opacity: 1, y: 0 });
+    }
     appState.isHolding = false;
     clearInterval(appState.rustleInterval);
     keyboardHoldTimer?.kill();
@@ -1816,6 +1945,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (followupMsgs) followupMsgs.innerHTML = '';
     if (followupInput) followupInput.value = '';
+    optionsAccordion?.close(true);
     document.getElementById('personalOptions')?.removeAttribute('open');
     document.querySelectorAll('.r-btn').forEach(button => button.classList.remove('active'));
     clearTimeout(showToast.timer);

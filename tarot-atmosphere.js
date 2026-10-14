@@ -10,15 +10,20 @@
       fragmentShader: `
         varying vec2 vUv; uniform float uTime; uniform float uEnergy;
         void main() {
-          vec2 p=(vUv-.5)*3.; float t=uTime*.14;
-          float bend=sin(p.x*2.8+t)*.21+sin(p.x*5.1-t*.7)*.09;
-          float ribbon=exp(-pow((p.y-bend-.22*sin(t*.5))*3.8,2.));
-          float mist=exp(-length(p-vec2(.36*sin(t*.6),.24*cos(t*.8)))*1.7);
-          float weave=.5+.5*sin(p.x*4.-p.y*2.+t);
-          vec3 color=mix(vec3(.18,.24,.54),vec3(.48,.23,.49),weave);
-          color=mix(color,vec3(.68,.43,.21),uEnergy*.32);
-          float alpha=(ribbon*.23+mist*.15)*(1.+uEnergy*.8);
-          gl_FragColor=vec4(color,alpha);
+          vec2 p=(vUv-.5)*3.; float t=uTime*.12;
+          float bend=sin(p.x*2.1+t)*.28+cos(p.x*4.3-t*.63)*.12;
+          float other=cos(p.x*1.8-t*.72)*.34+sin(p.x*3.7+t*.5)*.11;
+          float ribbon=exp(-pow((p.y-bend)*4.5,2.));
+          float veil=exp(-pow((p.y-other+.25)*3.2,2.));
+          vec2 center=vec2(.45*cos(t*.5),.33*sin(t*.7));
+          float mist=exp(-dot((p-center)*vec2(1.,1.35),(p-center)*vec2(1.,1.35))*1.6);
+          float weave=.5+.5*sin(p.x*2.7-p.y*1.6+t*.8);
+          vec3 color=mix(vec3(.15,.24,.55),vec3(.48,.20,.47),weave);
+          color=mix(color,vec3(.16,.39,.42),veil*.35);
+          color+=vec3(.35,.22,.09)*ribbon*(.15+uEnergy*.3);
+          float alpha=(ribbon*.22+veil*.14+mist*.19)*(1.+uEnergy*.6);
+          float dither=(fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)-.5)/255.;
+          gl_FragColor=vec4(color+dither,alpha);
         }`
     }));
     aurora.position.set(0, 0, -38); aurora.renderOrder = -10; scene.add(aurora);
