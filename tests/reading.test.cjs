@@ -52,6 +52,7 @@ test('reading rendering never interprets model output as HTML', () => {
   }
   const document = { createElement: tag => new Element(tag) }, container = new Element('div');
   reading.render(container, text + '\n<img src=x onerror=alert(1)>', state, document);
+  assert.equal(container.children[1].className, 'reading-section reading-interpretation', 'interpretation must not inherit the horizontal card-preview layout');
   const last = container.children.at(-1);
   assert.equal(last.className, 'reading-section reading-advice');
   assert.ok(last.children.some(child => child.tag === 'p' && child.textContent.includes('<img src=x')));

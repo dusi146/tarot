@@ -56,7 +56,7 @@
     container.classList?.remove('reading-plain');
     if (!blocks.some(block => block.title)) { container.classList?.add('reading-plain'); container.textContent = cleanText(text); return; }
     for (const block of blocks) {
-      const section = document.createElement('section'); section.className = `reading-section reading-${block.kind}`;
+      const section = document.createElement('section'); section.className = `reading-section reading-${block.kind === 'card' ? 'interpretation' : block.kind}`;
       if (block.theme) section.dataset.tone = block.theme.key;
       if (block.slot) { const label = document.createElement('p'); label.className = 'reading-section-role'; label.textContent = block.slot; section.appendChild(label); }
       if (block.title) { const title = document.createElement('h4'); title.textContent = block.title; section.appendChild(title); }
