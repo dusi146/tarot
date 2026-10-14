@@ -17,6 +17,7 @@ Xem [báo cáo phân tích và sửa 3D](3D_REVIEW.md) để biết nguyên nhâ
 - `tarot-audio.js` tạo tiếng giấy, gỗ và chuông với âm lượng thấp, đầu âm mềm, vang nhẹ; tắt âm sẽ giảm toàn bộ âm đang phát. Nền sáng sử dụng `tarot-atmosphere.js`.
 - Intro dùng đúng ba lá của cảnh chính: bay quanh nhau, về vị trí chính, logo/tên đi lên góc rồi menu xuất hiện. Có nút bỏ qua và tự rút gọn khi bật giảm chuyển động.
 - Tùy chỉnh thêm có màu vàng và mở/đóng bằng chuyển động có thể đảo chiều giữa chừng. Lá được chọn bay tới đúng khung ảnh ở hàng dưới; khi đủ lá, dừng nhẹ rồi bay lần lượt lên bàn.
+- Khi triển khai, GitHub Actions gắn mã commit vào địa chỉ các file giao diện và mã chạy để trình duyệt nhận đúng bản mới thay vì giữ file cũ trong bộ nhớ đệm.
 - Khi giữ xáo, thay phần trăm bằng những lời nhắn chậm rãi. `tarot-profile.js` nhớ tên, giới tính, ngày sinh, tông giọng và kiểu trải bài trong trình duyệt hiện tại; có nút quên thông tin. Không lưu câu hỏi hay tâm sự vào bộ nhớ này. Không đồng bộ hồ sơ giữa các thiết bị.
 
 Đã kiểm tra giao diện trên web public ở khung 1280×720 và 390×844: intro, tùy chỉnh, khung nhận bài và nhóm bài bay lên; trình duyệt không báo lỗi đồ họa. Đã nhập thông tin thử và xác nhận khôi phục đúng sau khi tải lại. Trình duyệt kiểm tra không truy cập được bản xem trước tại máy, nên việc xác minh hình ảnh được thực hiện sau triển khai. Chưa kiểm tra âm thanh trên loa thật. Các phản hồi AI trong kiểm thử là mô phỏng; chất lượng văn phong thực tế còn phụ thuộc Gemini và API key khi chạy web.

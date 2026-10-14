@@ -24,9 +24,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Inject Gemini API Key
+      - name: Prepare runtime configuration and asset version
         env:
           GEMINI_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ASSET_VERSION: ${{ github.sha }}
         run: |
           node -e '
             const fs = require("fs");
@@ -34,6 +35,7 @@ jobs:
               if (fs.existsSync(file)) {
                 let content = fs.readFileSync(file, "utf8");
                 content = content.split("{{GEMINI_API_KEY_SECRET}}").join(process.env.GEMINI_KEY || "");
+                content = content.split("{{ASSET_VERSION}}").join(process.env.ASSET_VERSION);
                 fs.writeFileSync(file, content, "utf8");
               }
             });
