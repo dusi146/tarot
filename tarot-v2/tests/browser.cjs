@@ -145,12 +145,11 @@ const devices = [
       await page.waitForFunction(() => !document.querySelector('#reading-modal').open);
       await page.click('#open-support'); await page.waitForSelector('#support-modal[open]');
       assert.match(await page.$eval('.shopee-link', element => element.href), /hoahong.vercel.app/);
-      assert.equal(await page.$eval('.donation-bank', element => element.open), false);
+      assert.equal(await page.$eval('#support-modal .sheet-scroll', element => element.firstElementChild.classList.contains('donation-bank')), true);
       await page.waitForFunction(() => document.querySelector('#support-modal').classList.contains('is-visible') && document.querySelector('#support-modal').getAnimations().length === 0);
       await page.screenshot({ path: path.join(root, 'artifacts', device.name + '-support.png') });
-      await page.click('.donation-bank summary');
       await page.waitForFunction(() => document.querySelector('.donation-qr').naturalWidth > 0);
-      assert.equal(await page.$eval('.donation-bank', element => element.open), true);
+      assert.equal(await page.$eval('.donation-bank', element => element.tagName), 'SECTION');
       await page.click('[data-close="support-modal"]');
       await page.waitForFunction(() => !document.querySelector('#support-modal').open);
       await page.click('#new-reading'); await page.waitForSelector('#welcome-panel:not([hidden])');

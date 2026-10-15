@@ -1,5 +1,7 @@
 # Lời giải và dự phòng API — 15/10/2026
 
+**Bổ sung ngắm gần và ủng hộ:** Lá được phóng lớn hơn trên máy tính từ 1024×600, theo vùng còn trống và tối đa 760px chiều cao thiết kế; căn camera theo vị trí thật của lá, tạm ẩn hướng dẫn để tránh che bài. Ba kiểm tra riêng đạt, gồm giới hạn điện thoại giữ nguyên và chiếu các góc lá nghiêng/ngược qua camera thật của Three.js tại 1024×600, 1280×720, 1440×900 và 1920×1080. Nút Nghe đọc đã thay bằng Ủng hộ Rót; QR hiện sẵn ở đầu cửa sổ, mở lại trở về đầu. Không gọi sinh lời giải hoặc sửa máy chủ cho các thay đổi giao diện này.
+
 **Đọc bài nhẹ hơn và rõ hơn:** Khi mở cửa sổ lời giải/ủng hộ, dừng vòng vẽ của cả hai lớp WebGL và giữ nguyên hình. Resize/font thay đổi chỉ đánh thức một khung cần thiết; đóng cửa sổ, trở lại tab hoặc phục hồi WebGL đồng bộ lại thời gian, không tua bù chuyển động. Năm kiểm tra riêng đạt: dừng cả hai renderer, tiếp tục sau thời gian đọc dài, cửa sổ chồng nhau, resize, tab ẩn/hiện và mất/phục hồi context. Đây là xác minh hành vi vòng vẽ, chưa đo mức giảm nhiệt/pin trên điện thoại thật.
 
 Chữ nội dung và tâm sự trên điện thoại tăng từ 12–13px lên 15px, ô nhập tâm sự 16px, tiêu đề lời giải 27px và tiêu đề mục nhỏ hơn. Lời mời tâm sự đổi thành “Mình cùng gỡ thêm nhé” và hai câu gần gũi theo nội dung chủ trang gửi. Bỏ dòng “Đã lưu trải bài” và khoảng trống trạng thái khi lưu thành công; thao tác lưu/nhật ký vẫn chạy. Chỉ kiểm tra các phần thay đổi, không gọi lại AI hoặc sửa Apps Script.
@@ -8,7 +10,7 @@ Chữ nội dung và tâm sự trên điện thoại tăng từ 12–13px lên 1
 
 Nội dung phán đoán được làm mờ, chạm hoặc nhấn Enter/Space mới hiện; vùng chữ giữ nguyên chiều cao. Cập nhật theo mẫu Threads của chủ trang: blur 5px/opacity 0,25, hạt vàng champagne phủ trực tiếp chữ, chạm tản hạt từ điểm chạm, hiện chữ trong 0,35 giây; bỏ nút nổi che đoạn. Mật độ gốc 60%, giới hạn 3.200 hạt và DPR 2, vẽ tối đa 30 lần/giây, không đọc lại computed style mỗi khung. Hạt dừng ngoài vùng nhìn, khi đóng cửa sổ hoặc ẩn tab; khi mở xong thì giải phóng canvas/listener. Giảm chuyển động dùng mặt hạt tĩnh và mở tức thì. Chỉ chạy 8 kiểm tra liên quan phần tiết lộ cho cập nhật này; không gọi lại AI hoặc triển khai lại Apps Script.
 
-Trước khi mở, nội dung không tham gia điều hướng/đọc hỗ trợ và nút Nghe đọc cũng bỏ qua phần này. Kết đúng một lần bằng “Đây chỉ là dự đoán dựa trên năng lượng của bạn với trải bài này.” Chữ lời giải và tên lá hiện nhẹ trong khoảng 0,95 giây, giảm chuyển động bỏ cả độ trễ so le.
+Trước khi mở, nội dung không tham gia điều hướng/đọc hỗ trợ. Kết đúng một lần bằng “Đây chỉ là dự đoán dựa trên năng lượng của bạn với trải bài này.” Chữ lời giải và tên lá hiện nhẹ trong khoảng 0,95 giây, giảm chuyển động bỏ cả độ trễ so le.
 
 Giao thức readingFormat=3 giữ khóa JSON advice để tương thích gateway. Tab cũ nhận tiêu đề cũ, tab mới nhận Phán đoán của Rót; cache tách hai dạng, tránh đổi tiêu đề làm lỗi lời giải thiếu. 137 kiểm thử liên quan đạt, gồm tiết lộ an toàn, câu kết không che giấu phần thiếu, tương thích cache/tab và chuỗi năm API. Bản nguồn máy chủ 27/28 đã được lưu riêng.
 

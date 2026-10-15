@@ -20,7 +20,15 @@
     });
     return { columns, rows, cardHeight, captionHeight, top, bottom, cells };
   }
-  const api = { reveal };
+  function inspection({ width, height, top, bottom, captionHeight = 76, cardRatio = 1.5 / 2.55,
+    desktopTop = 80, desktopBottom = height - 90 }) {
+    const desktop = width >= 1024 && height >= 600;
+    if (!desktop) return { desktop, top, bottom, cardHeight: Math.max(60, Math.min(460, bottom - top - captionHeight - 42)) };
+    const safeTop = Math.max(80, desktopTop), safeBottom = Math.min(height - 24, desktopBottom);
+    return { desktop, top: safeTop, bottom: safeBottom,
+      cardHeight: Math.max(60, Math.min(760, safeBottom - safeTop - captionHeight - 32, (width - 96) / cardRatio)) };
+  }
+  const api = { reveal, inspection };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.TarotLayout = api;
 })(typeof window === 'object' ? window : this);

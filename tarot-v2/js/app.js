@@ -70,10 +70,9 @@
     $('feedback-form').reset(); $('feedback-status').textContent = $('sheet-status').textContent = '';
     $('sheet-status').hidden = true;
     document.querySelector('#reading-modal .sheet-scroll').scrollTop = 0; $('reading-cards').scrollLeft = 0;
-    $('open-reading').disabled = true; $('read-aloud').textContent = 'Nghe đọc';
+    $('open-reading').disabled = true;
     $('open-reading').classList.remove('reading-ready');
     $('open-reading').textContent = 'Xem lời giải';
-    window.speechSynthesis?.cancel();
   }
   async function restart() {
     if (restarting) return;
@@ -139,7 +138,7 @@
     if (!dialog.open) return Promise.resolve();
     if (dialogClosures.has(dialog)) return dialogClosures.get(dialog);
     const closing = new Promise(resolve => {
-      dialog.classList.add('is-closing'); dialog.classList.remove('is-visible'); window.speechSynthesis?.cancel();
+      dialog.classList.add('is-closing'); dialog.classList.remove('is-visible');
       if (![...document.querySelectorAll('dialog[open]')].some(item => !item.classList.contains('is-closing'))) $('modal-shade').classList.remove('visible');
       const duration = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 820;
       setTimeout(() => { dialog.close(); dialog.classList.remove('is-closing'); dialogClosures.delete(dialog); resolve(); }, duration);
@@ -148,7 +147,7 @@
   }
   for (const dialog of document.querySelectorAll('dialog')) {
     dialog.addEventListener('close', () => {
-      engine.blockInput(Boolean(document.querySelector('dialog[open]'))); window.speechSynthesis?.cancel(); $('read-aloud').textContent = 'Nghe đọc';
+      engine.blockInput(Boolean(document.querySelector('dialog[open]')));
       dialog.classList.remove('is-visible');
       if (!document.querySelector('dialog[open]')) $('modal-shade').classList.remove('visible');
       dialogFocus.get(dialog)?.focus({ preventScroll: true });
@@ -285,6 +284,7 @@
   let topLoaded = false;
   async function support() {
     showDialog('support-modal');
+    document.querySelector('#support-modal .sheet-scroll').scrollTop = 0;
     if (topLoaded || preview) return;
     try {
       const result = await window.TarotSheets.topDonates(); if (result.status !== 'success' || !Array.isArray(result.data)) return;
@@ -305,17 +305,5 @@
       if (navigator.share) await navigator.share({ title: 'Một khoảng lặng cùng Ta Văn Rót', text: 'Gửi bạn một góc nhỏ để chậm lại, trải bài và tâm sự.', url });
       else { await navigator.clipboard.writeText(url); toast('Đã sao chép link. Bạn gửi đến người mình nghĩ tới nha.'); }
     } catch (error) { if (error.name !== 'AbortError') toast('Bạn có thể chia sẻ link: ' + url); }
-  });
-  $('read-aloud').addEventListener('click', () => {
-    if (!state.readingResult) return;
-    if (!window.speechSynthesis) { toast('Trình duyệt chưa hỗ trợ đọc thành tiếng.'); return; }
-    if (speechSynthesis.speaking) { speechSynthesis.cancel(); $('read-aloud').textContent = 'Nghe đọc'; return; }
-    const predictionRevealed = Boolean($('reading-text').querySelector('.prediction-spoiler.is-revealed'));
-    const spokenText = reading.sections(state.readingResult, state).filter(block => block.kind !== 'prediction' || predictionRevealed)
-      .map(block => [block.title, ...block.paragraphs].filter(Boolean).join('\n')).join('\n\n');
-    const utterance = new SpeechSynthesisUtterance(spokenText); utterance.lang = 'vi-VN'; utterance.rate = .88;
-    utterance.voice = speechSynthesis.getVoices().find(voice => voice.lang.startsWith('vi')) || null;
-    utterance.onend = utterance.onerror = () => { $('read-aloud').textContent = 'Nghe đọc'; };
-    $('read-aloud').textContent = 'Dừng đọc'; speechSynthesis.speak(utterance);
   });
 })();

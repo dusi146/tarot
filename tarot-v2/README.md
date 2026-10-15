@@ -26,12 +26,13 @@ Máy chủ chỉ nghe tại máy đang chạy. Có thể đặt biến môi trư
 - Giữ để xáo, chuyển tốc độ và ánh sáng theo thời gian giữ; lời nhắn nhỏ thay phần trăm.
 - Bộ 78 lá được trộn thật, có xuôi/ngược. Vuốt, kéo, nút, bàn phím và con lăn nối vòng liên tục cả hai chiều; không có điểm chặn đầu/cuối. Thanh trượt chuyển nhanh tới vị trí gần nhất trong vòng. Lá đã rút bị loại khỏi vòng, các lá còn lại khép khoảng trống mềm, không trùng danh tính.
 - Lá được chọn bay vào đúng ô nhận, đủ số thì cùng bay lên; lật từng lá, mở tất cả, chạm để ngắm gần.
+- Ngắm gần trên máy tính từ 1024×600 dùng vùng nhìn lớn hơn, tạm ẩn hướng dẫn và căn giữa theo lá thật, chừa chỗ cho thương hiệu, tên lá và thanh nút. Điện thoại giữ cách ngắm gần hiện tại.
 - Bốn cách trải: thời gian, một lá, thân/tâm/trí, gỡ rối bốn lá.
 - Tùy chỉnh màu vàng, mở/đóng có chuyển động; tên, ngày sinh hợp lệ, cung hoàng đạo và bốn tông giọng. Nhớ thông tin trên cùng trình duyệt, có nút quên; không đồng bộ giữa thiết bị.
 - Lời giải theo từng lá, Góc nhìn chung chi tiết và Phán đoán của Rót chạm để mở: chữ mờ và hạt vàng theo mẫu Threads, tản hạt tại điểm chạm; tự dừng khi không nhìn thấy, hỗ trợ bàn phím và giảm chuyển động. Có thử lại khi thiếu nội dung. Tâm sự giữ bối cảnh trải bài, mời ủng hộ một lần sau lượt thứ ba.
 - Khi đọc lời giải hoặc mở cửa sổ, sân khấu 3D giữ nguyên hình và dừng vòng vẽ; đổi kích thước chỉ vẽ lại một lần, đóng cửa sổ thì tiếp tục với đồng hồ mới để tránh nhảy chuyển động. Trên điện thoại, chữ nội dung/tâm sự 15px, ô nhập tâm sự 16px, tiêu đề gọn hơn. Lời mời “Mình cùng gỡ thêm nhé” gần gũi hơn; bỏ thông báo lưu thành công khỏi giao diện.
-- Đánh giá, ghi chú, góp ý; phần ủng hộ có chia sẻ Rót, chuyển đổi đơn hàng và QR mở khi cần. Bảng người ủng hộ dùng kết nối cũ ở chế độ thật.
-- Âm thanh tự bật sau lần chạm hoặc nhấn phím đầu tiên. Hệ số âm tổng tăng từ 1,65 lên 3,2, tăng thêm tiếng giấy và tiếng bấm, giữ nén đỉnh để tiếng không chói. Có đọc thành tiếng khi trình duyệt hỗ trợ và tôn trọng tùy chọn giảm chuyển động của hệ điều hành.
+- Đánh giá, ghi chú, góp ý; nút Ủng hộ Rót ở chân lời giải thay nút Nghe đọc, mở cửa sổ với mã QR luôn hiện ở đầu. Mỗi lần mở lại đều trở về QR; bên dưới có chia sẻ Rót và chuyển đổi đơn hàng. Bảng người ủng hộ dùng kết nối cũ ở chế độ thật.
+- Âm thanh tự bật sau lần chạm hoặc nhấn phím đầu tiên. Hệ số âm tổng tăng từ 1,65 lên 3,2, tăng thêm tiếng giấy và tiếng bấm, giữ nén đỉnh để tiếng không chói; tôn trọng tùy chọn giảm chuyển động của hệ điều hành.
 - Bỏ hai nút âm thanh/cảm biến ở góc và nút rung trong Tùy chỉnh thêm. Phản hồi điện thoại tự bật khi tương tác lần đầu; trình duyệt có thể yêu cầu quyền cảm biến một lần. Nếu bị từ chối hoặc không hỗ trợ, chạm/vuốt vẫn hoạt động. Cảm biến chỉ điều khiển ánh sáng và độ nghiêng, không ảnh hưởng chọn lá. Rung ngắn khi bấm giao diện, lướt, rút, đáp ô và mở bài; khi xáo có nhịp nghỉ.
 - Nút đóng dùng SVG căn giữa. Cửa sổ lời giải/ủng hộ mở và đóng khoảng 0,8 giây, lớp nền tối/mờ chuyển trong 0,9 giây, dùng chung khi mở cửa sổ lồng nhau.
 - Tắt lớp tô xanh mặc định khi chạm trên điện thoại và viền focus của thao tác con trỏ; vẫn giữ viền vàng khi dùng bàn phím.

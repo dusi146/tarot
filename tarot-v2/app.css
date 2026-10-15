@@ -89,6 +89,9 @@ body:not([data-act="INTRO"]) #skip-intro{display:none}
 .revealed-card-caption.shown .tap-to-flip-badge{display:inline-flex;opacity:0;visibility:hidden;pointer-events:none}
 .revealed-card-caption .revealed-name{display:block;max-width:100%;overflow-wrap:normal;text-wrap:balance}
 .revealed-card-caption.inspection-muted{opacity:0;pointer-events:none}
+@media(min-width:1024px) and (min-height:600px){
+ body[data-act="REVEAL"].inspecting-card #reveal-action-bar{opacity:0;visibility:hidden;pointer-events:none}
+}
 #reveal-action-bar{top:100px;gap:7px}
 #flip-all{pointer-events:auto;min-height:32px;padding:6px 16px;border-radius:24px;font-size:10px}
 #btn-flip-next{letter-spacing:.03em;text-transform:none;min-height:37px}
@@ -299,14 +302,9 @@ body:not([data-act="INTRO"]) #skip-intro{display:none}
 .support-path h3{font-size:26px;margin:13px 0 10px}
 .support-path p{font-size:12px;line-height:1.8;margin-bottom:20px;flex:1}
 .support-path .gold-button,.support-path .outline-button{font-size:10px;width:100%;line-height:1.6;gap:10px;min-height:44px;text-align:center;margin:0;backdrop-filter:none}
-.donation-bank{border:1px solid rgba(226,194,133,.18);border-radius:15px;padding:0 20px;background:rgba(226,194,133,.035)}
-.donation-bank summary{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:17px 0;color:var(--gold-bright);font-size:13px;cursor:pointer;list-style:none}
-.donation-bank summary::-webkit-details-marker{display:none}
-.donation-bank summary small{display:block;font-size:10px;margin-top:5px;color:var(--text-muted)}
-.donation-bank summary>span:last-child{font-size:22px;transition:transform .3s}
-.donation-bank[open] summary>span:last-child{transform:rotate(45deg)}
-.donation-bank>p{font-size:12px}
-.donation-bank .donation-qr{width:200px;margin:20px auto}
+.donation-bank{border:1px solid rgba(226,194,133,.18);border-radius:15px;padding:20px;margin:0 0 24px;background:rgba(226,194,133,.035);text-align:center}
+.donation-bank>p{font-size:13px;line-height:1.8}
+.donation-bank .donation-qr{width:min(240px,100%,36dvh);max-width:100%;margin:0 auto 15px;background:#fff;border-radius:12px}
 .support-reassurance{font-size:11px!important;text-align:center;color:var(--text-muted)!important;line-height:1.8;margin:22px 15px}
 .donor-note{border-top:1px solid rgba(226,194,133,.12);padding-top:22px;margin-top:20px}
 .support-letter{border:1px solid rgba(226,194,133,.16);padding:24px;border-radius:20px;background:radial-gradient(ellipse at 0 0,rgba(226,194,133,.075),transparent 65%)}

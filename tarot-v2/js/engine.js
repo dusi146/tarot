@@ -2706,6 +2706,7 @@
       }
 
       function updateRevealActionUI() {
+        document.body.classList.toggle('inspecting-card', state.act === 'REVEAL' && state.inspectedSlot !== -1);
         if (state.act !== 'REVEAL') {
           revealActionBarEl.classList.remove('visible');
           return;
@@ -3448,11 +3449,15 @@
 
         if (state.inspectedSlot !== -1) {
           const focusX = heroXs[state.inspectedSlot];
-          const focusY = layoutMetrics.revealHeroYs[state.inspectedSlot] + 0.02;
-          const offsetY = (revealLayout.top + revealLayout.bottom - revealLayout.captionHeight - 14 - innerHeight) / 2
-            * (2 * layoutMetrics.revealInspectCamZ * Math.tan(camera.fov * Math.PI / 360) / innerHeight);
-          state.camTargetPos.set(focusX * 0.85, focusY + offsetY, layoutMetrics.revealInspectCamZ);
-          state.camTargetLookAt.set(focusX * 0.96, focusY + offsetY, 0.25);
+          const bounds = layoutMetrics.revealInspectBounds || revealLayout;
+          const desktopFocus = !!bounds.desktop;
+          const focusCard = desktopFocus ? state.selectedCards[state.inspectedSlot] : null;
+          const focusY = focusCard ? focusCard.pos.y : layoutMetrics.revealHeroYs[state.inspectedSlot] + .02;
+          const focusDepth = layoutMetrics.revealInspectCamZ - (focusCard ? focusCard.pos.z : desktopFocus ? .55 : 0);
+          const offsetY = (bounds.top + bounds.bottom - revealLayout.captionHeight - 14 - innerHeight) / 2
+            * (2 * focusDepth * Math.tan(camera.fov * Math.PI / 360) / innerHeight);
+          state.camTargetPos.set(focusX * (desktopFocus ? 1 : .85), focusY + offsetY, layoutMetrics.revealInspectCamZ);
+          state.camTargetLookAt.set(focusX * (desktopFocus ? 1 : .96), focusY + offsetY, 0.25);
         } else {
           state.camTargetPos.set(
             state.smoothPointer.x * 0.24,
@@ -4008,8 +4013,9 @@ function prepareFace(card) {
 function computeRevealLayout() {
   const w = innerWidth, h = innerHeight, landscape = h < 500 && w > 640;
   const action = revealActionBarEl, dock = document.getElementById('control-dock');
+  const dockTop = dock.getBoundingClientRect().top;
   const measuredTop = landscape ? 125 : Math.max(170, action.offsetTop + action.offsetHeight + 22);
-  const measuredBottom = landscape ? h - 20 : Math.min(h - 112, dock.getBoundingClientRect().top - 16);
+  const measuredBottom = landscape ? h - 20 : Math.min(h - 112, dockTop - 16);
   // Retain the largest header reservation through the flip, so controls disappearing never resize cards.
   if (revealLayoutViewport !== w + ':' + h) { revealLayoutViewport = w + ':' + h; revealReservedTop = 0; }
   revealReservedTop = Math.max(revealReservedTop, measuredTop);
@@ -4027,8 +4033,12 @@ function computeRevealLayout() {
     const caption = captionEls[i], cache = captionStyleCache[i], cssWidth = width.toFixed(1) + 'px';
     if (cache.width !== cssWidth) { caption.style.width = cssWidth; cache.width = cssWidth; }
   }
-  const inspectHeight = Math.min(460, revealLayout.bottom - revealLayout.top - revealLayout.captionHeight - 42);
-  layoutMetrics.revealInspectCamZ = Math.max(layoutMetrics.revealInspectCamZ, .55 + depth * pixelHeight / Math.max(60, inspectHeight));
+  const inspection = window.TarotLayout.inspection({ width: w, height: h, top: revealLayout.top, bottom: revealLayout.bottom,
+    captionHeight: revealLayout.captionHeight, desktopTop: brandCrestEl.getBoundingClientRect().bottom + 24,
+    desktopBottom: dockTop - 16 });
+  layoutMetrics.revealInspectBounds = inspection;
+  const inspectDepth = (inspection.desktop ? .68 : .55) + depth * pixelHeight * (inspection.desktop ? 1.035 : 1) / inspection.cardHeight;
+  layoutMetrics.revealInspectCamZ = inspection.desktop ? inspectDepth : Math.max(layoutMetrics.revealInspectCamZ, inspectDepth);
   revealLayoutDirty = false;
 }
 function recordDockError(card, slotIndex) {
