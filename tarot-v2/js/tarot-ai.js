@@ -7,19 +7,25 @@
       dob: { ...state.dob }, spreadId: state.activeSpread.id,
       cards: state.selectedCards.map(card => ({ id: card.data.id, reversed: card.isReversed })) };
   }
-  const CODES = ['OK', 'RATE_LIMIT', 'BUSY', 'AUTH_ERROR', 'NOT_CONFIGURED', 'PROVIDER_ERROR', 'PROVIDER_TIMEOUT', 'INCOMPLETE_READING', 'CONNECTION_ERROR', 'CONNECTION_TIMEOUT', 'INVALID_RESPONSE', 'AI_ERROR'];
+  const CODES = ['OK', 'RATE_LIMIT', 'BUSY', 'AUTH_ERROR', 'NOT_CONFIGURED', 'PROVIDER_ERROR', 'PROVIDER_TIMEOUT', 'INCOMPLETE_READING', 'CONNECTION_ERROR', 'CONNECTION_TIMEOUT', 'INVALID_RESPONSE', 'AI_ERROR', 'AI_UNAVAILABLE'];
+  const REASONS = ['TPM', 'TPD', 'RPM', 'RPD', 'QUOTA', 'SCHEMA', 'REQUEST_TOO_LARGE'];
   function safeAttempts(value) {
     return (Array.isArray(value) ? value : []).slice(0, 3).filter(item => item && ['intern', 'groq', 'gemini'].includes(item.provider) && CODES.includes(item.code))
       .map(item => ({ provider: item.provider, code: item.code, status: Number.isInteger(item.status) && item.status >= 100 && item.status <= 599 ? item.status : 0,
-        elapsedMs: Number.isFinite(item.elapsedMs) ? Math.max(0, Math.min(600000, Math.round(item.elapsedMs))) : 0 }));
+        elapsedMs: Number.isFinite(item.elapsedMs) ? Math.max(0, Math.min(600000, Math.round(item.elapsedMs))) : 0,
+        ...(['upstream', 'cooldown'].includes(item.source) ? { source: item.source } : {}),
+        ...(REASONS.includes(item.reason) ? { reason: item.reason } : {}),
+        ...(Number.isFinite(item.retryAfter) && item.retryAfter > 0 ? { retryAfter: Math.max(1, Math.min(21600, Math.ceil(item.retryAfter))) } : {}) }));
   }
   function diagnostics(value = {}) {
-    const chain = safeAttempts(value.attempts).map(item => item.provider + ':' + item.code + (item.status ? '/HTTP' + item.status : '') + '/' + item.elapsedMs + 'ms').join(' → ');
+    const chain = safeAttempts(value.attempts).map(item => item.provider + ':' + item.code + (item.source === 'cooldown' ? '/SKIP' : '')
+      + (item.status ? '/HTTP' + item.status : '') + (item.reason ? '/' + item.reason : '')
+      + (item.retryAfter ? '/retry' + item.retryAfter + 's' : '') + '/' + item.elapsedMs + 'ms').join(' → ');
     return [CODES.includes(value.code) ? value.code : '', chain].filter(Boolean).join(' / ');
   }
   function create(options = {}) {
     const transport = network.create({ fetch: options.fetch, now: options.now, sleep: options.sleep }), now = options.now || Date.now;
-    let health, retryAt = 0;
+    let health, retryAt = 0, retryCode = 'RATE_LIMIT';
     const inFlight = new Map(), wait = options.sleep || (ms => new Promise(resolve => setTimeout(resolve, ms)));
     const exchange = (url, payload, timeout) => transport.request(url, { payload, timeout: timeout || (payload ? 210000 : 20000) });
     async function ready() {
@@ -55,14 +61,18 @@
       await ready();
       const result = await recover(payload);
       if (result.status !== 'success' || typeof result.text !== 'string' || !result.text.trim()) {
-        if (result.code === 'RATE_LIMIT') retryAt = now() + Math.max(1, Math.min(86400, Number(result.retryAfter) || 30)) * 1000;
+        if (['RATE_LIMIT', 'AI_UNAVAILABLE'].includes(result.code)) {
+          retryAt = now() + Math.max(1, Math.min(21600, Number(result.retryAfter) || 30)) * 1000; retryCode = result.code;
+        }
         const error = new Error(result.code === 'RATE_LIMIT'
           ? `Dịch vụ đang chạm hạn mức. Bạn chờ khoảng ${Math.ceil((retryAt - now()) / 1000)} giây rồi thử lại nhé.`
+          : result.code === 'AI_UNAVAILABLE' ? `Rót đang tạm bận. Các lá bài vẫn được giữ; bạn thử lại sau khoảng ${Math.ceil((retryAt - now()) / 1000)} giây nhé.`
           : result.code === 'BUSY' ? 'Rót vẫn đang xử lý lượt này. Bạn chờ thêm một chút rồi thử lại nhé, các lá được giữ nguyên.'
           : result.code === 'NOT_CONFIGURED' || result.code === 'AUTH_ERROR' ? 'Kết nối AI cần được chủ trang kiểm tra lại. Bạn quay lại sau một chút nhé.'
           : result.code === 'INCOMPLETE_READING' ? 'Rót chưa nhận đủ nội dung lời giải. Bạn nhấn Thử lại lời giải nhé, các lá đã chọn vẫn được giữ.'
           : 'Rót chưa kết nối được. Bạn thử lại sau một chút nhé.');
         error.code = CODES.includes(result.code) ? result.code : 'AI_ERROR';
+        if (['RATE_LIMIT', 'AI_UNAVAILABLE'].includes(error.code)) error.retryAfter = Math.ceil((retryAt - now()) / 1000);
         error.attempts = safeAttempts(result.attempts);
         throw error;
       }
@@ -72,7 +82,12 @@
     }
     async function request(action, state, history) {
       const remaining = Math.ceil((retryAt - now()) / 1000);
-      if (remaining > 0) throw new Error(`Dịch vụ đang chạm hạn mức. Bạn chờ khoảng ${remaining} giây rồi thử lại nhé.`);
+      if (remaining > 0) {
+        const error = new Error(retryCode === 'AI_UNAVAILABLE'
+          ? `Rót đang tạm bận. Các lá bài vẫn được giữ; bạn thử lại sau khoảng ${remaining} giây nhé.`
+          : `Dịch vụ đang chạm hạn mức. Bạn chờ khoảng ${remaining} giây rồi thử lại nhé.`);
+        error.code = retryCode; error.retryAfter = remaining; throw error;
+      }
       // Keep complete user/assistant pairs and the latest question within the server's bound.
       const recent = history ? history.map(item => ({ role: item.role === 'user' ? 'user' : 'rot', text: item.text })) : null;
       while (recent && recent.length > 1 && (recent.length > 29 || recent.reduce((sum, item) => sum + item.text.length, 0) > 24000)) recent.splice(0, 2);
@@ -82,7 +97,7 @@
       const pending = perform(payload); inFlight.set(key, pending);
       try { return await pending; } finally { inFlight.delete(key); }
     }
-    return { readResult: state => request('ai_reading', state),
+    return { retryAfter: () => Math.max(0, Math.ceil((retryAt - now()) / 1000)), readResult: state => request('ai_reading', state),
       read: state => request('ai_reading', state).then(result => result.text),
       chat: (state, history) => request('ai_followup', state, history).then(result => result.text) };
   }

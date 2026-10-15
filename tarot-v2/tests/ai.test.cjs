@@ -85,3 +85,23 @@ test('diagnostics keep only known providers and codes, never arbitrary provider 
   const text = diagnostics({ code: 'PROVIDER_ERROR', attempts, message: 'private-secret' });
   assert.equal(text, 'PROVIDER_ERROR / intern:AUTH_ERROR/HTTP401/1000ms');
 });
+
+test('diagnostics distinguish quota skips from actual HTTP errors with only safe metadata', () => {
+  const {diagnostics}=require('../js/tarot-ai.js');
+  const text=diagnostics({attempts:[{provider:'groq',code:'RATE_LIMIT',status:429,source:'cooldown',reason:'TPD',retryAfter:706,elapsedMs:173,body:'private-secret'},
+    {provider:'gemini',code:'OK',status:200,source:'private-secret',reason:'private-secret',elapsedMs:4880}]});
+  assert.equal(text,'groq:RATE_LIMIT/SKIP/HTTP429/TPD/retry706s/173ms → gemini:OK/HTTP200/4880ms');
+});
+
+test('mixed temporary failures explain the wait and suppress repeated requests until it expires', async () => {
+  let now=0,posts=0;
+  const ai=create({endpoint:'https://example.test/exec',now:()=>now,fetch:async(_,options)=>{
+    if(!options.body)return response({service:'tarot-ai',version:2,configured:true});
+    posts++;return response(posts===1?{status:'error',code:'AI_UNAVAILABLE',retryAfter:45}:{status:'success',text:'Đã đọc được.'});
+  }});
+  await assert.rejects(ai.read(state),e=>e.code==='AI_UNAVAILABLE'&&e.retryAfter===45&&/45/.test(e.message)&&!/kiểm tra mạng|hạn mức/.test(e.message));
+  assert.equal(ai.retryAfter(),45);
+  now=10000;await assert.rejects(ai.read(state),e=>e.code==='AI_UNAVAILABLE'&&e.retryAfter===35);assert.equal(posts,1);
+  now=45001;assert.equal(await ai.read(state),'Đã đọc được.');assert.equal(posts,2);
+  assert.equal(ai.retryAfter(),0);
+});

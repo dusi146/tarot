@@ -1,5 +1,7 @@
 # Lời giải và dự phòng API — 15/10/2026
 
+**Cập nhật mới nhất:** đã đối chiếu thêm 34 lượt và xác minh hạn mức token/ngày của Groq bằng phản hồi thật. Xem [sự cố hạn mức và bản xử lý](QUOTA_INCIDENT.md); số kiểm thử hiện tại là 98. Phần dưới ghi lịch sử các lần cập nhật trước.
+
 ## Cập nhật tiếp theo: Groq → Gemini → Intern
 
 Theo yêu cầu mới của chủ trang, thứ tự hiện tại là **Groq → Gemini → Intern**, áp dụng cả đọc trải bài và tâm sự. Thông tin Intern đứng đầu bên dưới là lịch sử phiên bản trước. Cache dùng phiên bản mới để không trả lại lời giải theo cấu hình cũ.

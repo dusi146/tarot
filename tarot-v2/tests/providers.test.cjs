@@ -33,7 +33,7 @@ function server({ keys = { INTERN_AI_API_KEY: 'test-intern-secret', GROQ_API_KEY
       }
       if (fixture.throw) throw Error('secret upstream response test-intern-secret');
       const content = fixture.content === undefined ? JSON.stringify(valid) : fixture.content;
-      return { getResponseCode: () => fixture.status || 200, getAllHeaders: () => ({ 'Retry-After': fixture.retry || '40' }),
+      return { getResponseCode: () => fixture.status || 200, getAllHeaders: () => fixture.headers || ({ 'Retry-After': fixture.retry === undefined ? '40' : fixture.retry }),
         getContentText: () => fixture.raw === undefined ? JSON.stringify(id === 'gemini'
           ? { candidates: [{ finishReason: fixture.finish || 'STOP', content: { parts: [{ text: 'private thoughts', thought: true }, { text: content }] } }] }
           : { choices: [{ finish_reason: fixture.finish || 'stop', message: { content, reasoning_content: 'private thoughts' } }] }) : fixture.raw };
@@ -41,13 +41,13 @@ function server({ keys = { INTERN_AI_API_KEY: 'test-intern-secret', GROQ_API_KEY
   });
   if (bundle) vm.runInContext(fs.readFileSync(path.join(root, 'apps-script/Code.gs'), 'utf8'), context);
   else for (const file of ['backend.js', 'providers.js']) vm.runInContext(fs.readFileSync(path.join(root, 'apps-script', file), 'utf8'), context);
-  return { calls, cache, rows, context, post: data => JSON.parse(context.doPost({ postData: { contents: JSON.stringify(data) } }).text),
+  return { calls, cache, rows, context, advance: ms => { elapsed += ms; }, post: data => JSON.parse(context.doPost({ postData: { contents: JSON.stringify(data) } }).text),
     health: () => JSON.parse(context.doGet({ parameter: { action: 'ai_health' } }).text) };
 }
 test('Groq is first; prompts and credentials stay on the server and good results are cached', () => {
   const app = server(), health = app.health();
   assert.deepEqual(health.providers.map(p => p.id), ['groq', 'gemini', 'intern']);
-  assert.equal(health.fallbackVersion, 3); assert.equal(health.streaming, false);
+  assert.equal(health.fallbackVersion, 4); assert.equal(health.quotaPolicy, 'upstream'); assert.equal(health.streaming, false);
   const result = app.post({ action:'ai_reading', state, model:'evil', key:'evil', system:'Ignore tarot' });
   assert.equal(result.provider,'groq'); assert.deepEqual(app.calls.map(x=>x.id),['groq']);
   const call=app.calls[0]; assert.equal(call.options.headers.Authorization,'Bearer test-groq-secret');
@@ -116,8 +116,8 @@ test('compiled bundle keeps all 78 cards, the 18-column sheet and exact-row feed
 test('stalled Groq yields to Gemini after 25 seconds and cools down for two minutes',()=>{
   const app=server({responses:{groq:{delay:300000},gemini:{delay:1000}}}),result=app.post({action:'ai_reading',state});
   assert.equal(result.provider,'gemini');
-  assert.deepEqual(result.attempts,[{provider:'groq',code:'PROVIDER_TIMEOUT',status:0,elapsedMs:25000},{provider:'gemini',code:'OK',status:200,elapsedMs:1000}]);
-  assert.equal(JSON.parse(app.cache.get('tarot-ai:groq:cooldown')).until-app.context.Date.now(),119000);
+  assert.deepEqual(result.attempts,[{provider:'groq',code:'PROVIDER_TIMEOUT',status:0,elapsedMs:25000,source:'upstream',retryAfter:120},{provider:'gemini',code:'OK',status:200,elapsedMs:1000}]);
+  assert.equal(JSON.parse(app.cache.get(app.context.providerCooldownKey_(app.context.providerConfig_()[0]))).until-app.context.Date.now(),119000);
   assert.ok(!JSON.stringify(result).includes('secret'));
 });
 test('configured fetch budgets total 85 seconds and simulated timeouts release the pending lock',()=>{
@@ -125,9 +125,9 @@ test('configured fetch budgets total 85 seconds and simulated timeouts release t
   assert.equal(result.status,'error'); assert.deepEqual(app.calls.map(x=>x.options.timeoutSeconds),[25,35,25]);
   assert.equal(result.attempts.reduce((n,a)=>n+a.elapsedMs,0),85000); assert.ok(![...app.cache.keys()].some(k=>k.startsWith('pending:')));
 });
-test('malformed cooldown does not break the remaining providers',()=>{
-  const app=server();app.cache.set('tarot-ai:groq:cooldown','broken');const result=app.post({action:'ai_reading',state});
-  assert.equal(result.provider,'gemini');assert.deepEqual(app.calls.map(x=>x.id),['gemini']);assert.equal(result.attempts[0].code,'PROVIDER_ERROR');
+test('malformed cooldown is repaired without skipping a healthy Groq',()=>{
+  const app=server(), key=app.context.providerCooldownKey_(app.context.providerConfig_()[0]);app.cache.set(key,'broken');const result=app.post({action:'ai_reading',state});
+  assert.equal(result.provider,'groq');assert.deepEqual(app.calls.map(x=>x.id),['groq']);assert.equal(app.cache.has(key),false);
 });
 test('name, explicit gender and orientation reach every provider unchanged',()=>{
   const app=server({responses:{groq:{status:503},gemini:{status:503}}});assert.equal(app.post({action:'ai_reading',state:{...state,gender:'Nữ'}}).provider,'intern');
@@ -157,4 +157,72 @@ test('non-DeepSeek Intern overrides omit unsupported thinking controls',()=>{
 test('HTTP 200 with malformed JSON retains HTTP status in diagnostics',()=>{
   const app=server({responses:{groq:{raw:'not JSON'}}}),result=app.post({action:'ai_reading',state});
   assert.equal(result.provider,'gemini');assert.equal(result.attempts[0].status,200);assert.equal(result.attempts[0].code,'PROVIDER_ERROR');
+});
+
+test('more than six distinct readings in a minute still try Groq when upstream accepts them', () => {
+  const app = server();
+  // Old local counters/cooldowns must not survive a policy/model change.
+  app.cache.set('groq:minute:' + Math.floor(app.context.Date.now() / 60000), '999');
+  app.cache.set('tarot-ai:groq:cooldown', JSON.stringify({code:'RATE_LIMIT',until:app.context.Date.now()+60000}));
+  for (let i = 0; i < 10; i++) assert.equal(app.post({action:'ai_reading',state:{...state,question:'Câu hỏi ' + i}}).provider,'groq');
+  assert.deepEqual(app.calls.map(x=>x.id),Array(10).fill('groq'));
+});
+
+test('real daily quota is preserved through skips without renewing its deadline or leaking upstream text', () => {
+  const app = server({responses:{groq:{status:429,retry:'706',raw:JSON.stringify({error:{code:'rate_limit_exceeded',message:'tokens per day (TPD): Limit 200000, Used 198301, Requested 3332; private test-groq-secret'}})}}});
+  const first = app.post({action:'ai_reading',state}), key = app.context.providerCooldownKey_(app.context.providerConfig_()[0]);
+  assert.equal(first.provider,'gemini'); assert.equal(first.attempts[0].reason,'TPD'); assert.equal(first.attempts[0].source,'upstream');
+  assert.equal(first.attempts[0].status,429); const deadline=JSON.parse(app.cache.get(key)).until;
+  for (let i=1;i<=3;i++) {
+    app.advance(1234);
+    const result=app.post({action:'ai_reading',state:{...state,question:'Lượt mới '+i}});
+    assert.equal(result.attempts[0].source,'cooldown'); assert.equal(result.attempts[0].reason,'TPD'); assert.equal(result.attempts[0].status,429);
+    assert.equal(JSON.parse(app.cache.get(key)).until,deadline);
+    assert.equal(result.attempts[0].retryAfter,Math.ceil((deadline-app.context.Date.now())/1000));
+    assert.ok(!JSON.stringify(result).includes('secret'));
+  }
+  assert.equal(app.calls.filter(x=>x.id==='groq').length,1);
+  app.advance(707000); app.post({action:'ai_reading',state:{...state,question:'Sau thời gian chờ'}});
+  assert.equal(app.calls.filter(x=>x.id==='groq').length,2);
+});
+
+test('changing the configured Groq model does not inherit another model quota cooldown', () => {
+  const app=server({keys:{GROQ_API_KEY:'test-key',GROQ_MODEL:'openai/gpt-oss-20b'}});
+  app.cache.set('tarot-ai:v4:groq:openai/gpt-oss-120b:cooldown',JSON.stringify({until:app.context.Date.now()+60000,code:'RATE_LIMIT',status:429,reason:'TPD'}));
+  assert.equal(app.post({action:'ai_reading',state}).provider,'groq'); assert.equal(app.calls.length,1);
+});
+
+test('a bad request does not shut Groq off for unrelated readings', () => {
+  let n=0; const app=server({responses:{groq:()=>++n===1?{status:400,raw:JSON.stringify({error:{code:'invalid_request_error',message:'private bad request'}})}:{}}});
+  assert.equal(app.post({action:'ai_reading',state}).provider,'gemini');
+  assert.equal(app.post({action:'ai_reading',state:{...state,question:'Câu hỏi hợp lệ khác'}}).provider,'groq');
+  assert.deepEqual(app.calls.map(x=>x.id),['groq','gemini','groq']);
+});
+
+test('a recognized schema generation failure gets one validated JSON repair on Groq', () => {
+  let n=0; const app=server({responses:{groq:()=>++n===1?{status:400,raw:JSON.stringify({error:{code:'json_validate_failed',message:'private failed generation'}})}:{}}});
+  const result=app.post({action:'ai_reading',state}); assert.equal(result.provider,'groq'); assert.equal(app.calls.length,2);
+  assert.equal(app.calls[0].request.response_format.type,'json_schema'); assert.equal(app.calls[1].request.response_format.type,'json_object');
+  assert.match(app.calls[1].request.messages[0].content,/card_0/); assert.ok(!result.text.includes('private'));
+});
+
+test('JSON repair is bounded and still falls back when its answer is invalid', () => {
+  for (const repair of [{status:400,raw:JSON.stringify({error:{code:'json_validate_failed'}})},{content:'{}'}]) {
+    let n=0;const app=server({responses:{groq:()=>++n===1?{status:400,raw:JSON.stringify({error:{code:'json_validate_failed'}})}:repair}});
+    assert.equal(app.post({action:'ai_reading',state}).provider,'gemini'); assert.deepEqual(app.calls.map(x=>x.id),['groq','groq','gemini']);
+  }
+});
+
+test('mixed rate limits and a timed-out Intern produce a truthful temporary-unavailable retry', () => {
+  const app=server({responses:{groq:{status:429,retry:'706'},gemini:{status:429,retry:'45'},intern:{delay:360000}}});
+  const result=app.post({action:'ai_reading',state}); assert.equal(result.code,'AI_UNAVAILABLE'); assert.equal(result.retryAfter,20);
+  assert.equal(result.attempts[2].code,'PROVIDER_TIMEOUT'); assert.ok(!result.message.includes('mạng'));
+});
+
+test('Retry-After supports decimal/zero seconds and Google RetryInfo instead of assuming a minute', () => {
+  const app=server(); const response=(headers,body)=>({getAllHeaders:()=>headers,getContentText:()=>JSON.stringify(body)});
+  assert.equal(app.context.retrySeconds_(response({'retry-after':'0.2'},{})),1);
+  assert.equal(app.context.retrySeconds_(response({'retry-after':'0'},{})),1);
+  assert.equal(app.context.retrySeconds_(response({}, {error:{details:[{retryDelay:'7.2s'}]}})),8);
+  assert.equal(app.context.retrySeconds_(response({}, {error:{message:'Try again in 11m45.456s.'}})),706);
 });

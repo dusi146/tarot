@@ -15,7 +15,7 @@
   const ai = window.TarotAI.create({ endpoint: window.TAROT_SHEETS_CONFIG.endpoint });
   let version = 0, readingPending = false, chatPending = false, sheetSession = null, feedbackPending = false, nudged = false;
   let state = { userName: '', userGender: '', userQuestion: '', userVibe: 'chualanh', dob: {}, zodiac: '', activeSpread: spreads.time, selectedCards: [], readingResult: '', followupHistory: [] };
-  let ready = false, optionsAnimation = null, toastTimer, restarting = false;
+  let ready = false, optionsAnimation = null, toastTimer, restarting = false, readingRetryTimer;
   const picked = name => document.querySelector('input[name="' + name + '"]:checked')?.value;
   const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
   function toast(text) { $('toast').textContent = text; $('toast').classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('show'), 3600); }
@@ -59,6 +59,7 @@
     optionsAnimation.onfinish = () => { content.hidden = !opening; content.style.height = ''; optionsAnimation = null; };
   });
   function clearSession() {
+    clearTimeout(readingRetryTimer); $('retry-reading').disabled = false; $('retry-reading').textContent = 'Thử lại lời giải';
     version++; readingPending = chatPending = feedbackPending = false; sheetSession = null; nudged = false;
     state.readingResult = ''; state.selectedCards = []; state.followupHistory = [];
     $('reading-text').textContent = ''; $('messages').textContent = ''; $('chat-input').value = '';
@@ -175,8 +176,22 @@
     reading.renderCards($('reading-cards'), state, document, 'images/');
     $('reading-cards').querySelectorAll('img').forEach((image, index) => { image.src = state.selectedCards[index].image; });
   }
+  function updateReadingRetry() {
+    clearTimeout(readingRetryTimer);
+    const remaining = preview ? 0 : ai.retryAfter(), button = $('retry-reading');
+    button.hidden = false; button.disabled = remaining > 0;
+    button.textContent = remaining > 0 ? 'Thử lại sau ' + remaining + ' giây' : 'Thử lại lời giải';
+    if (remaining > 0 && $('reading-modal').open) readingRetryTimer = setTimeout(updateReadingRetry, 1000);
+  }
   async function requestReading() {
     if (readingPending || state.readingResult || !state.selectedCards.every(card => card.isFlipped)) return;
+    const remaining = preview ? 0 : ai.retryAfter();
+    if (remaining > 0) {
+      $('reading-loading').hidden = true;
+      $('reading-text').textContent = 'Rót đang tạm bận. Các lá bài vẫn được giữ; bạn thử lại sau khoảng ' + remaining + ' giây nhé.';
+      updateReadingRetry(); return;
+    }
+    clearTimeout(readingRetryTimer);
     readingPending = true; const requestVersion = version;
     $('reading-loading').hidden = false; $('retry-reading').hidden = true; $('reading-text').textContent = '';
     let session = null;
@@ -195,7 +210,7 @@
     } catch (error) {
       if (requestVersion !== version) return;
       $('reading-text').textContent = error.message || 'Rót chưa kết nối được. Bạn thử lại sau một chút nhé.';
-      $('retry-reading').hidden = false;
+      updateReadingRetry();
       if (!preview) window.TarotSheets.begin(logProfile(error)).record(error.message, 'Thất bại').catch(() => {});
     } finally { if (requestVersion === version) { readingPending = false; $('reading-loading').hidden = true; } }
   }
@@ -210,6 +225,8 @@
   function message(text, role) { const element = document.createElement('div'); element.className = 'message ' + role; element.textContent = text; $('messages').appendChild(element); return element; }
   $('chat-form').addEventListener('submit', async event => {
     event.preventDefault(); if (chatPending || !state.readingResult) return;
+    const remaining = preview ? 0 : ai.retryAfter();
+    if (remaining > 0) { toast('Rót đang tạm bận. Bạn thử lại sau ' + remaining + ' giây nhé.'); return; }
     const text = $('chat-input').value.trim(); if (!text) return;
     const requestVersion = version, history = [...state.followupHistory, { role: 'user', text }];
     chatPending = true; $('chat-send').disabled = true; message(text, 'user'); $('chat-input').value = '';

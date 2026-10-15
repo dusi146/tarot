@@ -11,7 +11,10 @@ const endpoint = 'https://script.google.com/macros/s/AKfycbyGthc9VzZjrSpQELLDNq7
     spreadId: 'single', cards: [{ id: '01', reversed: false }]
   } } });
   const report = { checkedAt: new Date().toISOString(), providers: health.providers, status: result.status,
-    provider: result.provider, model: result.model, code: result.code, characters: result.text?.length || 0, sheetWrites: 0 };
+    fallbackVersion: health.fallbackVersion, quotaPolicy: health.quotaPolicy,
+    provider: result.provider, model: result.model, code: result.code, characters: result.text?.length || 0,
+    diagnostics: require('../js/tarot-ai.js').diagnostics(result), sheetWrites: 0 };
   fs.writeFileSync(path.join(__dirname, '../artifacts/live-connection.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report));
+  if (result.status !== 'success') process.exitCode = 1;
 })().catch(error => { console.error(error.message); process.exitCode = 1; });
