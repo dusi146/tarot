@@ -3831,7 +3831,7 @@
        * 10. WINDOW RESIZE & MAIN DELTA-TIME RENDER LOOP
        * ============================================================================ */
       let viewportDirty = false;
-      window.addEventListener('resize', () => { viewportDirty = true; spreadRectsDirty = true; });
+      window.addEventListener('resize', () => { viewportDirty = true; spreadRectsDirty = true; requestSceneFrame(); });
       function applyViewportResize() {
         viewportDirty = false;
         const w = window.innerWidth;
@@ -3852,7 +3852,7 @@
       }
 
       // Application extension of the original 3D.html director.
-let generation = 0, holdPointerId = null, frameRequest = 0, contextLost = false;
+let generation = 0, holdPointerId = null, frameRequest = 0, contextLost = false, renderStarted = false;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const backRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
 const scheduled = new Set(), faceCache = new Map();
@@ -4076,10 +4076,10 @@ const revealLayoutObserver = new ResizeObserver(entries => {
       if (captionHeights[index] !== height) { captionHeights[index] = height; changed ||= height > (revealLayout?.captionHeight || 76); }
     } else changed = true;
   }
-  if (changed) revealLayoutDirty = true;
+  if (changed) { revealLayoutDirty = true; requestSceneFrame(); }
 });
 for (const element of [...captionEls, revealActionBarEl, document.getElementById('control-dock')]) revealLayoutObserver.observe(element);
-document.fonts?.ready.then(() => { revealLayoutDirty = true; });
+document.fonts?.ready.then(() => { revealLayoutDirty = true; requestSceneFrame(); });
 function projectedCardBounds(card, out) {
   out.left = out.top = Infinity; out.right = out.bottom = -Infinity;
   for (let i = 0; i < 8; i++) {
@@ -4248,11 +4248,15 @@ window.TarotExperience = {
       disposeFace(face); faceCache.delete(key);
     }
     state.camTargetPos.set(0, .14, layoutMetrics.introCamZ); state.camTargetLookAt.set(0, .12, 0);
+    syncSceneActivity();
   },
   snapshot() { return state.selectedCards.map(card => ({ data: card.data, isReversed: !!card.data?.isReversed,
     slotTitle: SPREAD_STEP_NAMES[card.slotIndex], image: card.image || 'images/' + card.data?.file, isFlipped: !!card.flipComplete })); },
   flipAll() { state.selectedCards.forEach((card, i) => schedule(() => triggerSingleCardFlip(i), i * 160)); },
-  blockInput(blocked) { state.inputBlocked = blocked; state.hoveredCardIndex = -1; pointerState.isDown = false; window.TarotMobile?.suspend(blocked); },
+  blockInput(blocked) {
+    state.inputBlocked = blocked; state.hoveredCardIndex = -1; pointerState.isDown = false;
+    window.TarotMobile?.suspend(blocked); syncSceneActivity();
+  },
   skipIntro() { if (state.act === 'INTRO' && state.introSkipAt === null) { state.introSkipAt = state.actTime; state.introSkipFrom = state.introBlend; } },
   geometrySnapshot() {
     return cards.filter(card => card.mesh.visible).map(card => {
@@ -4302,19 +4306,47 @@ document.addEventListener('visibilitychange', () => {
   lastFrameTime = performance.now(); state.isHoldingShuffle = false; pointerState.isDown = false;
   holdBtnEl.classList.remove('holding'); holdLabelEl.textContent = 'Giữ để xáo';
   if (document.hidden) sound.ctx?.suspend(); else if (sound.enabled && sound.unlocked) sound.ctx?.resume();
+  syncSceneActivity();
 });
-renderer.domElement.addEventListener('webglcontextlost', event => { event.preventDefault(); contextLost = true; });
-renderer.domElement.addEventListener('webglcontextrestored', () => { contextLost = false; lastFrameTime = performance.now(); });
+renderer.domElement.addEventListener('webglcontextlost', event => { event.preventDefault(); contextLost = true; syncSceneActivity(); });
+renderer.domElement.addEventListener('webglcontextrestored', () => { contextLost = false; viewportDirty = true; syncSceneActivity(); });
 holdBtnEl.addEventListener('keydown', event => { if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) startHoldShuffle(); });
 holdBtnEl.addEventListener('keyup', event => { if (event.key === 'Enter' || event.key === ' ') endHoldShuffle(); });
 
       let lastFrameTime = performance.now();
 
-      function animate(now) {
+      function requestSceneFrame() {
+        if (!renderStarted || frameRequest || document.hidden || contextLost) return;
         frameRequest = requestAnimationFrame(animate);
+      }
+      function syncSceneActivity() {
+        if (frameRequest) cancelAnimationFrame(frameRequest);
+        frameRequest = 0; lastFrameTime = performance.now();
+        requestSceneFrame();
+      }
+      function drawScene() {
+        cardBatch.sync(cards, camera);
+        moteBatch.sync(revealMotesPool, camera);
+        renderer.render(scene, camera);
+        const overlayVisible = overlayScene.children.some(item => item.isMesh);
+        const overlayDisplay = overlayVisible ? 'block' : 'none';
+        if (overlayRenderer.domElement.style.display !== overlayDisplay) overlayRenderer.domElement.style.display = overlayDisplay;
+        if (overlayVisible) overlayRenderer.render(overlayScene, camera);
+      }
+      function animate(now) {
+        frameRequest = 0;
         if (document.hidden || contextLost) return;
+        const layoutChanged = viewportDirty || (revealLayoutDirty && (state.act === 'REVEAL' || state.act === 'ASCEND'));
         if (viewportDirty) applyViewportResize();
         if (revealLayoutDirty && (state.act === 'REVEAL' || state.act === 'ASCEND')) computeRevealLayout();
+        // Keep the last 3D image behind a dialog. Resize redraws once without
+        // advancing cards, particles or the scene clock; closing resumes normally.
+        if (state.inputBlocked) {
+          lastFrameTime = now;
+          if (layoutChanged) drawScene();
+          return;
+        }
+        requestSceneFrame();
 
         const dt = Math.min((now - lastFrameTime) * 0.001, 0.05);
         lastFrameTime = now;
@@ -4389,13 +4421,7 @@ holdBtnEl.addEventListener('keyup', event => { if (event.key === 'Enter' || even
         }
 
         if (hoverPending) { performCardRaycast(); hoverPending = false; }
-        cardBatch.sync(cards, camera);
-        moteBatch.sync(revealMotesPool, camera);
-        renderer.render(scene, camera);
-        const overlayVisible = overlayScene.children.some(item => item.isMesh);
-        const overlayDisplay = overlayVisible ? 'block' : 'none';
-        if (overlayRenderer.domElement.style.display !== overlayDisplay) overlayRenderer.domElement.style.display = overlayDisplay;
-        if (overlayVisible) overlayRenderer.render(overlayScene, camera);
+        drawScene();
         publishState(dt);
       }
 
@@ -4416,6 +4442,7 @@ holdBtnEl.addEventListener('keyup', event => { if (event.key === 'Enter' || even
         window.TarotExperience.home(true);
         window.dispatchEvent(new Event('tarot:ready'));
         lastFrameTime = performance.now();
-        requestAnimationFrame(animate);
+        renderStarted = true;
+        requestSceneFrame();
       };
     })();

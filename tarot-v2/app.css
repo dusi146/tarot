@@ -203,9 +203,17 @@ body:not([data-act="INTRO"]) #skip-intro{display:none}
  #control-dock{max-width:calc(100vw - 20px);gap:3px;padding:6px}
  .dock-btn{font-size:10px;padding:9px 12px;white-space:nowrap}
  .sheet-header{padding:20px}
+ .sheet-header h2{font-size:27px;line-height:1.2}
  .sheet-scroll{padding:0 20px 25px}
  .sheet-footer{padding-left:20px;padding-right:20px}
- .sheet-scroll p{font-size:12px}
+ .sheet-scroll p{font-size:15px;line-height:1.85}
+ .reading-section{padding-left:13px;margin:20px 0 28px}
+ .reading-section h4{font-size:27px;line-height:1.2}
+ .reading-section p+p{margin-top:14px}
+ .prediction-content .prediction-notice{font-size:13px}
+ .sheet-scroll h3{font-size:25px;line-height:1.25}
+ .message{font-size:15px;line-height:1.8}
+ #chat-input{font-size:16px;line-height:1.6}
  .reading-card{min-width:158px}
  .revealed-name{font-size:16px}
  .revealed-position-tag{font-size:8px}

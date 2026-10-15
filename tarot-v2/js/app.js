@@ -68,6 +68,7 @@
     $('conversation').hidden = $('feedback-panel').hidden = true;
     $('chat-send').disabled = $('feedback-send').disabled = false;
     $('feedback-form').reset(); $('feedback-status').textContent = $('sheet-status').textContent = '';
+    $('sheet-status').hidden = true;
     document.querySelector('#reading-modal .sheet-scroll').scrollTop = 0; $('reading-cards').scrollLeft = 0;
     $('open-reading').disabled = true; $('read-aloud').textContent = 'Nghe đọc';
     $('open-reading').classList.remove('reading-ready');
@@ -216,9 +217,12 @@
       reading.render($('reading-text'), result, state, document);
       window.TarotSpoiler?.init($('reading-text'));
       $('conversation').hidden = $('feedback-panel').hidden = false;
-      if (session) session.record(result, 'Thành công').then(() => {
-        if (requestVersion === version) $('sheet-status').textContent = 'Đã lưu trải bài.';
-      }).catch(() => { if (requestVersion === version) $('sheet-status').textContent = 'Chưa xác nhận lưu trải bài. Lời giải vẫn ở đây để bạn đọc.'; });
+      if (session) session.record(result, 'Thành công').catch(() => {
+        if (requestVersion === version) {
+          $('sheet-status').hidden = false;
+          $('sheet-status').textContent = 'Chưa xác nhận lưu trải bài. Lời giải vẫn ở đây để bạn đọc.';
+        }
+      });
     } catch (error) {
       if (requestVersion !== version) return;
       $('reading-text').textContent = error.message || 'Rót chưa kết nối được. Bạn thử lại sau một chút nhé.';
