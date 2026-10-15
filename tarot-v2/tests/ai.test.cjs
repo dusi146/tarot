@@ -111,3 +111,9 @@ test('diagnostics keep all four authorized providers and preserve a fourth fallb
   const text=diagnostics({attempts:['xkiro','groq','gemini','intern'].map(provider=>({provider,code:'OK',status:200,elapsedMs:10}))});
   assert.equal(text,'xkiro:OK/HTTP200/10ms → groq:OK/HTTP200/10ms → gemini:OK/HTTP200/10ms → intern:OK/HTTP200/10ms');
 });
+
+test('diagnostics distinguish both Intern keys and keep the fifth Groq attempt',()=>{
+  const {diagnostics}=require('../js/tarot-ai.js');
+  const text=diagnostics({attempts:['xkiro','intern2','intern','gemini','groq'].map(provider=>({provider,code:'OK',status:200,elapsedMs:10}))});
+  assert.equal(text,'xkiro:OK/HTTP200/10ms → intern2:OK/HTTP200/10ms → intern:OK/HTTP200/10ms → gemini:OK/HTTP200/10ms → groq:OK/HTTP200/10ms');
+});

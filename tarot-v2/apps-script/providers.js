@@ -7,14 +7,15 @@ function providerConfig_() {
       model: override && /^[a-zA-Z0-9._/-]{1,100}$/.test(override) ? override : model, timeoutSeconds: timeoutSeconds };
   }
   return [config('xkiro', 'XKIRO_API_KEY', 'XKIRO_MODEL', 'mistralai/mistral-large-4-0', 30),
-    config('groq', 'GROQ_API_KEY', 'GROQ_MODEL', 'openai/gpt-oss-120b', 25),
+    config('intern2', 'INTERN_AI_API_KEY_2', 'INTERN_AI_MODEL_2', 'deepseek-v4-flash-0731', 35),
+    config('intern', 'INTERN_AI_API_KEY', 'INTERN_AI_MODEL', 'deepseek-v4-flash-0731', 35),
     config('gemini', 'GEMINI_API_KEY', 'GEMINI_MODEL', 'gemini-2.5-flash', 35),
-    config('intern', 'INTERN_AI_API_KEY', 'INTERN_AI_MODEL', 'deepseek-v4-flash-0731', 25)];
+    config('groq', 'GROQ_API_KEY', 'GROQ_MODEL', 'openai/gpt-oss-120b', 25)];
 }
 function aiHealth_() {
   var providers = providerConfig_();
   return { status: 'success', service: 'tarot-ai', version: 2, readingFormat: 2, streaming: false,
-    promptVersion: TarotServerPersona.PROMPT_VERSION, fallbackVersion: 5, quotaPolicy: 'upstream',
+    promptVersion: TarotServerPersona.PROMPT_VERSION, fallbackVersion: 6, quotaPolicy: 'upstream',
     configured: providers.some(function (p) { return !!p.key; }),
     providers: providers.map(function (p) { return { id: p.id, model: p.model, configured: !!p.key }; }) };
 }
@@ -77,7 +78,7 @@ function providerCall_(provider, payload, state, followup, jsonFallback) {
     }
   } else {
     url = provider.id === 'xkiro' ? 'https://api.xkiro.com/v1/chat/completions'
-      : provider.id === 'intern' ? 'https://discovery-api.intern-ai.org.cn/v1/chat/completions'
+      : (provider.id === 'intern' || provider.id === 'intern2') ? 'https://discovery-api.intern-ai.org.cn/v1/chat/completions'
       : 'https://api.groq.com/openai/v1/chat/completions';
     headers = { Authorization: 'Bearer ' + provider.key };
     request = { model: provider.model, stream: false,
@@ -240,7 +241,7 @@ function checkAIConnections() {
   var providers = providerConfig_();
   providers.forEach(function (p) {
     if (!p.key) { console.log(p.id + ': chưa cấu hình, sẽ bỏ qua.'); return; }
-    var url = p.id === 'xkiro' ? 'https://api.xkiro.com/v1/models' : p.id === 'intern' ? 'https://discovery-api.intern-ai.org.cn/v1/models' : p.id === 'groq'
+    var url = p.id === 'xkiro' ? 'https://api.xkiro.com/v1/models' : (p.id === 'intern' || p.id === 'intern2') ? 'https://discovery-api.intern-ai.org.cn/v1/models' : p.id === 'groq'
       ? 'https://api.groq.com/openai/v1/models' : 'https://generativelanguage.googleapis.com/v1beta/models';
     try {
       var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true, timeoutSeconds: 10,
@@ -256,6 +257,9 @@ function checkAIGeneration() {
 }
 function checkXkiroGeneration() {
   checkGenerationFor_('xkiro');
+}
+function checkIntern2Generation() {
+  checkGenerationFor_('intern2');
 }
 function checkGenerationFor_(providerId) {
   var state = state_({ name: '', question: 'Mình muốn học một kỹ năng mới trong tháng này, nên bắt đầu thế nào?',

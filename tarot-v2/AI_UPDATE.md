@@ -1,6 +1,12 @@
 # Lời giải và dự phòng API — 15/10/2026
 
-**Cập nhật mới nhất:** theo yêu cầu chủ trang, thêm **Xkiro / mistralai/mistral-large-4-0 → Groq → Gemini → Intern**. Khóa được lưu trực tiếp vào Script Properties, không có trong mã nguồn hoặc phía web. Xkiro đã sinh lời giải đầy đủ trong phép thử thật khoảng 5,6 giây. Mẫu JSON bổ sung cũng giúp Intern trả đủ bốn phần trong một phép thử 20,8 giây. 113 kiểm thử liên quan đạt, gồm bốn lớp dự phòng, tâm sự, đầu ra thiếu và không lộ khóa. Xem [sự cố hạn mức](QUOTA_INCIDENT.md); phần dưới ghi lịch sử các lần cập nhật trước.
+**Cập nhật mới nhất:** theo yêu cầu tiếp theo của chủ trang, thêm khóa Intern thứ hai và đổi thành **Xkiro → Intern mới (intern2) → Intern cũ (intern) → Gemini → Groq**. Khóa mới được lưu riêng trong INTERN_AI_API_KEY_2; khóa cũ giữ nguyên. Hai slot dùng cooldown/model override riêng, nhật ký giữ đủ năm lượt. 131 kiểm thử liên quan đạt, gồm từng nhánh chuyển tiếp, lỗi của một khóa không chặn khóa còn lại, tâm sự trên từng route, đầu ra đủ bốn lá, quota và không lộ khóa.
+
+Xác minh khóa Intern mới bằng POST sinh văn bản ngắn: HTTP 200, có câu trả lời và finish_reason=stop trong 2.040 ms. Hai phép thử lời giải đầy đủ trước đó timeout ở 24.505 ms và 34.502 ms; vì vậy không khẳng định model sinh lời giải luôn hoạt động tốt chỉ từ kiểm tra ngắn. Ngưỡng chờ gửi cho mỗi slot Intern hiện là 35 giây; khi lỗi, chuỗi chuyển tiếp như đã kiểm thử. Không đưa khóa vào mã nguồn, báo cáo hoặc Sheet.
+
+Đã triển khai **Apps Script 27** lúc 11:32 ngày 15/10/2026 trên cùng địa chỉ /exec. Health trả fallbackVersion=6 và đúng thứ tự xkiro, intern2, intern, gemini, groq, cả năm slot đã có cấu hình. Lượt xác minh sau triển khai lúc 11:33 thành công qua Xkiro, 1.010 ký tự, upstream 6.037 ms, không ghi Sheet. Kết quả metadata nằm trong artifacts/live-connection.json; nguồn máy chủ 26 được sao lưu để đối chiếu.
+
+**Bản 26:** theo yêu cầu trước đó, thêm **Xkiro / mistralai/mistral-large-4-0 → Groq → Gemini → Intern**. Khóa được lưu trực tiếp vào Script Properties, không có trong mã nguồn hoặc phía web. Xkiro đã sinh lời giải đầy đủ trong phép thử thật khoảng 5,6 giây. Mẫu JSON bổ sung cũng giúp Intern trả đủ bốn phần trong một phép thử 20,8 giây. Xem [sự cố hạn mức](QUOTA_INCIDENT.md); phần dưới ghi lịch sử các lần cập nhật trước.
 
 Đã triển khai **Apps Script 26** lúc 11:17 ngày 15/10/2026, cùng địa chỉ /exec, health fallbackVersion=5. Xác minh sau triển khai bằng dữ liệu giả lập: trải bốn lá thành công qua Xkiro, 1.854 ký tự, thời gian upstream 9.445 ms (toàn lượt 11.140 ms); tâm sự tiếp theo cũng qua Xkiro, 853 ký tự, upstream 5.539 ms (toàn lượt 7.719 ms). Không ghi các lượt kiểm tra vào Sheet. Bản nguồn máy chủ 25 được lưu riêng để đối chiếu/khôi phục.
 
