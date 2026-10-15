@@ -91,7 +91,7 @@
       // Keep complete user/assistant pairs and the latest question within the server's bound.
       const recent = history ? history.map(item => ({ role: item.role === 'user' ? 'user' : 'rot', text: item.text })) : null;
       while (recent && recent.length > 1 && (recent.length > 29 || recent.reduce((sum, item) => sum + item.text.length, 0) > 24000)) recent.splice(0, 2);
-      const payload = { action, state: snapshot(state), ...(recent ? { reading: state.readingResult, history: recent } : {}) };
+      const payload = { action, readingFormat: 3, state: snapshot(state), ...(recent ? { reading: state.readingResult, history: recent } : {}) };
       const key = JSON.stringify(payload);
       if (inFlight.has(key)) return inFlight.get(key);
       const pending = perform(payload); inFlight.set(key, pending);

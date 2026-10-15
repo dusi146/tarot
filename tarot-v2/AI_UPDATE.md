@@ -1,6 +1,14 @@
 # Lời giải và dự phòng API — 15/10/2026
 
-**Cập nhật mới nhất:** theo yêu cầu tiếp theo của chủ trang, thêm khóa Intern thứ hai và đổi thành **Xkiro → Intern mới (intern2) → Intern cũ (intern) → Gemini → Groq**. Khóa mới được lưu riêng trong INTERN_AI_API_KEY_2; khóa cũ giữ nguyên. Hai slot dùng cooldown/model override riêng, nhật ký giữ đủ năm lượt. 131 kiểm thử liên quan đạt, gồm từng nhánh chuyển tiếp, lỗi của một khóa không chặn khóa còn lại, tâm sự trên từng route, đầu ra đủ bốn lá, quota và không lộ khóa.
+**Prompt 7 và phần tiết lộ:** Góc nhìn chung được yêu cầu khoảng 100–140 từ, nối các lá, điểm thuận/vướng và dấu hiệu đối chiếu. Thay Một bước nhỏ cho bạn bằng **Phán đoán của Rót**: một sự việc hoặc chuyển biến cụ thể có thể quan sát, gắn với lá/vị trí/chiều bài, khoảng 50–80 từ trước câu kết. Chỉ dẫn phân biệt dự đoán với lời khuyên “bạn nên…” và không dùng cảm giác yên tâm làm tín hiệu kiểm chứng.
+
+Nội dung phán đoán được làm mờ, chạm hoặc nhấn Enter/Space mới hiện; vùng chữ giữ nguyên chiều cao. Trước khi mở, nội dung không tham gia điều hướng/đọc hỗ trợ và nút Nghe đọc cũng bỏ qua phần này. Kết đúng một lần bằng “Đây chỉ là dự đoán dựa trên năng lượng của bạn với trải bài này.” Chữ lời giải và tên lá hiện nhẹ trong khoảng 0,95 giây, giảm chuyển động bỏ cả độ trễ so le.
+
+Giao thức readingFormat=3 giữ khóa JSON advice để tương thích gateway. Tab cũ nhận tiêu đề cũ, tab mới nhận Phán đoán của Rót; cache tách hai dạng, tránh đổi tiêu đề làm lỗi lời giải thiếu. 137 kiểm thử liên quan đạt, gồm tiết lộ an toàn, câu kết không che giấu phần thiếu, tương thích cache/tab và chuỗi năm API. Bản nguồn máy chủ 27/28 đã được lưu riêng.
+
+Đã triển khai **Apps Script 29** lúc 13:15 ngày 15/10/2026, cùng địa chỉ /exec. Health trả promptVersion=7, readingFormat=3 và giữ fallbackVersion=6. Lượt kiểm tra giả lập sau triển khai thành công qua Xkiro: upstream 10.707 ms, tổng 12.824 ms, 1.973 ký tự; Góc nhìn chung 100 từ, phán đoán 78 từ trước câu kết. Phán đoán đã dự báo một phản hồi/trao đổi cụ thể thay cho lời khuyên “nên chờ”. Không ghi lượt API kiểm tra này vào Sheet; metadata ở artifacts/live-connection.json. Đây là kiểm tra một mẫu, không bảo đảm mọi lần sinh sẽ bám hoàn toàn số từ hoặc giọng văn.
+
+**Thứ tự API hiện tại:** **Xkiro → Intern mới (intern2) → Intern cũ (intern) → Gemini → Groq**. Khóa mới được lưu riêng trong INTERN_AI_API_KEY_2; khóa cũ giữ nguyên. Hai slot dùng cooldown/model override riêng, nhật ký giữ đủ năm lượt. Các kiểm thử gồm từng nhánh chuyển tiếp, lỗi của một khóa không chặn khóa còn lại, tâm sự trên từng route, đầu ra đủ bốn lá, quota và không lộ khóa.
 
 Xác minh khóa Intern mới bằng POST sinh văn bản ngắn: HTTP 200, có câu trả lời và finish_reason=stop trong 2.040 ms. Hai phép thử lời giải đầy đủ trước đó timeout ở 24.505 ms và 34.502 ms; vì vậy không khẳng định model sinh lời giải luôn hoạt động tốt chỉ từ kiểm tra ngắn. Ngưỡng chờ gửi cho mỗi slot Intern hiện là 35 giây; khi lỗi, chuỗi chuyển tiếp như đã kiểm thử. Không đưa khóa vào mã nguồn, báo cáo hoặc Sheet.
 

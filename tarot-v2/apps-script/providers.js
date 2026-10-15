@@ -14,7 +14,7 @@ function providerConfig_() {
 }
 function aiHealth_() {
   var providers = providerConfig_();
-  return { status: 'success', service: 'tarot-ai', version: 2, readingFormat: 2, streaming: false,
+  return { status: 'success', service: 'tarot-ai', version: 2, readingFormat: 3, streaming: false,
     promptVersion: TarotServerPersona.PROMPT_VERSION, fallbackVersion: 6, quotaPolicy: 'upstream',
     configured: providers.some(function (p) { return !!p.key; }),
     providers: providers.map(function (p) { return { id: p.id, model: p.model, configured: !!p.key }; }) };
@@ -62,7 +62,7 @@ function readingExample_(state) {
   return '\nTrả lời đúng một đối tượng JSON có ĐỦ BỐN khóa cấp ngoài: greeting, cards, summary, advice. '
     + 'summary và advice nằm NGANG HÀNG với cards, không được bỏ sót hoặc đặt trong cards. '
     + 'Thay các chuỗi minh họa bằng nội dung đầy đủ cho trải bài, không chép mẫu:\n'
-    + JSON.stringify({ greeting: 'Lời chào', cards: cards, summary: 'Kết luận trả lời câu hỏi', advice: 'Một hành động cụ thể' });
+    + JSON.stringify({ greeting: 'Lời chào', cards: cards, summary: 'Góc nhìn chung chi tiết', advice: 'Một phán đoán cụ thể từ các lá' });
 }
 function providerCall_(provider, payload, state, followup, jsonFallback) {
   var request, url, headers, readingTokens = 2048 + 1024 * state.selectedCards.length;
@@ -181,7 +181,8 @@ function ai_(data) {
   var providers = providerConfig_().filter(function (p) { return !!p.key; });
   if (!providers.length) throw failure_('NOT_CONFIGURED', 'Chưa cấu hình dịch vụ AI.');
   var cache = CacheService.getScriptCache();
-  var digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, JSON.stringify({ format: 5, action: data.action, payload: payload,
+  var readingFormat = data.readingFormat === 3 ? 3 : 2;
+  var digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, JSON.stringify({ format: 6, readingFormat: readingFormat, action: data.action, payload: payload,
     providers: providers.map(function (p) { return [p.id, p.model]; }) }));
   var cacheKey = 'reply:' + Utilities.base64EncodeWebSafe(digest), lock = LockService.getScriptLock();
   if (!lock.tryLock(1500)) throw failure_('BUSY', 'Dịch vụ đang bận.', 5);
@@ -208,6 +209,8 @@ function ai_(data) {
         var reservation = reserveProvider_(provider, cache);
         if (reservation) throw reservation;
         var answer = providerCall_(provider, payload, state, followup);
+        // Tabs opened before format 3 only recognize the previous section heading.
+        if (!followup && readingFormat < 3) answer.text = answer.text.replace(/^Phán đoán của Rót$/m, 'Một bước nhỏ cho bạn');
         trace(provider, "OK", 200, started); answer.attempts = attempts;
         try { cache.put(cacheKey, JSON.stringify(answer), 300); } catch (_) {}
         return answer;

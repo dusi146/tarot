@@ -158,6 +158,20 @@ test('four-card readings remain complete with all five routes and explicit JSON 
  if(id==='gemini'){assert.equal(request.generationConfig.thinkingConfig.thinkingBudget,0);assert.equal(request.generationConfig.responseMimeType,'application/json');}
  }
 });
+test('new prediction headings are negotiated per request and cached separately from already-open older tabs',()=>{
+ for(const formats of [[undefined,3],[3,undefined]]){
+  const app=server(); assert.equal(app.health().readingFormat,3); assert.equal(app.health().promptVersion,7);
+  for(const readingFormat of formats){
+   const request={action:'ai_reading',state,...(readingFormat?{readingFormat}:{})},result=app.post(request);
+   assert.equal(result.status,'success');
+   assert.match(result.text,readingFormat===3?/\nPhán đoán của Rót\n/:/\nMột bước nhỏ cho bạn\n/);
+   assert.ok(result.text.endsWith(require('../js/tarot-reading.js').PREDICTION_NOTICE));
+   assert.equal(app.post(request).text,result.text);
+  }
+  assert.equal(app.calls.length,2); assert.equal(app.rows.length,0);
+ }
+});
+
 test('compiled bundle keeps 78 cards and the exact-row 18-column Sheet protocol',()=>{
  const app=server({bundle:true});assert.equal(app.context.TarotServerCards.length,78);assert.equal(app.post({action:'ai_reading',state}).provider,'xkiro');assert.equal(app.rows.length,0);
  const log={action:'log_reading',time:'10:00:00.001 15/10/2026',ip:'test',name:'=bad',conclusion:'Lời giải',solver:'xkiro'};assert.equal(app.post(log).status,'success');assert.equal(app.rows[0].length,18);assert.equal(app.rows[1].length,18);assert.ok(app.rows[1][2].startsWith("'="));

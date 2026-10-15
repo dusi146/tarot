@@ -83,7 +83,7 @@ body:not([data-act="INTRO"]) #skip-intro{display:none}
 .revealed-sub{font-size:9px}
 .revealed-numeral:empty{display:none}
 .revealed-card-caption{line-height:1.4}
-.revealed-card-caption .revealed-details{display:flex;width:100%;visibility:hidden;opacity:0;transform:translateY(5px);transition:opacity .6s ease,transform .6s var(--ease-out),visibility .6s}
+.revealed-card-caption .revealed-details{display:flex;width:100%;visibility:hidden;opacity:0;transform:translateY(7px);transition:opacity .95s ease,transform .95s var(--ease-out),visibility .95s}
 .revealed-card-caption.shown .revealed-details{visibility:visible;opacity:1;transform:translateY(0)}
 .revealed-card-caption .tap-to-flip-badge{position:absolute;top:18px;white-space:nowrap;transition:opacity .5s,visibility .5s,border-color .25s,background .25s}
 .revealed-card-caption.shown .tap-to-flip-badge{display:inline-flex;opacity:0;visibility:hidden;pointer-events:none}
@@ -130,10 +130,21 @@ body:not([data-act="INTRO"]) #skip-intro{display:none}
 .reading-loading{display:flex;flex-direction:column;align-items:center;gap:12px;padding:30px 0}
 .reading-loading .loader-ring{width:25px;height:25px;border-width:1px}
 .reading-loading p{font-size:11px}
-.reading-section{margin:20px 0 30px;padding:0 0 0 17px;border-left:2px solid var(--role-color,rgba(226,194,133,.3))}
+.reading-section{margin:20px 0 30px;padding:0 0 0 17px;border-left:2px solid var(--role-color,rgba(226,194,133,.3));animation:reading-emerge .95s var(--ease-out) var(--reading-delay,0ms) both}
+@keyframes reading-emerge{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
 .reading-section h4{font:500 30px/1.15 var(--title-font);color:var(--role-color,var(--gold-bright));margin:7px 0 12px}
 .reading-section-role{font-size:10px!important;color:var(--role-color,var(--gold-champagne))!important}
 .reading-section p+p{margin-top:10px}
+.reading-prediction{border-color:rgba(226,194,133,.45)}
+.prediction-spoiler{position:relative;isolation:isolate;overflow:hidden;border:1px solid rgba(226,194,133,.15);border-radius:15px;background:linear-gradient(135deg,rgba(226,194,133,.045),rgba(169,142,219,.05))}
+.prediction-content{padding:20px;overflow-wrap:anywhere;filter:blur(7px);opacity:.38;user-select:none;pointer-events:none;transition:filter .75s ease,opacity .75s ease}
+.prediction-reveal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;padding:20px;border:0;background:rgba(14,10,24,.15);color:var(--gold-bright);cursor:pointer;font:inherit;-webkit-tap-highlight-color:transparent}
+.prediction-reveal-label{padding:12px 17px;border:1px solid rgba(226,194,133,.32);border-radius:999px;background:rgba(22,16,33,.94);font-size:12px;line-height:1.5;box-shadow:0 4px 24px rgba(0,0,0,.15)}
+.prediction-reveal:hover .prediction-reveal-label{border-color:rgba(226,194,133,.6)}
+.prediction-reveal:focus-visible{outline:2px solid var(--gold-bright);outline-offset:-4px;border-radius:15px}
+.prediction-spoiler.is-revealed .prediction-content{filter:blur(0);opacity:1;user-select:text;pointer-events:auto}
+.prediction-content:focus{outline:none}
+.prediction-content .prediction-notice{margin-top:16px;padding-top:14px;border-top:1px solid rgba(226,194,133,.12);color:var(--text-muted);font-size:12px;line-height:1.8}
 [data-tone="reflection"]{--role-color:#c4b5e8}
 [data-tone="clarity"]{--role-color:#91cfc7}
 [data-tone="possibility"]{--role-color:#e4c38b}
@@ -358,4 +369,4 @@ body:not([data-act="INTRO"]) #skip-intro{display:none}
  .welcome-panel form{max-height:calc(100dvh - 105px);overflow:auto}
  .support-paths{grid-template-columns:1fr 1fr}
 }
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;transition-delay:0s!important;scroll-behavior:auto!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important;transition-delay:0s!important;scroll-behavior:auto!important}}

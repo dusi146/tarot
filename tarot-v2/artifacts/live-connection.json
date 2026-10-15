@@ -1,5 +1,7 @@
 {
-  "checkedAt": "2026-10-15T04:33:30.034Z",
+  "checkedAt": "2026-10-15T06:16:01.509Z",
+  "promptVersion": 7,
+  "readingFormat": 3,
   "providers": [
     {
       "id": "xkiro",
@@ -32,7 +34,10 @@
   "quotaPolicy": "upstream",
   "provider": "xkiro",
   "model": "mistralai/mistral-large-4-0",
-  "characters": 1010,
-  "diagnostics": "xkiro:OK/HTTP200/6037ms",
+  "characters": 1973,
+  "elapsedMs": 12824,
+  "summaryWords": 100,
+  "predictionWords": 78,
+  "diagnostics": "xkiro:OK/HTTP200/10707ms",
   "sheetWrites": 0
 }

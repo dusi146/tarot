@@ -104,11 +104,17 @@
     if (!selected.length) return;
     state.selectedCards = selected;
     const complete = selected.length === state.activeSpread.count && selected.every(card => card.isFlipped);
+    const becameComplete = complete && !$('open-reading').classList.contains('reading-ready');
     $('open-reading').disabled = !complete;
     $('open-reading').classList.toggle('reading-ready', complete);
     $('open-reading').textContent = complete ? 'Đọc trải bài cùng Rót' : 'Xem lời giải';
     $('flip-all').hidden = complete;
     if (complete) $('reveal-header-hint').textContent = 'Chạm vào lá để ngắm gần, hoặc cùng Rót đọc trải bài.';
+    if (becameComplete && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      for (const element of [$('reveal-header-hint'), $('open-reading')]) {
+        element.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 950, easing: 'ease-out' });
+      }
+    }
   });
   function setReady() { ready = true; $('begin-reading').disabled = false; if (document.body.dataset.act === 'HOME') $('welcome-panel').hidden = false; }
   window.addEventListener('tarot:ready', setReady);
@@ -169,8 +175,11 @@
     return [opening, ...state.selectedCards.map((card, index) => state.activeSpread.slots[index].title + ': ' + card.data.viName + '\n'
       + card.data.viName + ' ở vị trí này gợi ý về ' + (card.isReversed ? card.data.revMeaning : card.data.meaning).toLowerCase()
       + '. Bạn có thể đối chiếu điều ấy với câu hỏi của mình và chọn một việc thực tế để thay đổi, thay vì vội kết luận về tương lai.'),
-      'Góc nhìn chung\nBạn nên bắt đầu từ điều mình có thể chủ động trong hiện tại. Các vị trí trong trải bài nhắc bạn cân nhắc cảm xúc, giới hạn và những gì đã thực sự xảy ra. Đây là nội dung minh họa của bản xem thử, chưa phải lời giải AI cho câu hỏi của bạn.',
-      'Một bước nhỏ cho bạn\nViết xuống một điều đang làm bạn băn khoăn và một việc nhỏ bạn có thể làm hôm nay. Dành mười phút cho việc đó rồi quan sát cảm giác của mình, chưa cần ép bản thân có mọi câu trả lời.'].join('\n\n');
+      'Góc nhìn chung\nRót nghiêng về việc thử một bước vừa sức trước khi quyết định thay đổi lớn. ' + state.selectedCards[0].data.viName
+        + ' gợi trọng tâm để bạn đối chiếu, còn cả trải bài cần được đọc cùng câu hỏi và những gì đã thực sự xảy ra. Điểm thuận là bạn có thể quan sát kết quả của một lựa chọn nhỏ; điểm vướng là mình chưa có đủ bối cảnh để kết luận thay bạn. Nếu thông tin mới khác với điều đang nghĩ, hướng đi cũng cần được điều chỉnh. Hãy đối chiếu bằng một phản hồi cụ thể, thay vì chỉ chờ cảm giác chắc chắn. Đây là nội dung minh họa bố cục, chưa phải lời giải AI.',
+      'Phán đoán của Rót\nRót đoán rằng bạn sẽ thử một cách bắt đầu nhỏ trước khi quyết định thay đổi hẳn. Trong mẫu minh họa này, '
+        + state.selectedCards[0].data.viName + ' gợi ý về ' + (state.selectedCards[0].isReversed ? state.selectedCards[0].data.revMeaning : state.selectedCards[0].data.meaning).toLowerCase()
+        + ', từ đó nối sang khả năng thử trước một việc vừa sức. Dấu hiệu để đối chiếu là bạn chọn thử một việc cụ thể, thay vì chỉ tiếp tục cân nhắc. Bản thật sẽ dựa vào câu hỏi và toàn bộ lá bạn rút.\n\n' + reading.PREDICTION_NOTICE].join('\n\n');
   }
   function renderSelectedCards() {
     reading.renderCards($('reading-cards'), state, document, 'images/');
@@ -294,7 +303,10 @@
     if (!state.readingResult) return;
     if (!window.speechSynthesis) { toast('Trình duyệt chưa hỗ trợ đọc thành tiếng.'); return; }
     if (speechSynthesis.speaking) { speechSynthesis.cancel(); $('read-aloud').textContent = 'Nghe đọc'; return; }
-    const utterance = new SpeechSynthesisUtterance(state.readingResult); utterance.lang = 'vi-VN'; utterance.rate = .88;
+    const predictionRevealed = Boolean($('reading-text').querySelector('.prediction-spoiler.is-revealed'));
+    const spokenText = reading.sections(state.readingResult, state).filter(block => block.kind !== 'prediction' || predictionRevealed)
+      .map(block => [block.title, ...block.paragraphs].filter(Boolean).join('\n')).join('\n\n');
+    const utterance = new SpeechSynthesisUtterance(spokenText); utterance.lang = 'vi-VN'; utterance.rate = .88;
     utterance.voice = speechSynthesis.getVoices().find(voice => voice.lang.startsWith('vi')) || null;
     utterance.onend = utterance.onerror = () => { $('read-aloud').textContent = 'Nghe đọc'; };
     $('read-aloud').textContent = 'Dừng đọc'; speechSynthesis.speak(utterance);

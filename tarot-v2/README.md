@@ -2,7 +2,7 @@
 
 Bản mới độc lập, phát triển trực tiếp từ `3D.html` người dùng cung cấp. Giữ sân khấu, thiết kế mặt lưng, chất liệu, ánh sáng, bộ điều khiển chuyển động và âm thanh của bản 3D. Web cũ và bản sao lưu vẫn nằm ngoài thư mục này.
 
-Ngày 15/10/2026: ưu tiên **Xkiro / Mistral Large 4 → Intern mới → Intern cũ → Gemini → Groq**. Đã sửa cách xử lý quota và lượt thử lại, bổ sung mẫu JSON đầy đủ cho các gateway, giữ lời giải tự nhiên và có cá nhân hóa. 131 kiểm thử liên quan đạt; xem [báo cáo AI](AI_UPDATE.md) và [sự cố hạn mức](QUOTA_INCIDENT.md).
+Ngày 15/10/2026: ưu tiên **Xkiro / Mistral Large 4 → Intern mới → Intern cũ → Gemini → Groq**. Prompt 7 mở rộng Góc nhìn chung, đổi phần cuối thành một Phán đoán của Rót cụ thể theo lá bài, làm mờ và chạm để tiết lộ. Chữ hiện nhẹ sau khi mở bài và nhận lời giải; hỗ trợ bàn phím, đọc hỗ trợ và giảm chuyển động. 137 kiểm thử liên quan đạt; xem [báo cáo AI](AI_UPDATE.md) và [sự cố hạn mức](QUOTA_INCIDENT.md).
 
 ## Chạy trên máy
 
@@ -28,7 +28,7 @@ Máy chủ chỉ nghe tại máy đang chạy. Có thể đặt biến môi trư
 - Lá được chọn bay vào đúng ô nhận, đủ số thì cùng bay lên; lật từng lá, mở tất cả, chạm để ngắm gần.
 - Bốn cách trải: thời gian, một lá, thân/tâm/trí, gỡ rối bốn lá.
 - Tùy chỉnh màu vàng, mở/đóng có chuyển động; tên, ngày sinh hợp lệ, cung hoàng đạo và bốn tông giọng. Nhớ thông tin trên cùng trình duyệt, có nút quên; không đồng bộ giữa thiết bị.
-- Lời giải theo từng lá, kết luận và gợi ý hành động; có thử lại khi thiếu nội dung. Tâm sự giữ bối cảnh trải bài, mời ủng hộ một lần sau lượt thứ ba.
+- Lời giải theo từng lá, Góc nhìn chung chi tiết và Phán đoán của Rót chạm để mở; có thử lại khi thiếu nội dung. Tâm sự giữ bối cảnh trải bài, mời ủng hộ một lần sau lượt thứ ba.
 - Đánh giá, ghi chú, góp ý; phần ủng hộ có chia sẻ Rót, chuyển đổi đơn hàng và QR mở khi cần. Bảng người ủng hộ dùng kết nối cũ ở chế độ thật.
 - Âm thanh tự bật sau lần chạm hoặc nhấn phím đầu tiên. Hệ số âm tổng tăng từ 1,65 lên 3,2, tăng thêm tiếng giấy và tiếng bấm, giữ nén đỉnh để tiếng không chói. Có đọc thành tiếng khi trình duyệt hỗ trợ và tôn trọng tùy chọn giảm chuyển động của hệ điều hành.
 - Bỏ hai nút âm thanh/cảm biến ở góc và nút rung trong Tùy chỉnh thêm. Phản hồi điện thoại tự bật khi tương tác lần đầu; trình duyệt có thể yêu cầu quyền cảm biến một lần. Nếu bị từ chối hoặc không hỗ trợ, chạm/vuốt vẫn hoạt động. Cảm biến chỉ điều khiển ánh sáng và độ nghiêng, không ảnh hưởng chọn lá. Rung ngắn khi bấm giao diện, lướt, rút, đáp ô và mở bài; khi xáo có nhịp nghỉ.
