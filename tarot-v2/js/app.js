@@ -14,7 +14,7 @@
   const profile = window.TarotProfile.create(() => localStorage);
   const ai = window.TarotAI.create({ endpoint: window.TAROT_SHEETS_CONFIG.endpoint });
   let version = 0, readingPending = false, chatPending = false, sheetSession = null, feedbackPending = false, nudged = false;
-  let state = { userName: '', userQuestion: '', userVibe: 'chualanh', dob: {}, zodiac: '', activeSpread: spreads.time, selectedCards: [], readingResult: '', followupHistory: [] };
+  let state = { userName: '', userGender: '', userQuestion: '', userVibe: 'chualanh', dob: {}, zodiac: '', activeSpread: spreads.time, selectedCards: [], readingResult: '', followupHistory: [] };
   let ready = false, optionsAnimation = null, toastTimer, restarting = false;
   const picked = name => document.querySelector('input[name="' + name + '"]:checked')?.value;
   const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -88,7 +88,7 @@
     const question = $('question').value.trim();
     if (!question) { $('form-error').textContent = 'Bạn để lại một câu hỏi để Rót hiểu điều bạn đang nghĩ nhé.'; $('question').focus(); return; }
     clearSession();
-    state = { userName: value.name.trim(), userQuestion: question, userVibe: value.vibe, dob, zodiac: persona.zodiac(dob.day, dob.month, dob.year),
+    state = { userName: value.name.trim(), userGender: value.gender, userQuestion: question, userVibe: value.vibe, dob, zodiac: persona.zodiac(dob.day, dob.month, dob.year),
       activeSpread: spreads[value.spread], selectedCards: [], readingResult: '', followupHistory: [] };
     $('form-error').textContent = ''; profile.save(value); engine.start(state.activeSpread);
   });
@@ -154,11 +154,11 @@
   handle.addEventListener('pointerup', event => { if (handleStart !== null && event.clientY - handleStart > 70) closeDialog($('reading-modal')); handleStart = null; });
   handle.addEventListener('pointercancel', () => { handleStart = null; });
   function logProfile(result) {
-    const p = getProfile();
     return { name: state.userName || 'Khách', dob: state.dob.day ? [state.dob.day, state.dob.month, state.dob.year].join('/') : 'Không rõ',
-      zodiac: state.zodiac || 'Không rõ', gender: p.gender || 'Không rõ', question: state.userQuestion,
+      zodiac: state.zodiac || 'Không rõ', gender: state.userGender || 'Không rõ', question: state.userQuestion,
       spread: state.activeSpread.count + ' lá', vibe: state.userVibe,
-      solver: result ? 'Ta Văn Rót V2 / ' + result.provider + ' / ' + result.model : 'Ta Văn Rót V2 / Chưa có lời giải',
+      solver: (result?.provider ? 'Ta Văn Rót V2 / ' + result.provider + ' / ' + result.model : 'Ta Văn Rót V2 / Chưa có lời giải')
+        + (window.TarotAI.diagnostics(result) ? ' [' + window.TarotAI.diagnostics(result) + ']' : ''),
       source: 'Ta Văn Rót V2 / ' + (new URLSearchParams(location.search).get('ref') || 'Trực tiếp / Không rõ') };
   }
   function demoReading() {
@@ -196,7 +196,7 @@
       if (requestVersion !== version) return;
       $('reading-text').textContent = error.message || 'Rót chưa kết nối được. Bạn thử lại sau một chút nhé.';
       $('retry-reading').hidden = false;
-      if (!preview) window.TarotSheets.begin(logProfile()).record(error.message, 'Thất bại').catch(() => {});
+      if (!preview) window.TarotSheets.begin(logProfile(error)).record(error.message, 'Thất bại').catch(() => {});
     } finally { if (requestVersion === version) { readingPending = false; $('reading-loading').hidden = true; } }
   }
   $('open-reading').addEventListener('click', () => {

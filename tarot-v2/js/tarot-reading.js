@@ -69,15 +69,15 @@
     const properties = {}, required = [];
     state.selectedCards.forEach((card, i) => {
       const key = 'card_' + i; required.push(key);
-      properties[key] = { type: 'string', description: `${state.activeSpread.slots[i].title}: ${card.data.viName}, ${card.isReversed ? 'ngược' : 'xuôi'}. Viết 2 đến 3 câu phân tích gắn với câu hỏi, không tiêu đề, không bỏ trống.` };
+      properties[key] = { type: 'string', description: `${state.activeSpread.slots[i].title}: ${card.data.viName}, ${card.isReversed ? 'ngược' : 'xuôi'}. Viết 3–5 câu, khoảng 65–95 từ (trải một lá: 90–125 từ); giải nghĩa chính, liên hệ câu hỏi và một biểu hiện cần đối chiếu. Giọng trò chuyện, không tiêu đề, không bỏ trống.` };
     });
     return { type: 'json_schema', json_schema: { name: 'tarot_reading', strict: true, schema: {
       type: 'object', additionalProperties: false, required: ['greeting', 'cards', 'summary', 'advice'],
       properties: {
-        greeting: { type: 'string', description: 'Một lời chào ngắn, có thể để trống.' },
+        greeting: { type: 'string', description: 'Lời chào 2–3 câu tự nhiên, gọi tên nếu người xem cung cấp, nhắc đúng câu hỏi hoặc cảm xúc đã chia sẻ; không được bỏ trống.' },
         cards: { type: 'object', additionalProperties: false, required, properties },
-        summary: { type: 'string', description: 'Góc nhìn chung: trả lời thẳng câu hỏi ngay câu đầu, 3 câu ngắn, khoảng 45 đến 70 từ. Không kể hình ảnh lá, không chép lại từng lá, không lòng vòng.' },
-        advice: { type: 'string', description: 'Một bước nhỏ cho bạn: một hành động cụ thể, vừa sức, kèm cách bắt đầu. 2 câu ngắn, khoảng 30 đến 50 từ.' }
+        summary: { type: 'string', description: 'Góc nhìn chung: trả lời thẳng câu hỏi ngay câu đầu, Khoảng 4 câu, 65–95 từ; nối các vị trí thành một lý do và nêu điều kiện/rủi ro cần chú ý. Không kể hình ảnh lá, không chép lại từng lá, không lòng vòng.' },
+        advice: { type: 'string', description: 'Một bước nhỏ cho bạn: một hành động cụ thể, vừa sức, kèm cách bắt đầu. 3–4 câu, khoảng 45–75 từ; nêu cách bắt đầu và dấu hiệu tự đánh giá, khép lại ấm áp.' }
       }
     } } };
   }
@@ -85,7 +85,8 @@
     const prose = text => typeof text === 'string' ? cleanText(text).replace(/\s+/g, ' ').trim() : '';
     const fail = () => { const error = new Error('Lời giải chưa đủ các phần cần thiết.'); error.code = 'INCOMPLETE_READING'; throw error; };
     if (!value || typeof value !== 'object' || !value.cards || typeof value.cards !== 'object') fail();
-    const intro = prose(value.greeting), summary = prose(value.summary), advice = prose(value.advice);
+    const intro = prose(value.greeting) || (state.userName ? prose(state.userName) + ' ơi, Rót chào bạn.' : 'Chào bạn, Rót đây.') + ' Mình cùng nhìn câu hỏi của bạn qua những lá vừa mở nhé.';
+    const summary = prose(value.summary), advice = prose(value.advice);
     const body = state.selectedCards.map((card, index) => {
       const content = prose(value.cards['card_' + index]); if (content.length < 40) fail();
       return `${state.activeSpread.slots[index].title}: ${card.data.viName}\n${content}`;

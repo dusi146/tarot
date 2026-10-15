@@ -35,7 +35,7 @@ function state_(input) {
   });
   var dob = input.dob || {}, day = Number(dob.day), month = Number(dob.month), year = Number(dob.year);
   var valid = TarotServerPersona.validDate(day, month, year);
-  return { userName: text_(input.name, 120), userQuestion: text_(input.question, 3000),
+  return { userName: text_(input.name, 120), userGender: ['Nam', 'Nữ', 'Khác'].indexOf(input.gender) >= 0 ? input.gender : '', userQuestion: text_(input.question, 3000),
     userVibe: Object.prototype.hasOwnProperty.call(TarotServerPersona.TONES, input.vibe) ? input.vibe : 'chualanh',
     dob: valid ? { day: day, month: month, year: year } : null,
     zodiac: valid ? TarotServerPersona.zodiac(day, month, year) : '',
@@ -84,7 +84,7 @@ function doPost(e) {
     try { return json_(saveSheet_(data)); } finally { lock.releaseLock(); }
   } catch (error) {
     // Never return a provider body, authorization header, or arbitrary exception.
-    return json_({ status: 'error', code: error.code || 'SERVER_ERROR', message: error.code ? error.message : 'Chưa xử lý được yêu cầu.', retryAfter: error.retryAfter || 0 });
+    return json_({ status: 'error', code: error.code || 'SERVER_ERROR', message: error.code ? error.message : 'Chưa xử lý được yêu cầu.', retryAfter: error.retryAfter || 0, attempts: error.attempts || [] });
   }
 }
 function doGet(e) {

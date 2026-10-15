@@ -1,6 +1,6 @@
 # Bật Intern InkStone → Groq → Gemini
 
-Mã mới đã chuẩn bị trong **Code.gs ở cùng thư mục này**. Chưa thay đổi bản Apps Script đang chạy. Bản xem thử tại `http://127.0.0.1:4182/?preview=1` vẫn dùng dữ liệu mô phỏng, không tiêu token hay ghi Sheet.
+Ngày 15/10/2026, đã cập nhật bản Apps Script đang dùng lên **phiên bản 21** với Prompt 4 và giới hạn chờ riêng từng API. Nguồn tương ứng nằm trong **Code.gs ở cùng thư mục này**; địa chỉ /exec giữ nguyên. Xem [phân tích nhật ký và kiểm tra](../AI_UPDATE.md). Bản xem thử tại `http://127.0.0.1:4182/?preview=1` vẫn dùng dữ liệu mô phỏng, không tiêu token hay ghi Sheet.
 
 ## 1. Mở dự án Apps Script cũ
 
@@ -52,7 +52,7 @@ Luồng thử tự động đã kiểm tra bằng phản hồi mô phỏng, chư
 
 ## Cách dự phòng hoạt động
 
-Mỗi lượt ưu tiên Intern, rồi Groq, rồi Gemini. HTTP 401/403, 429, lỗi máy chủ, kết nối hỏng hoặc lời giải thiếu đều có thể chuyển sang nhà cung cấp tiếp theo. Chỉ nhà cung cấp lỗi bị tạm nghỉ; một API chạm hạn mức không khóa toàn bộ chuỗi. Khi cả chuỗi hết hạn mức, giao diện thông báo thời gian chờ. Nếu cả chuỗi sai khóa, giao diện báo cần kiểm tra cấu hình.
+Mỗi lượt ưu tiên Intern (tối đa 45 giây), rồi Groq (35 giây), rồi Gemini (45 giây). HTTP 401/403, 429, lỗi máy chủ, kết nối hỏng, timeout hoặc lời giải thiếu đều có thể chuyển sang nhà cung cấp tiếp theo. Chỉ nhà cung cấp lỗi bị tạm nghỉ; một API chạm hạn mức không khóa toàn bộ chuỗi. Khi cả chuỗi hết hạn mức, giao diện thông báo thời gian chờ. Nếu cả chuỗi sai khóa, giao diện báo cần kiểm tra cấu hình.
 
 Nếu `checkAIConnections` báo Intern HTTP 401 thì kết nối đang bị từ chối xác thực, dù tên model đã đúng. Đặt khóa lấy từ tài khoản Intern vào `INTERN_AI_API_KEY`; khóa lấy từ Google AI Studio vào `GEMINI_API_KEY`. HTTP 400 của Gemini chưa xác định riêng được nguyên nhân từ mã trạng thái. Lưu thuộc tính không cần triển khai lại. Kết nối bị từ chối xác thực tạm nghỉ 300 giây; đợi hết thời gian này rồi thử một lượt đọc để xác nhận nhà cung cấp thực sự được dùng. Không gửi ảnh có giá trị khóa vào chat.
 

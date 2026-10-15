@@ -8,12 +8,12 @@ const valid = { greeting: 'Chào An.', cards: { card_0: 'Bạn cần cân nhắc
   advice: 'Hãy viết ra một việc nhỏ có thể hoàn thành hôm nay. Dành mười phút bắt đầu rồi quan sát cảm giác của bạn.' };
 function server({ keys = { INTERN_AI_API_KEY: 'test-intern-secret', GROQ_API_KEY: 'test-groq-secret', GEMINI_API_KEY: 'test-gemini-secret' }, responses = {}, bundle = false } = {}) {
   const cache = new Map(), calls = [], rows = [];
-  let created = false;
+  let created = false, elapsed = 0;
   const sheet = { getLastRow: () => rows.length, appendRow: row => rows.push(row), setFrozenRows() {},
     getRange: (...args) => ({ setFontWeight() { return this; }, setBackground() { return this; }, setFontColor() { return this; },
       getDisplayValues: () => rows.slice(1).map(row => row.slice(0, 2).map(value => String(value).replace(/^'/, ''))),
       setValues(values) { const [row, col] = args; values[0].forEach((value, i) => { rows[row - 1][col - 1 + i] = value; }); } }) };
-  const context = vm.createContext({ console: { log() {} },
+  const context = vm.createContext({ console: { log() {} }, Date: class extends Date { static now() { return 1700000000000 + elapsed; } },
     TarotServerPersona: require('../js/tarot-persona.js'), TarotServerReading: require('../js/tarot-reading.js'),
     TarotServerCards: [{ id: '00', viName: 'Kẻ Khờ', name: 'The Fool', meaning: 'Khởi đầu', revMeaning: 'Do dự' }],
     PropertiesService: { getScriptProperties: () => ({ getProperty: name => keys[name] || '' }) },
@@ -25,8 +25,12 @@ function server({ keys = { INTERN_AI_API_KEY: 'test-intern-secret', GROQ_API_KEY
     SpreadsheetApp: { openById: () => ({ getSheetByName: () => created ? sheet : null, insertSheet: () => { created = true; return sheet; } }) },
     UrlFetchApp: { fetch: (url, options) => {
       const id = url.includes('intern-ai') ? 'intern' : url.includes('groq.com') ? 'groq' : 'gemini';
-      const request = JSON.parse(options.payload); calls.push({ id, url, options, request });
+      const request = JSON.parse(options.payload || '{}'); calls.push({ id, url, options, request });
       const fixture = typeof responses[id] === 'function' ? responses[id](request) : responses[id] || {};
+      if (fixture.delay) {
+        elapsed += Math.min(fixture.delay, (options.timeoutSeconds || 360) * 1000);
+        if (fixture.delay > (options.timeoutSeconds || 360) * 1000) throw Error('Request timed out: private test-intern-secret');
+      }
       if (fixture.throw) throw Error('secret upstream response test-intern-secret');
       const content = fixture.content === undefined ? JSON.stringify(valid) : fixture.content;
       return { getResponseCode: () => fixture.status || 200, getAllHeaders: () => ({ 'Retry-After': fixture.retry || '40' }),
@@ -115,4 +119,49 @@ test('new bundle keeps 78 cards, spreadsheet schema and exact-row feedback', () 
   assert.equal(app.post({ action: 'update_feedback', time: log.time, ip: log.ip, rating: 5, ratingNote: 'Ổn', feedback: 'Cảm ơn' }).status, 'success');
   assert.equal(app.rows[1][11], '5 Sao');
   assert.equal(app.post({ action: 'update_feedback', time: 'wrong', ip: log.ip, rating: 3 }).code, 'NOT_FOUND');
+});
+
+test('a stalled Intern times out within its own budget and Groq completes with safe diagnostics', () => {
+  const app = server({ responses: { intern: { delay: 300000 }, groq: { delay: 1000 } } });
+  const result = app.post({ action: 'ai_reading', state });
+  assert.equal(result.provider, 'groq'); assert.deepEqual(app.calls.map(call => call.id), ['intern', 'groq']);
+  assert.equal(app.calls[0].options.timeoutSeconds, 45);
+  assert.deepEqual(result.attempts, [{ provider: 'intern', code: 'PROVIDER_TIMEOUT', status: 0, elapsedMs: 45000 },
+    { provider: 'groq', code: 'OK', status: 200, elapsedMs: 1000 }]);
+  assert.ok(!JSON.stringify(result).includes('secret'));
+  const health = app.health(); assert.equal(health.promptVersion, 4); assert.equal(health.fallbackVersion, 2);
+});
+
+test('all stalled providers finish before the browser budget and do not leave a pending lock', () => {
+  const app = server({ responses: { intern: { delay: 360000 }, groq: { delay: 360000 }, gemini: { delay: 360000 } } });
+  const result = app.post({ action: 'ai_reading', state });
+  assert.equal(result.status, 'error'); assert.equal(result.attempts.length, 3);
+  assert.deepEqual(app.calls.map(call => call.options.timeoutSeconds), [45, 35, 45]);
+  assert.equal(result.attempts.reduce((sum, item) => sum + item.elapsedMs, 0), 125000);
+  assert.ok(![...app.cache.keys()].some(key => key.startsWith('pending:')));
+});
+
+test('a malformed provider cooldown cannot break the rest of the chain', () => {
+  const app = server(); app.cache.set('tarot-ai:intern:cooldown', 'broken');
+  const result = app.post({ action: 'ai_reading', state });
+  assert.equal(result.provider, 'groq'); assert.deepEqual(app.calls.map(call => call.id), ['groq']);
+  assert.equal(result.attempts[0].code, 'PROVIDER_ERROR');
+});
+
+test('explicit gender and name reach every fallback prompt without changing card identity', () => {
+  const app = server({ responses: { intern: { status: 503 } } });
+  assert.equal(app.post({ action: 'ai_reading', state: { ...state, gender: 'Nữ' } }).provider, 'groq');
+  for (const call of app.calls) {
+    assert.match(call.request.messages[1].content, /"gender":"Nữ"/);
+    assert.match(call.request.messages[1].content, /"name":"An"/);
+    assert.match(call.request.messages[1].content, /"orientation":"Ngược"/);
+    assert.match(call.request.messages[0].content, /CHÀO VÀ CÁ NHÂN HÓA/);
+  }
+});
+
+test('connection diagnostics continue checking Groq and Gemini when Intern throws', () => {
+  const app = server({ responses: { intern: { throw: true } } });
+  app.context.checkAIConnections();
+  assert.deepEqual(app.calls.map(call => call.id), ['intern', 'groq', 'gemini']);
+  for (const call of app.calls) assert.equal(call.options.timeoutSeconds, 10);
 });

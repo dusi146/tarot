@@ -2,6 +2,8 @@
 
 Bản mới độc lập, phát triển trực tiếp từ `3D.html` người dùng cung cấp. Giữ sân khấu, thiết kế mặt lưng, chất liệu, ánh sáng, bộ điều khiển chuyển động và âm thanh của bản 3D. Web cũ và bản sao lưu vẫn nằm ngoài thư mục này.
 
+Ngày 15/10/2026: đã chỉnh lời giải tự nhiên và có cá nhân hóa, đồng bộ schema với prompt, giới hạn chờ từng API và phục hồi phản hồi khi mất kết nối. Máy chủ dùng phiên bản 21; chi tiết và 84 kiểm thử liên quan ở [báo cáo AI](AI_UPDATE.md).
+
 ## Chạy trên máy
 
 Tại thư mục gốc của dự án:

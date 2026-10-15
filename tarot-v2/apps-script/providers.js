@@ -1,18 +1,19 @@
 /* Server only. Keys are read from Script Properties; never accepted from callers. */
 function providerConfig_() {
   var properties = PropertiesService.getScriptProperties();
-  function config(id, keyName, modelName, model, rpm) {
+  function config(id, keyName, modelName, model, rpm, timeoutSeconds) {
     var override = properties.getProperty(modelName);
     return { id: id, key: properties.getProperty(keyName) || '',
-      model: override && /^[a-zA-Z0-9._/-]{1,100}$/.test(override) ? override : model, rpm: rpm };
+      model: override && /^[a-zA-Z0-9._/-]{1,100}$/.test(override) ? override : model, rpm: rpm, timeoutSeconds: timeoutSeconds };
   }
-  return [config('intern', 'INTERN_AI_API_KEY', 'INTERN_AI_MODEL', 'deepseek-v4-flash-0731', 45),
-    config('groq', 'GROQ_API_KEY', 'GROQ_MODEL', 'openai/gpt-oss-120b', 6),
-    config('gemini', 'GEMINI_API_KEY', 'GEMINI_MODEL', 'gemini-2.5-flash', 6)];
+  return [config('intern', 'INTERN_AI_API_KEY', 'INTERN_AI_MODEL', 'deepseek-v4-flash-0731', 45, 45),
+    config('groq', 'GROQ_API_KEY', 'GROQ_MODEL', 'openai/gpt-oss-120b', 6, 35),
+    config('gemini', 'GEMINI_API_KEY', 'GEMINI_MODEL', 'gemini-2.5-flash', 6, 45)];
 }
 function aiHealth_() {
   var providers = providerConfig_();
   return { status: 'success', service: 'tarot-ai', version: 2, readingFormat: 2, streaming: false,
+    promptVersion: TarotServerPersona.PROMPT_VERSION, fallbackVersion: 2,
     configured: providers.some(function (p) { return !!p.key; }),
     providers: providers.map(function (p) { return { id: p.id, model: p.model, configured: !!p.key }; }) };
 }
@@ -60,12 +61,17 @@ function providerCall_(provider, payload, state, followup) {
   }
   var response;
   try { response = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', muteHttpExceptions: true,
-    headers: headers, payload: JSON.stringify(request) }); }
-  catch (_) { throw failure_('PROVIDER_ERROR', 'Kết nối dịch vụ bị gián đoạn.', 10); }
+    headers: headers, payload: JSON.stringify(request), timeoutSeconds: provider.timeoutSeconds }); }
+  catch (error) {
+    var timedOut = /time\s*out|timed\s*out|timeout|deadline/i.test(String(error && error.message || ''));
+    throw failure_(timedOut ? 'PROVIDER_TIMEOUT' : 'PROVIDER_ERROR', 'Kết nối dịch vụ bị gián đoạn.', 30);
+  }
   var status = response.getResponseCode();
-  if (status === 429) throw failure_('RATE_LIMIT', 'Dịch vụ đang chạm hạn mức.', retrySeconds_(response));
-  if (status === 401 || status === 403) throw failure_('AUTH_ERROR', 'Cấu hình kết nối cần được kiểm tra.', 300);
-  if (status < 200 || status >= 300) throw failure_('PROVIDER_ERROR', 'Dịch vụ chưa phản hồi.', status >= 500 ? 15 : 60);
+  var httpError;
+  if (status === 429) httpError = failure_('RATE_LIMIT', 'Dịch vụ đang chạm hạn mức.', retrySeconds_(response));
+  else if (status === 401 || status === 403) httpError = failure_('AUTH_ERROR', 'Cấu hình kết nối cần được kiểm tra.', 300);
+  else if (status < 200 || status >= 300) httpError = failure_('PROVIDER_ERROR', 'Dịch vụ chưa phản hồi.', status >= 500 ? 15 : 60);
+  if (httpError) { httpError.httpStatus = status; throw httpError; }
   var result;
   try { result = JSON.parse(response.getContentText()); } catch (_) { throw failure_('PROVIDER_ERROR', 'Phản hồi không hợp lệ.', 10); }
   var content, finish;
@@ -127,28 +133,37 @@ function ai_(data) {
     if (cache.get('pending:' + cacheKey)) throw failure_('BUSY', 'Lượt này đang được đọc.', 5);
     cache.put('pending:' + cacheKey, '1', 240);
   } finally { lock.releaseLock(); }
-  var failures = [];
+  var failures = [], attempts = [];
+  function trace(provider, code, status, started) {
+    var item = { provider: provider.id, code: code, status: Number(status) || 0, elapsedMs: Math.max(0, Date.now() - started) };
+    attempts.push(item); console.log(JSON.stringify({ event: "tarot_ai_attempt", provider: item.provider, code: item.code, status: item.status, elapsedMs: item.elapsedMs }));
+  }
+  function exhausted(code, message, retryAfter) { var error = failure_(code, message, retryAfter); error.attempts = attempts; return error; }
   try {
     for (var i = 0; i < providers.length; i++) {
-      var provider = providers[i], reservation = reserveProvider_(provider, cache);
-      if (reservation) { failures.push(reservation); continue; }
+      var provider = providers[i], started = Date.now();
       try {
+        var reservation = reserveProvider_(provider, cache);
+        if (reservation) throw reservation;
         var answer = providerCall_(provider, payload, state, followup);
-        cache.put(cacheKey, JSON.stringify(answer), 300); return answer;
+        trace(provider, "OK", 200, started); answer.attempts = attempts;
+        try { cache.put(cacheKey, JSON.stringify(answer), 300); } catch (_) {}
+        return answer;
       } catch (error) {
         // Validation occurred before this loop. Provider faults never expose upstream bodies or keys.
-        var safe = error.code ? error : failure_('PROVIDER_ERROR', 'Dịch vụ chưa phản hồi.', 10);
+        var safe = ['RATE_LIMIT', 'AUTH_ERROR', 'PROVIDER_ERROR', 'PROVIDER_TIMEOUT', 'INCOMPLETE_READING', 'BUSY'].indexOf(error && error.code) >= 0 ? error : failure_('PROVIDER_ERROR', 'Dịch vụ chưa phản hồi.', 10);
+        trace(provider, safe.code, safe.httpStatus, started);
         failures.push(safe);
-        if (safe.retryAfter) cache.put('tarot-ai:' + provider.id + ':cooldown', JSON.stringify({ until: Date.now() + safe.retryAfter * 1000, code: safe.code }), Math.min(21600, safe.retryAfter));
+        if (safe.retryAfter) { try { cache.put('tarot-ai:' + provider.id + ':cooldown', JSON.stringify({ until: Date.now() + safe.retryAfter * 1000, code: safe.code }), Math.min(21600, safe.retryAfter)); } catch (_) {} }
       }
     }
     var allRate = failures.every(function (e) { return e.code === 'RATE_LIMIT'; });
     var retry = Math.min.apply(null, failures.map(function (e) { return e.retryAfter || 30; }));
-    if (allRate) throw failure_('RATE_LIMIT', 'Các dịch vụ đang chạm hạn mức.', retry);
-    if (failures.every(function (e) { return e.code === 'BUSY'; })) throw failure_('BUSY', 'Dịch vụ đang bận.', retry);
-    if (failures.every(function (e) { return e.code === 'AUTH_ERROR'; })) throw failure_('AUTH_ERROR', 'Cấu hình kết nối cần được kiểm tra.');
-    if (failures.some(function (e) { return e.code === 'INCOMPLETE_READING'; })) throw failure_('INCOMPLETE_READING', 'Lời giải chưa hoàn chỉnh.');
-    throw failure_('PROVIDER_ERROR', 'Các dịch vụ chưa phản hồi. Bạn thử lại sau một chút nhé.');
+    if (allRate) throw exhausted('RATE_LIMIT', 'Các dịch vụ đang chạm hạn mức.', retry);
+    if (failures.every(function (e) { return e.code === 'BUSY'; })) throw exhausted('BUSY', 'Dịch vụ đang bận.', retry);
+    if (failures.every(function (e) { return e.code === 'AUTH_ERROR'; })) throw exhausted('AUTH_ERROR', 'Cấu hình kết nối cần được kiểm tra.');
+    if (failures.some(function (e) { return e.code === 'INCOMPLETE_READING'; })) throw exhausted('INCOMPLETE_READING', 'Lời giải chưa hoàn chỉnh.');
+    throw exhausted('PROVIDER_ERROR', 'Các dịch vụ chưa phản hồi. Bạn thử lại sau một chút nhé.');
   } finally { cache.remove('pending:' + cacheKey); }
 }
 // Run manually in the editor. Checks credentials without generating a paid response.
@@ -158,8 +173,10 @@ function checkAIConnections() {
     if (!p.key) { console.log(p.id + ': chưa cấu hình, sẽ bỏ qua.'); return; }
     var url = p.id === 'intern' ? 'https://discovery-api.intern-ai.org.cn/v1/models' : p.id === 'groq'
       ? 'https://api.groq.com/openai/v1/models' : 'https://generativelanguage.googleapis.com/v1beta/models';
-    var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true,
-      headers: p.id === 'gemini' ? { 'x-goog-api-key': p.key } : { Authorization: 'Bearer ' + p.key } });
-    console.log(p.id + ': HTTP ' + response.getResponseCode() + '; model đang chọn: ' + p.model + '. Khóa không được xuất ra web.');
+    try {
+      var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true, timeoutSeconds: 10,
+        headers: p.id === 'gemini' ? { 'x-goog-api-key': p.key } : { Authorization: 'Bearer ' + p.key } });
+      console.log(p.id + ': HTTP ' + response.getResponseCode() + '; model đang chọn: ' + p.model + '. Khóa không được xuất ra web.');
+    } catch (_) { console.log(p.id + ': lỗi kết nối hoặc quá thời gian; tiếp tục kiểm tra dịch vụ sau.'); }
   });
 }

@@ -41,3 +41,47 @@ test('only an exhausted chain imposes a browser cooldown, and auth errors explai
     ? { status: 'error', code: 'AUTH_ERROR', message: 'secret upstream response' } : { service: 'tarot-ai', version: 2, configured: true }) });
   await assert.rejects(auth.read(state), /chủ trang kiểm tra/);
 });
+
+test('connection loss and a pending server request recover using the exact same AI snapshot', async () => {
+  const posts = [], waits = []; let now = 0;
+  const ai = create({ endpoint: 'https://example.test/exec', now: () => now,
+    sleep: async ms => { waits.push(ms); now += ms; }, fetch: async (_, options) => {
+      if (!options.body) return response({ service: 'tarot-ai', version: 2, configured: true });
+      posts.push(JSON.parse(options.body));
+      if (posts.length === 1) throw new TypeError('Network disconnected');
+      if (posts.length === 2) return response({ status: 'error', code: 'BUSY', retryAfter: 5 });
+      return response({ status: 'success', text: 'An ơi, Rót chào bạn.', provider: 'groq' });
+    } });
+  const result = await ai.read({ ...state, userGender: 'Nữ' });
+  assert.match(result, /An ơi/); assert.equal(posts.length, 3);
+  assert.deepEqual(posts[0], posts[1]); assert.deepEqual(posts[1], posts[2]);
+  assert.equal(posts[0].state.gender, 'Nữ'); assert.deepEqual(waits, [1500, 5000]);
+});
+
+test('concurrent identical reading requests share one network operation', async () => {
+  let posts = 0, release; const gate = new Promise(resolve => { release = resolve; });
+  const ai = create({ endpoint: 'https://example.test/exec', fetch: async (_, options) => {
+    if (!options.body) return response({ service: 'tarot-ai', version: 2, configured: true });
+    posts++; await gate; return response({ status: 'success', text: 'Một lượt đọc.' });
+  } });
+  const first = ai.read(state), second = ai.read(state); release();
+  assert.deepEqual(await Promise.all([first, second]), ['Một lượt đọc.', 'Một lượt đọc.']);
+  assert.equal(posts, 1);
+});
+
+test('BUSY has a bounded wait and never becomes a misleading rate limit on the next attempt', async () => {
+  let busy = true, now = 0;
+  const ai = create({ endpoint: 'https://example.test/exec', now: () => now, sleep: async ms => { now += ms; },
+    fetch: async (_, options) => response(!options.body ? { service: 'tarot-ai', version: 2, configured: true }
+      : busy ? { status: 'error', code: 'BUSY', retryAfter: 5 } : { status: 'success', text: 'Đã xong.' }) });
+  await assert.rejects(ai.read(state), error => error.code === 'BUSY' && !/hạn mức/.test(error.message));
+  busy = false; assert.equal(await ai.read(state), 'Đã xong.');
+});
+
+test('diagnostics keep only known providers and codes, never arbitrary provider bodies', async () => {
+  const { diagnostics } = require('../js/tarot-ai.js');
+  const attempts = [{ provider: 'intern', code: 'AUTH_ERROR', status: 401, elapsedMs: 1000, key: 'private-secret' },
+    { provider: 'evil-private-secret', code: 'OK', status: 200 }, { provider: 'groq', code: 'private-secret' }];
+  const text = diagnostics({ code: 'PROVIDER_ERROR', attempts, message: 'private-secret' });
+  assert.equal(text, 'PROVIDER_ERROR / intern:AUTH_ERROR/HTTP401/1000ms');
+});
