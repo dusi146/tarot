@@ -14,7 +14,7 @@
   const profile = window.TarotProfile.create(() => localStorage);
   const ai = window.TarotAI.create({ endpoint: window.TAROT_SHEETS_CONFIG.endpoint });
   let version = 0, readingPending = false, chatPending = false, sheetSession = null, feedbackPending = false, nudged = false;
-  let state = { userName: '', userGender: '', userQuestion: '', userVibe: 'chualanh', dob: {}, zodiac: '', activeSpread: spreads.time, selectedCards: [], readingResult: '', followupHistory: [] };
+  let state = { userName: '', userGender: '', userQuestion: '', userVibe: 'rot', dob: {}, zodiac: '', activeSpread: spreads.time, selectedCards: [], readingResult: '', followupHistory: [] };
   let ready = false, optionsAnimation = null, toastTimer, restarting = false, readingRetryTimer;
   const picked = name => document.querySelector('input[name="' + name + '"]:checked')?.value;
   const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -78,11 +78,13 @@
     if (restarting) return;
     restarting = true; version++;
     await Promise.all([...document.querySelectorAll('dialog[open]')].map(closeDialog));
-    clearSession(); state.userQuestion = ''; $('question').value = ''; engine.home();
-    restarting = false;
+    try {
+      await engine.returnHome();
+      clearSession(); state.userQuestion = ''; $('question').value = '';
+    } finally { restarting = false; }
   }
   $('intent-form').addEventListener('submit', event => {
-    event.preventDefault(); if (!ready) return;
+    event.preventDefault(); if (!ready || restarting || document.body.dataset.act !== 'HOME') return;
     const value = getProfile(), dob = value.dob, anyDate = dob.day || dob.month || dob.year;
     if (anyDate && (!dob.day || !dob.month || !dob.year || !persona.validDate(dob.day, dob.month, dob.year))) {
       $('form-error').textContent = 'Bạn nhập đủ ngày, tháng, năm sinh hợp lệ hoặc để trống cả ba nhé.'; return;
@@ -95,12 +97,15 @@
     $('form-error').textContent = ''; profile.save(value); engine.start(state.activeSpread);
   });
   function onStage(event) {
-    const home = event.detail === 'HOME';
-    $('welcome-panel').hidden = !home;
-    if (home) $('begin-reading').disabled = false;
+    const home = event.detail === 'HOME', returning = event.detail === 'RETURN';
+    $('welcome-panel').hidden = !(home || returning);
+    $('welcome-panel').inert = !home;
+    $('begin-reading').disabled = !home;
+    if (!home && !returning) document.body.classList.remove('return-arriving');
   }
   window.addEventListener('tarot:stage', onStage);
   window.addEventListener('tarot:selection', event => {
+    if (document.body.dataset.act === 'RETURN') return;
     const selected = event.detail;
     if (!selected.length) return;
     state.selectedCards = selected;
@@ -108,9 +113,9 @@
     const becameComplete = complete && !$('open-reading').classList.contains('reading-ready');
     $('open-reading').disabled = !complete;
     $('open-reading').classList.toggle('reading-ready', complete);
-    $('open-reading').textContent = complete ? 'Đọc trải bài cùng Rót' : 'Xem lời giải';
+    $('open-reading').textContent = complete ? (state.userVibe === 'rost' ? 'Read with Rost' : 'Đọc trải bài cùng ' + persona.tone(state.userVibe).label) : 'Xem lời giải';
     $('flip-all').hidden = complete;
-    if (complete) $('reveal-header-hint').textContent = 'Chạm vào lá để ngắm gần, hoặc cùng Rót đọc trải bài.';
+    if (complete) $('reveal-header-hint').textContent = state.userVibe === 'rost' ? 'Tap a card for a closer look, or read the spread with Rost.' : 'Chạm vào lá để ngắm gần, hoặc cùng ' + persona.tone(state.userVibe).label + ' đọc trải bài.';
     if (becameComplete && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
       for (const element of [$('reveal-header-hint'), $('open-reading')]) {
         element.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 950, easing: 'ease-out' });
@@ -170,9 +175,15 @@
       source: 'Ta Văn Rót V2 / ' + (new URLSearchParams(location.search).get('ref') || 'Trực tiếp / Không rõ') };
   }
   function demoReading() {
-    const opening = { chualanh: 'Mình chậm lại một chút nhé. Rót đang nghe điều bạn băn khoăn.',
-      tatnuoc: 'Rót nói thẳng vào điều cần nhìn nhận nhé.', quansu: 'Mình tách câu chuyện thành những việc có thể chủ động.',
-      phansau: 'Mình thử nhìn điều đang lặp lại trong câu chuyện của bạn.' }[state.userVibe];
+    if (state.userVibe === 'rost') return reading.fromStructured({
+      greeting: 'Hello' + (state.userName ? ', ' + state.userName : '') + ', Rost here. Let’s take a closer look at your question.',
+      cards: Object.fromEntries(state.selectedCards.map((card, i) => ['card_' + i, card.data.name + ' offers a starting point for reflecting on this question. Its position and orientation would shape the full interpretation, alongside the other cards and the details you shared. This is a layout preview, not an AI reading.'])),
+      summary: 'This preview illustrates how Rost connects the spread to your question. A full reading would weigh the actual cards together, explain what supports a direction and what might complicate it, then identify a real-world sign to check. No conclusion about your circumstances is being made in this sample.',
+      advice: 'This is a preview of the prediction section, rather than a prediction about your life. In the full reading, Rost would name one observable development, explain which cards suggest it and give a practical sign to check.'
+    }, state);
+    const opening = { rot: 'Mình chậm lại một chút nhé. Rót đang nghe điều bạn băn khoăn.',
+      zot: 'Zót nói thẳng vào điều cần nhìn nhận nhé.', tot: 'Mình tách câu chuyện thành những việc có thể chủ động.',
+      bot: 'Bót nghe bạn nè. Mình thử nhìn điều đang lặp lại trong câu chuyện của bạn.' }[state.userVibe];
     return [opening, ...state.selectedCards.map((card, index) => state.activeSpread.slots[index].title + ': ' + card.data.viName + '\n'
       + card.data.viName + ' ở vị trí này gợi ý về ' + (card.isReversed ? card.data.revMeaning : card.data.meaning).toLowerCase()
       + '. Bạn có thể đối chiếu điều ấy với câu hỏi của mình và chọn một việc thực tế để thay đổi, thay vì vội kết luận về tương lai.'),
@@ -180,7 +191,17 @@
         + ' gợi trọng tâm để bạn đối chiếu, còn cả trải bài cần được đọc cùng câu hỏi và những gì đã thực sự xảy ra. Điểm thuận là bạn có thể quan sát kết quả của một lựa chọn nhỏ; điểm vướng là mình chưa có đủ bối cảnh để kết luận thay bạn. Nếu thông tin mới khác với điều đang nghĩ, hướng đi cũng cần được điều chỉnh. Hãy đối chiếu bằng một phản hồi cụ thể, thay vì chỉ chờ cảm giác chắc chắn. Đây là nội dung minh họa bố cục, chưa phải lời giải AI.',
       'Phán đoán của Rót\nRót đoán rằng bạn sẽ thử một cách bắt đầu nhỏ trước khi quyết định thay đổi hẳn. Trong mẫu minh họa này, '
         + state.selectedCards[0].data.viName + ' gợi ý về ' + (state.selectedCards[0].isReversed ? state.selectedCards[0].data.revMeaning : state.selectedCards[0].data.meaning).toLowerCase()
-        + ', từ đó nối sang khả năng thử trước một việc vừa sức. Dấu hiệu để đối chiếu là bạn chọn thử một việc cụ thể, thay vì chỉ tiếp tục cân nhắc. Bản thật sẽ dựa vào câu hỏi và toàn bộ lá bạn rút.\n\n' + reading.PREDICTION_NOTICE].join('\n\n');
+        + ', từ đó nối sang khả năng thử trước một việc vừa sức. Dấu hiệu để đối chiếu là bạn chọn thử một việc cụ thể, thay vì chỉ tiếp tục cân nhắc. Bản thật sẽ dựa vào câu hỏi và toàn bộ lá bạn rút.\n\n' + reading.PREDICTION_NOTICE].join('\n\n').replace(/Rót/g, persona.tone(state.userVibe).label);
+  }
+  function syncReaderUI() {
+    const name = persona.tone(state.userVibe).label, english = state.userVibe === 'rost';
+    $('reader-eyebrow').textContent = english ? 'A PERSPECTIVE FROM ROST' : 'GÓC NHÌN TỪ ' + name.toUpperCase();
+    $('reading-loading').querySelector('p').textContent = english ? 'Rost is reading your cards…' : name + ' đang đọc những lá bài…';
+    $('conversation-title').textContent = english ? 'Let’s talk it through' : 'Mình cùng gỡ thêm nhé';
+    document.querySelector('.conversation-invitation').textContent = english ? 'If the reading left something on your mind, tell Rost a little more. We can make sense of it together, one detail at a time.' : 'Nếu trải bài chưa gỡ hết điều bạn đang băn khoăn, cứ kể thêm cho ' + name + ' nghe nha. Mình cùng nhìn rõ câu chuyện của bạn, từng chút một.';
+    $('chat-input').placeholder = english ? 'Tell me what’s on your mind…' : 'Bạn cứ kể, ' + name + ' nghe nè…';
+    $('chat-input').lang = english ? 'en' : 'vi';
+    $('chat-send').textContent = english ? 'Send message' : 'Gửi tâm sự';
   }
   function renderSelectedCards() {
     reading.renderCards($('reading-cards'), state, document, 'images/');
@@ -230,7 +251,8 @@
     } finally { if (requestVersion === version) { readingPending = false; $('reading-loading').hidden = true; } }
   }
   $('open-reading').addEventListener('click', () => {
-    if ($('open-reading').disabled) return;
+    if ($('open-reading').disabled || restarting) return;
+    syncReaderUI();
     $('reading-title').textContent = state.userQuestion; $('preview-notice').hidden = !preview;
     renderSelectedCards(); showDialog('reading-modal');
     if (!state.readingResult) document.querySelector('#reading-modal .sheet-scroll').scrollTop = 0;
@@ -245,7 +267,7 @@
     const text = $('chat-input').value.trim(); if (!text) return;
     const requestVersion = version, history = [...state.followupHistory, { role: 'user', text }];
     chatPending = true; $('chat-send').disabled = true; message(text, 'user'); $('chat-input').value = '';
-    const pending = message('Rót đang nghe bạn…', 'pending');
+    const pending = message(state.userVibe === 'rost' ? 'Rost is listening…' : persona.tone(state.userVibe).label + ' đang nghe bạn…', 'pending');
     try {
       const card = state.selectedCards[0];
       const answer = preview ? (await wait(350), 'Rót nghe bạn. Trong trải bài mình vừa xem, ' + card.data.viName + ' ở vị trí ' + card.slotTitle
@@ -283,6 +305,7 @@
   });
   let topLoaded = false;
   async function support() {
+    if (restarting) return;
     showDialog('support-modal');
     document.querySelector('#support-modal .sheet-scroll').scrollTop = 0;
     if (topLoaded || preview) return;

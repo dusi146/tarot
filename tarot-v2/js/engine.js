@@ -3922,7 +3922,7 @@ function pumpFaces() {
     const job = faceJobs[0];
     if (!job) return;
     if (job.version !== generation) { faceJobs.shift(); job.resolve(null); pumpFaces(); return; }
-    const busy = state.picking || state.act === 'ASCEND' || state.act === 'GATHER' || state.act === 'INTRO'
+    const busy = state.picking || state.act === 'ASCEND' || state.act === 'GATHER' || state.act === 'INTRO' || state.act === 'RETURN'
       || state.isHoldingShuffle || state.selectedCards.some(card => card.flipRequested && !card.flipComplete);
     if (busy) { pumpFaces(); return; }
     faceJobs.shift();
@@ -4122,11 +4122,7 @@ const introTrails = [0xD2B5FA, 0xF8E5B8, 0x78DCD6].map(color => {
   introOrbits.add(glow);
   return { positions, geometry, material, glow };
 });
-function updateHome(dt) {
-  const intro = state.act === 'INTRO';
-  let blend = intro ? clamp((state.actTime - .15) / 6.2, 0, 1) : 1;
-  if (intro && state.introSkipAt !== null) blend = lerp(state.introSkipFrom, 1, smootherstep((state.actTime - state.introSkipAt) / .95));
-  state.introBlend = blend;
+function homeFrame(dt) {
   const t = reducedMotion ? 0 : state.globalTime;
   const z = layoutMetrics.introCamZ;
   const viewHeight = 2 * z * Math.tan(camera.fov * Math.PI / 360), unit = viewHeight / innerHeight;
@@ -4138,6 +4134,87 @@ function updateHome(dt) {
   const centerX = compact ? 0 : innerWidth * .225 * unit;
   const centerY = portrait ? (innerHeight / 2 - homePlacement.center) * unit : compact ? viewHeight * .27 : 0;
   const size = portrait ? Math.min(.68, homePlacement.height * unit / CARD_H) : compact ? Math.min(.68, viewHeight * .24 / CARD_H) : Math.min(1.05, viewHeight * .53 / CARD_H, viewWidth * .14 / CARD_W);
+  return { t, z, viewHeight, viewWidth, compact, centerX, centerY, size };
+}
+let homeReturn = null;
+function beginReturnHome() {
+  if (homeReturn) return homeReturn.promise;
+  if (!['REVEAL', 'ASCEND'].includes(state.act) || ![1, 3, 4].includes(state.selectedCards.length) || reducedMotion) {
+    window.TarotExperience.home(); return Promise.resolve();
+  }
+  generation++; for (const timer of scheduled) clearTimeout(timer); scheduled.clear();
+  state.inputBlocked = false; state.picking = false; state.isHoldingShuffle = false;
+  pointerState.isDown = pointerState.isDragging = false; state.hoveredCardIndex = -1;
+  window.TarotMobile?.suspend(true);
+  hideSpreadUI(); hideRevealedCaptions(); introOrbits.visible = false;
+  holdBtnEl.classList.remove('visible', 'holding'); setWhisper('');
+  document.body.classList.remove('inspecting-card', 'return-arriving');
+  const selected = [...state.selectedCards].sort((a, b) => a.pos.x - b.pos.x || b.pos.y - a.pos.y);
+  const unused = cards.filter(card => !selected.includes(card));
+  cards.forEach(card => { card.mesh.visible = selected.includes(card); card.haloMat.opacity = 0; });
+  const items = window.TarotReturn.plan(selected.length).map(role => {
+    const card = role.source === null ? unused.shift() : selected[role.source];
+    deckGroup.attach(card.mesh);
+    if (role.kind === 'enter') { card.rot.set(0, Math.PI, 0); Object.assign(card.frontMat, backMaps); }
+    card.flightActive = false; card.vel.set(0, 0, 0); card.scaleVel = 0;
+    return { ...role, card, start: card.pos.clone(), quat: card.quat.clone(), size: card.scale,
+      back: new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI, 0)),
+      target: new THREE.Quaternion(), euler: new THREE.Euler() };
+  });
+  let resolve; const promise = new Promise(done => { resolve = done; });
+  homeReturn = { items, promise, resolve };
+  state.inspectedSlot = -1; state.actTime = 0; state.act = 'RETURN';
+  syncSceneActivity(); return promise;
+}
+function updateReturnHome(dt) {
+  if (!homeReturn) return;
+  if (state.actTime < .15) refreshHomeBounds();
+  const frame = homeFrame(dt), seconds = state.actTime;
+  const motion = window.TarotReturn.phase(seconds);
+  if (seconds >= window.TarotReturn.DEPART) {
+    state.camTargetPos.set(0, .14, frame.z); state.camTargetLookAt.set(0, .12, 0);
+  }
+  if (motion.flight > .48) document.body.classList.add('return-arriving');
+  homeReturn.items.forEach((item, index) => {
+    const { card, start, size } = item, phase = window.TarotReturn.phase(seconds, index);
+    const p = phase.flight, arc = Math.sin(p * Math.PI);
+    if (item.kind === 'exit') {
+      card.quat.copy(item.quat).slerp(item.back, phase.flip);
+      card.pos.set(start.x + p * (frame.viewWidth + CARD_W * size * 2), start.y + arc * .6,
+        start.z - p * 3.5);
+      card.scale = size * (1 - p * .25); card.mesh.visible = p < 1;
+    } else {
+      const slot = item.slot;
+      const gap = frame.compact ? CARD_W * frame.size * .72 : Math.min(1.18, frame.viewWidth * .115);
+      const x = frame.centerX + (slot - 1) * gap, y = frame.centerY + Math.sin(frame.t * .8 + slot) * .04, z = slot === 1 ? .82 : 0;
+      item.euler.set(-.035 + state.smoothPointer.y * .045, Math.PI + (1 - slot) * .22 + state.smoothPointer.x * .065, (1 - slot) * .10);
+      item.target.setFromEuler(item.euler);
+      const entering = item.kind === 'enter';
+      const fromX = entering ? item.side * (frame.viewWidth * .5 + CARD_W * frame.size * 2) : start.x;
+      const fromY = entering ? frame.centerY - .6 : start.y;
+      const fromZ = entering ? -1.4 : start.z;
+      card.mesh.visible = !entering || seconds >= window.TarotReturn.DEPART;
+      card.pos.set(lerp(fromX, x, p), lerp(fromY, y, p) + arc * (slot === 1 ? .22 : .48),
+        lerp(fromZ, z, p) - arc * (slot === 1 ? .15 : .55));
+      if (p === 0) card.quat.copy(item.quat).slerp(item.back, phase.flip);
+      else card.quat.copy(item.back).slerp(item.target, p);
+      card.scale = lerp(entering ? frame.size * .82 : size, frame.size, p);
+      card.glintPhase = Math.sin(frame.t * .4 + slot) * 1.15;
+    }
+    card.rimGlow = .16; card.mesh.scale.setScalar(card.scale);
+  });
+  if (motion.done) {
+    const finished = homeReturn; homeReturn = null;
+    window.TarotExperience.home(); updateHome(0);
+    window.TarotMobile?.suspend(false); finished.resolve();
+  }
+}
+function updateHome(dt) {
+  const intro = state.act === 'INTRO';
+  let blend = intro ? clamp((state.actTime - .15) / 6.2, 0, 1) : 1;
+  if (intro && state.introSkipAt !== null) blend = lerp(state.introSkipFrom, 1, smootherstep((state.actTime - state.introSkipAt) / .95));
+  state.introBlend = blend;
+  const { t, z, viewHeight, viewWidth, compact, centerX, centerY, size } = homeFrame(dt);
   const orbit = smootherstep((blend - .08) / .52), gather = smootherstep((blend - .60) / .23);
   const land = smootherstep((blend - .83) / .17);
   const heroSize = Math.min(.92, viewWidth * .19 / CARD_W, viewHeight * .25 / CARD_H);
@@ -4234,6 +4311,7 @@ function publishState(dt) {
   }
 }
 window.TarotExperience = {
+  returnHome: beginReturnHome,
   start(spread) {
     this.home(false); activeCount = spread.count; SPREAD_STEP_NAMES = spread.slots.map(s => s.title);
     document.body.style.setProperty('--slot-count', activeCount);
@@ -4245,6 +4323,8 @@ window.TarotExperience = {
     state.mode = 'MANUAL'; state.picking = false; enterActShuffle(false);
   },
   home(intro = false) {
+    if (homeReturn) { const cancelled = homeReturn; homeReturn = null; cancelled.resolve(); }
+    window.TarotMobile?.suspend(false);
     generation++; for (const timer of scheduled) clearTimeout(timer); scheduled.clear();
     maxFaceTask = 0; revealLayoutViewport = ''; revealReservedTop = 0;
     captionEls.forEach(caption => { caption.classList.remove('inspection-muted'); caption.inert = false; });
@@ -4405,6 +4485,7 @@ holdBtnEl.addEventListener('keyup', event => { if (event.key === 'Enter' || even
         // Execute current Act choreography
         switch (state.act) {
           case 'INTRO': case 'HOME': updateHome(dt); break;
+          case 'RETURN': updateReturnHome(dt); break;
           case 'SHUFFLE':
             updateActShuffle(dt, state.actTime);
             break;

@@ -173,6 +173,14 @@
       <label><input type="radio" name="spread" value="mind"><span class="spread-symbol glyph-mind" aria-hidden="true"><i></i><i></i><i></i></span><span class="spread-copy"><strong>Cân bằng</strong><small>Thân, tâm và trí</small></span></label>
       <label><input type="radio" name="spread" value="solution"><span class="spread-symbol glyph-solution" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="spread-copy"><strong>Gỡ rối</strong><small>Nhìn rõ hướng đi</small></span></label>
     </fieldset>
+    <fieldset class="tone-picker reader-picker" aria-describedby="tone-description"><legend>Chọn reader đồng hành</legend>
+      <label><input type="radio" name="vibe" value="rot" checked><span><strong>Rót</strong><small>Quốc dân</small></span></label>
+      <label><input type="radio" name="vibe" value="bot"><span><strong>Bót</strong><small>Tâm sự</small></span></label>
+      <label><input type="radio" name="vibe" value="tot"><span><strong>Tót</strong><small>Quân sư</small></span></label>
+      <label><input type="radio" name="vibe" value="zot"><span><strong>Zót</strong><small>Nói thẳng</small></span></label>
+      <label><input type="radio" name="vibe" value="rost"><span><strong>Rost</strong><small>English</small></span></label>
+    </fieldset>
+    <p id="tone-description" class="field-note reader-description" aria-live="polite"></p>
     <button type="button" id="options-toggle" class="options-toggle" aria-expanded="false" aria-controls="personal-options">Tùy chỉnh thêm <span aria-hidden="true">+</span></button>
     <div id="personal-options" class="personal-options" hidden>
       <div class="field-pair"><div><label for="name">Tên bạn <small>tùy chọn</small></label><input id="name" maxlength="100" autocomplete="given-name" placeholder="Rót gọi bạn là…"></div>
@@ -180,13 +188,6 @@
       <label>Ngày sinh <small>tùy chọn</small></label>
       <div class="birthday-fields"><select id="birth-day" aria-label="Ngày sinh"><option value="">Ngày</option></select><select id="birth-month" aria-label="Tháng sinh"><option value="">Tháng</option></select><select id="birth-year" aria-label="Năm sinh"><option value="">Năm</option></select></div>
       <output id="zodiac" class="zodiac" aria-live="polite"></output>
-      <fieldset class="tone-picker"><legend>Bạn muốn nghe Rót thế nào?</legend>
-        <label><input type="radio" name="vibe" value="chualanh" checked><span>Chữa lành</span></label>
-        <label><input type="radio" name="vibe" value="tatnuoc"><span>Thẳng thắn</span></label>
-        <label><input type="radio" name="vibe" value="quansu"><span>Chiến lược</span></label>
-        <label><input type="radio" name="vibe" value="phansau"><span>Triết lý</span></label>
-      </fieldset>
-      <p id="tone-description" class="field-note"></p>
       <p class="memory-note">Rót nhớ thông tin trên trình duyệt này. <button type="button" id="forget-profile">Quên thông tin</button></p>
     </div>
     <p id="form-error" class="form-error" role="alert"></p>
@@ -197,7 +198,7 @@
 <dialog id="reading-modal" class="app-dialog" aria-labelledby="reading-title">
   <div class="sheet-shell">
     <div class="sheet-handle" aria-hidden="true"></div>
-    <header class="sheet-header"><div><span class="eyebrow">GÓC NHÌN TỪ RÓT</span><h2 id="reading-title" tabindex="-1"></h2></div><button class="close-dialog" type="button" data-close="reading-modal" aria-label="Đóng lời giải"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+    <header class="sheet-header"><div><span class="eyebrow" id="reader-eyebrow">GÓC NHÌN TỪ RÓT</span><h2 id="reading-title" tabindex="-1"></h2></div><button class="close-dialog" type="button" data-close="reading-modal" aria-label="Đóng lời giải"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
     <div class="sheet-scroll">
       <p id="preview-notice" class="preview-notice" hidden>Bản xem thử. Lời giải và tâm sự được mô phỏng; không gửi dữ liệu ra ngoài.</p>
       <div id="reading-cards" class="reading-cards" aria-label="Các lá đã rút"></div>
@@ -205,7 +206,7 @@
       <div id="reading-text" class="reading-text" aria-live="polite"></div>
       <button id="retry-reading" class="outline-button" type="button" hidden>Thử lại lời giải</button>
       <p id="sheet-status" class="field-note" aria-live="polite" hidden></p>
-      <section id="conversation" hidden><h3>Mình cùng gỡ thêm nhé</h3><p class="conversation-invitation">Nếu trải bài chưa gỡ hết điều bạn đang băn khoăn, cứ kể thêm cho Rót nghe nha. Mình cùng nhìn rõ câu chuyện của bạn, từng chút một.</p>
+      <section id="conversation" hidden><h3 id="conversation-title">Mình cùng gỡ thêm nhé</h3><p class="conversation-invitation">Nếu trải bài chưa gỡ hết điều bạn đang băn khoăn, cứ kể thêm cho Rót nghe nha. Mình cùng nhìn rõ câu chuyện của bạn, từng chút một.</p>
         <div id="messages" class="messages" role="log" aria-live="polite"></div>
         <form id="chat-form"><label class="sr-only" for="chat-input">Lời tâm sự của bạn</label><textarea id="chat-input" rows="2" maxlength="6000" placeholder="Bạn cứ kể, Rót nghe nè…" required></textarea><button class="gold-button" id="chat-send" type="submit">Gửi tâm sự</button></form>
       </section>
@@ -242,6 +243,7 @@
 <div id="toast" class="app-toast" role="status" aria-live="polite"></div>
 <div id="modal-shade" aria-hidden="true"></div>
 
+  <script src="js/tarot-return.js" defer></script>
   <script src="js/engine.js" defer></script>
 <script src="js/tarot-spoiler.js" defer></script>
 <script src="js/app.js" defer></script>

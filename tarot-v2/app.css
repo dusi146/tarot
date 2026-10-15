@@ -377,3 +377,20 @@ body:not([data-act="INTRO"]) #skip-intro{display:none}
  .support-paths{grid-template-columns:1fr 1fr}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important;transition-delay:0s!important;scroll-behavior:auto!important}}
+
+/* Reader choices stay visible, including on narrow phones. */
+.reader-picker{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.reader-picker legend{margin-bottom:8px}
+.reader-picker label{min-width:0}
+.reader-picker span{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:57px;padding:8px 2px;border-radius:12px;text-align:center}
+.reader-picker strong{font-size:13px;font-weight:600;letter-spacing:.02em}
+.reader-picker small{font-size:9px;opacity:.6;margin:0;white-space:nowrap}
+.reader-picker input:checked+span{background:linear-gradient(145deg,rgba(226,194,133,.2),rgba(52,43,77,.5));box-shadow:inset 0 1px 0 rgba(255,242,208,.12),0 4px 16px rgba(5,8,24,.14)}
+.reader-description{margin:-4px 0 2px;min-height:2em;font-size:10px;line-height:1.6}
+body[data-act="RETURN"] #control-dock,body[data-act="RETURN"] #reveal-action-bar{opacity:0;pointer-events:none;visibility:hidden}
+body[data-act="RETURN"] #stage-container{pointer-events:none}
+body[data-act="RETURN"] .welcome-panel{animation:none;opacity:0;pointer-events:none;transition:opacity .8s ease}
+body[data-act="RETURN"].return-arriving .welcome-panel{opacity:1}
+body[data-act="HOME"].return-arriving .welcome-panel{animation:none}
+@media(max-width:767px){.reader-picker span{min-height:54px}.reader-picker strong{font-size:14px}.reader-description{font-size:11px}.reader-picker small{font-size:9px}}
+@media(prefers-reduced-motion:reduce){body[data-act="RETURN"] .welcome-panel{transition:none}}

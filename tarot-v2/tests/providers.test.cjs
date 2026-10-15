@@ -159,16 +159,16 @@ test('four-card readings remain complete with all five routes and explicit JSON 
  }
 });
 test('new prediction headings are negotiated per request and cached separately from already-open older tabs',()=>{
- for(const formats of [[undefined,3],[3,undefined]]){
-  const app=server(); assert.equal(app.health().readingFormat,3); assert.equal(app.health().promptVersion,7);
+ for(const formats of [[undefined,3,4],[4,3,undefined]]){
+  const app=server(); assert.equal(app.health().readingFormat,4); assert.equal(app.health().promptVersion,8);
   for(const readingFormat of formats){
    const request={action:'ai_reading',state,...(readingFormat?{readingFormat}:{})},result=app.post(request);
    assert.equal(result.status,'success');
-   assert.match(result.text,readingFormat===3?/\nPhán đoán của Rót\n/:/\nMột bước nhỏ cho bạn\n/);
+   assert.match(result.text,readingFormat===4?/\nPhán đoán của Zót\n/:readingFormat===3?/\nPhán đoán của Rót\n/:/\nMột bước nhỏ cho bạn\n/);
    assert.ok(result.text.endsWith(require('../js/tarot-reading.js').PREDICTION_NOTICE));
    assert.equal(app.post(request).text,result.text);
   }
-  assert.equal(app.calls.length,2); assert.equal(app.rows.length,0);
+  assert.equal(app.calls.length,3); assert.equal(app.rows.length,0);
  }
 });
 

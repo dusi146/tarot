@@ -14,7 +14,7 @@ for (const health of [{ service: 'tarot-ai', version: 2, configured: true }, { s
   } });
   assert.deepEqual(await ai.readResult(state), { text: 'Chào bạn.', provider: 'intern', model: 'deepseek-v4-flash-0711' });
   assert.equal(await ai.read(state), 'Chào bạn.'); assert.deepEqual(calls[0].state.cards, [{ id: '00', reversed: false }]);
-  assert.equal(calls[0].readingFormat, 3);
+  assert.equal(calls[0].readingFormat, 4);
   assert.ok(!/apiKey|Authorization|INTERN_AI_API_KEY/.test(JSON.stringify(calls)));
 });
 test('long conversation trims complete old pairs while keeping reading and newest question', async () => {

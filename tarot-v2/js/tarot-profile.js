@@ -2,7 +2,8 @@
 (function (root) {
   'use strict';
   const KEY = 'tarot.profile.v1';
-  const tones = ['chualanh', 'tatnuoc', 'quansu', 'phansau'];
+  const tones = ['rot', 'bot', 'tot', 'zot', 'rost'];
+  const aliases = { chualanh: 'rot', tatnuoc: 'zot', quansu: 'tot', phansau: 'rot' };
   const spreads = ['time', 'single', 'mind', 'solution'];
   function clean(value = {}) {
     if (!value || typeof value !== 'object') value = {};
@@ -11,7 +12,7 @@
       name: typeof value.name === 'string' ? value.name.trim().slice(0, 100) : '',
       gender: ['Nam', 'Nữ', 'Khác'].includes(value.gender) ? value.gender : '',
       dob: { day: number(value.dob?.day, 31), month: number(value.dob?.month, 12), year: number(value.dob?.year, new Date().getFullYear()) },
-      vibe: tones.includes(value.vibe) ? value.vibe : 'chualanh',
+      vibe: tones.includes(value.vibe) ? value.vibe : Object.prototype.hasOwnProperty.call(aliases, value.vibe) ? aliases[value.vibe] : 'rot',
       spread: spreads.includes(value.spread) ? value.spread : 'time'
     };
   }

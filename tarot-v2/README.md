@@ -1,5 +1,9 @@
 # Ta Văn Rót V2
 
+Reader chọn trực tiếp trên màn hình chính: Rót (mặc định, tỉ mỉ), Bót (tâm sự), Tót (quân sư), Zót (thẳng thắn) và Rost (English). Mỗi bạn có prompt lời giải/tâm sự riêng. Prompt 8 / readingFormat 4 giữ tương thích tab cũ.
+
+Nút Trải bài mới đóng cửa sổ đang mở rồi úp và đưa bài về màn hình chính: ba lá bay về, bốn lá có một lá bay ra, một lá được hai lá từ hai bên bay vào cùng. Chuyển cảnh 2,55 giây, có hỗ trợ giảm chuyển động.
+
 Bản mới độc lập, phát triển trực tiếp từ `3D.html` người dùng cung cấp. Giữ sân khấu, thiết kế mặt lưng, chất liệu, ánh sáng, bộ điều khiển chuyển động và âm thanh của bản 3D. Web cũ và bản sao lưu vẫn nằm ngoài thư mục này.
 
 Ngày 15/10/2026: ưu tiên **Xkiro / Mistral Large 4 → Intern mới → Intern cũ → Gemini → Groq**. Prompt 7 mở rộng Góc nhìn chung, đổi phần cuối thành một Phán đoán của Rót cụ thể theo lá bài, làm mờ và chạm để tiết lộ. Chữ hiện nhẹ sau khi mở bài và nhận lời giải; hỗ trợ bàn phím, đọc hỗ trợ và giảm chuyển động. 137 kiểm thử liên quan đạt; xem [báo cáo AI](AI_UPDATE.md) và [sự cố hạn mức](QUOTA_INCIDENT.md).
