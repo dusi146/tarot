@@ -1,6 +1,48 @@
 const test = require('node:test'), assert = require('node:assert/strict'), vm = require('node:vm'), fs = require('node:fs');
 const THREE = require('../vendor/three.r128.min.js');
 const source = fs.readFileSync(require.resolve('../js/engine.js'), 'utf8');
+
+test('Moon, Star and Sun load the matching deck image for both 3D faces and reading thumbnails', async () => {
+  const dataContext = { window: {} };
+  vm.runInNewContext(fs.readFileSync(require.resolve('../js/tarot-data.js'), 'utf8'), dataContext);
+  const deckData = ['18', '17', '19', '00'].map(id => dataContext.window.TAROT_CARDS.find(card => card.id === id));
+  const requested = [], drawn = [], initialized = [], faceCache = new Map();
+  class Image {
+    constructor() { this.naturalWidth = 610; this.naturalHeight = 1070; }
+    set src(value) { this.url = value; requested.push(value); queueMicrotask(() => this.onload()); }
+  }
+  const context = vm.createContext({ deckData, generation: 1, faceCache, Image, setTimeout, clearTimeout,
+    TEX_W: 900, TEX_H: 1530, state: { act: 'REVEAL' }, SPREAD_STEP_NAMES: ['Thông Điệp'], captionEls: [],
+    window: { TarotReading: { themeFor: () => ({ color: '#fff' }) } },
+    faceStep: async work => work(), renderer: { initTexture: texture => initialized.push(texture) },
+    createSynchronizedArtBuilder() {
+      const canvas = {};
+      return { cCtx: { createLinearGradient: () => ({ addColorStop() {} }), fillRect() {}, save() {}, clip() {}, restore() {},
+        drawImage(image) { canvas.asset = image.url; drawn.push(image.url); } },
+        applyPaperTextureOverlay() {}, drawFoil() {},
+        async compileMaps() { return { map: { image: canvas, dispose() {} }, roughnessMap: { dispose() {} } }; } };
+    }, roundedRectPath() {}, drawOrnateTarotFrame() {},
+    thumbnail(entry, canvas) { entry.image = 'blob:framed-' + canvas.asset; },
+    disposeFace(entry) { entry.disposed = true; }, applyMaps(card, maps) { card.frontMat = maps; }
+  });
+  vm.runInContext(source.slice(source.indexOf('function prepareFace(card)'), source.indexOf('function computeRevealLayout()')), context);
+  for (const [index, data] of deckData.entries()) {
+    const card = { index, slotIndex: 0, sharedUniforms: { uRimColor: { value: { set() {} } } } };
+    await context.prepareFace(card);
+    const asset = 'images/' + data.file;
+    assert.equal(card.frontMat.map.image.asset, asset);
+    assert.equal(card.image, 'blob:framed-' + asset);
+    assert.equal(card.faceReadyDone, true); assert.equal(faceCache.get(data.id).shared, false);
+    deckData[index] = { ...data, isReversed: true };
+    await context.prepareFace(card);
+    assert.equal(card.data.isReversed, true); assert.equal(card.frontMat.map.image.asset, asset);
+    assert.equal(requested.filter(url => url === asset).length, 1, 'Reversed/cached faces keep the same artwork without another request');
+    assert.ok(fs.existsSync(require.resolve('../' + asset)));
+  }
+  assert.deepEqual(drawn, requested); assert.equal(initialized.length, deckData.length * 2);
+  assert.doesNotMatch(source, /const heroMaps\s*=|maps\s*=\s*heroMaps\[/);
+});
+
 function artFixture() {
   const canvases = [];
   const document = { createElement() {

@@ -41,7 +41,7 @@ Máy chủ chỉ nghe tại máy đang chạy. Có thể đặt biến môi trư
 - Nút đóng dùng SVG căn giữa. Cửa sổ lời giải/ủng hộ mở và đóng khoảng 0,8 giây, lớp nền tối/mờ chuyển trong 0,9 giây, dùng chung khi mở cửa sổ lồng nhau.
 - Tắt lớp tô xanh mặc định khi chạm trên điện thoại và viền focus của thao tác con trỏ; vẫn giữ viền vàng khi dùng bàn phím.
 
-Ba tranh Moon, Star, Sun giữ bản vẽ procedural của `3D.html`. Những lá còn lại dùng ảnh Rider–Waite sẵn có, đặt trong khung chất liệu của bản 3D. Đây chưa phải 78 tranh vẽ mới cùng phong cách procedural.
+Cả 78 mặt bài dùng ảnh Rider–Waite sẵn có, kể cả Mặt Trăng, Ngôi Sao và Mặt Trời, đặt trong cùng khung chất liệu của bản 3D. Mặt lưng và hiệu ứng ánh sáng giữ thiết kế 3D.
 
 Khử răng cưa WebGL, lọc texture theo góc nhìn, giới hạn số điểm ảnh và giảm chất lượng tự động khi máy chậm. Chỉ vẽ các lá cần nhìn thấy, tải mặt trước khi cần và giữ bộ nhớ texture trong giới hạn khi trải lại. Độ mượt thực tế còn phụ thuộc GPU; không cam kết FPS trên mọi máy.
 

@@ -1,5 +1,7 @@
 # Lời giải và dự phòng API — 15/10/2026
 
+**Đồng bộ ảnh 78 lá:** Bỏ nhánh dùng tranh mẫu procedural cho Mặt Trăng (18), Ngôi Sao (17), Mặt Trời (19). Ba lá đi qua cùng luồng tải ảnh, tạo khung, thumbnail, cache và giải phóng texture như 75 lá còn lại. Không dựng hoặc tải trước ba bộ texture mẫu lúc mở trang. Giữ nguyên hiệu ứng 3D, lật bài và chiều ngược; không thay API/prompt.
+
 **Reader và trở về màn hình chính:** Prompt 8 / readingFormat 4 có năm reader: Rót mặc định tỉ mỉ, Bót tâm sự đáng yêu, Tót quân sư, Zót nói thẳng có căn cứ và Rost đọc/tâm sự bằng tiếng Anh. Picker hiện ngay trong form chính; tên, lời mời, tiêu đề phán đoán, schema và prompt theo reader. Các lựa chọn đã lưu trước đây được chuyển sang reader tương ứng. Giữ nguyên khóa JSON advice và thương lượng tiêu đề cho tab format 2/3; cache tách định dạng. Chuỗi nhà cung cấp và khóa không đổi.
 
 Trải bài mới đóng các cửa sổ trước, giữ các lá thật để úp trong 0,95 giây rồi bay về trong 1,6 giây. Ba lá về ba vị trí; bốn lá có một lá bay ra ngoài; một lá có hai lá từ hai bên bay vào. Form hiện dần cuối chuyển cảnh và khóa thao tác đến khi hoàn tất. Hủy kết quả AI trễ trước khi đóng cửa sổ; đồng hồ dùng giây, tab ẩn không tua bù. Tôn trọng giảm chuyển động. Kiểm tra riêng chuyển cảnh với Three.js trên máy tính/điện thoại, reader, schema tiếng Anh và tương thích tab cũ.

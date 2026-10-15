@@ -2419,13 +2419,8 @@
       const deckGroup = new THREE.Group();
       scene.add(deckGroup);
 
-      // Build procedural textures
+      // Only the back is procedural; every face uses the same 78-card image deck.
       const backMaps = buildBackCardMaps(renderer);
-      const heroMaps = [
-        buildMoonCardMaps(renderer), // 0: XVIII The Moon
-        buildStarCardMaps(renderer), // 1: XVII The Star
-        buildSunCardMaps(renderer)   // 2: XIX The Sun
-      ];
 
       const sharedCardGeometry = createBeveledCardGeometry();
       // Three's exact triangle raycast can reject empty space using the tight local box first.
@@ -3950,20 +3945,16 @@ function prepareFace(card) {
   const data = card.data, version = generation;
   let entry = faceCache.get(data.id);
   if (!entry) {
-    const hero = { '18': 0, '17': 1, '19': 2 }[data.id];
-    entry = { shared: hero !== undefined, image: '' };
+    entry = { shared: false, image: '' };
     entry.promise = (async () => {
-      let maps;
-      if (hero !== undefined) maps = heroMaps[hero];
-      else {
-        const image = new Image(); image.decoding = 'async';
-        const success = await new Promise(resolve => {
-          let settled = false;
-          const finish = value => { if (!settled) { settled = true; clearTimeout(timer); resolve(value); } };
-          const timer = setTimeout(() => finish(false), 10000);
-          image.onload = () => finish(true); image.onerror = () => finish(false); image.src = 'images/' + data.file;
-        });
-        const builder = await faceStep(() => {
+      const image = new Image(); image.decoding = 'async';
+      const success = await new Promise(resolve => {
+        let settled = false;
+        const finish = value => { if (!settled) { settled = true; clearTimeout(timer); resolve(value); } };
+        const timer = setTimeout(() => finish(false), 10000);
+        image.onload = () => finish(true); image.onerror = () => finish(false); image.src = 'images/' + data.file;
+      });
+      const builder = await faceStep(() => {
         const builder = createSynchronizedArtBuilder(), ctx = builder.cCtx;
         const gradient = ctx.createLinearGradient(0, 0, TEX_W, TEX_H);
         gradient.addColorStop(0, '#18213d'); gradient.addColorStop(1, '#080d1d');
@@ -3976,13 +3967,12 @@ function prepareFace(card) {
           builder.drawFoil(context => { drawEightPointStar(context, TEX_W / 2, TEX_H / 2, 160, 52); context.fill(); });
         }
         return builder;
-        }, version);
-        if (!builder) return null;
-        await faceStep(() => { builder.applyPaperTextureOverlay(.045);
-          drawOrnateTarotFrame(builder.drawFoil, true, data.id.toUpperCase(), data.viName.toUpperCase()); }, version);
-        maps = await builder.compileMaps(renderer, work => faceStep(work, version));
-        if (!maps) return null;
-      }
+      }, version);
+      if (!builder) return null;
+      await faceStep(() => { builder.applyPaperTextureOverlay(.045);
+        drawOrnateTarotFrame(builder.drawFoil, true, data.id.toUpperCase(), data.viName.toUpperCase()); }, version);
+      const maps = await builder.compileMaps(renderer, work => faceStep(work, version));
+      if (!maps) return null;
       entry.maps = maps; thumbnail(entry, maps.map.image);
       if (!entry.shared) for (const texture of Object.values(maps)) {
         if (await faceStep(() => { renderer.initTexture(texture); return true; }, version) === null) { disposeFace(entry); return null; }
@@ -4520,7 +4510,7 @@ holdBtnEl.addEventListener('keyup', event => { if (event.key === 'Enter' || even
         // Pre-compile WebGL shaders before hiding loading veil so first card flips & transitions never stutter
         cardBatch.mesh.visible = moteBatch.mesh.visible = true; renderer.compile(scene, camera); cardBatch.mesh.visible = moteBatch.mesh.visible = false;
         // Warm both WebGL contexts under the loading veil, avoiding first-pick shader stalls.
-        for (const maps of [backMaps, ...heroMaps]) for (const texture of Object.values(maps)) renderer.initTexture(texture);
+        for (const texture of Object.values(backMaps)) renderer.initTexture(texture);
         for (const texture of [...Object.values(backMaps), ...heroHaloTextures]) overlayRenderer.initTexture(texture);
         for (let i = 0; i < 3; i++) overlayScene.attach(cards[i].mesh);
         overlayRenderer.compile(overlayScene, camera); overlayRenderer.render(overlayScene, camera);
