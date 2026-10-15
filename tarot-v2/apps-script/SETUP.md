@@ -1,6 +1,6 @@
 # Bật Intern InkStone → Groq → Gemini
 
-Ngày 15/10/2026, đã cập nhật bản Apps Script đang dùng lên **phiên bản 21** với Prompt 4 và giới hạn chờ riêng từng API. Nguồn tương ứng nằm trong **Code.gs ở cùng thư mục này**; địa chỉ /exec giữ nguyên. Xem [phân tích nhật ký và kiểm tra](../AI_UPDATE.md). Bản xem thử tại `http://127.0.0.1:4182/?preview=1` vẫn dùng dữ liệu mô phỏng, không tiêu token hay ghi Sheet.
+Ngày 15/10/2026, đã cập nhật bản Apps Script đang dùng lên **phiên bản 23** với Prompt 6 và giới hạn chờ riêng từng API. Nguồn tương ứng nằm trong **Code.gs ở cùng thư mục này**; địa chỉ /exec giữ nguyên. Xem [phân tích nhật ký và kiểm tra](../AI_UPDATE.md). Bản xem thử tại `http://127.0.0.1:4182/?preview=1` vẫn dùng dữ liệu mô phỏng, không tiêu token hay ghi Sheet.
 
 ## 1. Mở dự án Apps Script cũ
 

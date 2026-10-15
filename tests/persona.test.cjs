@@ -56,8 +56,27 @@ test('conversation includes every card, orientation, full reading and previous t
 test('general conclusion answers the question directly across all tones and structured output keeps card analysis separate', () => {
   for (const userVibe of Object.keys(persona.TONES)) {
     const prompt = persona.readingPayload({ ...state, userVibe }, { structured: true }).systemInstruction.parts[0].text;
-    assert.ok(prompt.includes('NGAY CÂU ĐẦU')); assert.ok(prompt.includes('45 đến 70 từ'));
+    assert.ok(prompt.includes('NGAY CÂU ĐẦU')); assert.ok(prompt.includes('65–95 từ'));
     assert.ok(prompt.includes('Không dồn phần phân tích này sang Góc nhìn chung'));
     assert.ok(prompt.includes('đúng JSON theo schema')); assert.ok(prompt.includes('Nếu câu hỏi mơ hồ'));
   }
+});
+
+test('personal context carries explicit information and does not invent a name or gender', () => {
+  const named = JSON.parse(persona.context({ ...state, userGender: 'Nữ' }));
+  assert.equal(named.name, 'An'); assert.equal(named.gender, 'Nữ');
+  assert.deepEqual(named.dob, state.dob); assert.equal(named.question, state.userQuestion);
+  const anonymous = JSON.parse(persona.context({ ...state, userName: '', userGender: '' }));
+  assert.equal(anonymous.name, ''); assert.equal(anonymous.gender, '');
+  const instructions = persona.readingPayload(state).systemInstruction.parts[0].text;
+  assert.match(instructions, /Không đoán giới tính từ tên/);
+  assert.match(instructions, /CHÀO VÀ CÁ NHÂN HÓA/);
+  assert.match(instructions, /65–95 từ/); assert.match(instructions, /điều kiện/);
+  assert.match(instructions, /không bịa sự kiện/); assert.match(instructions, /THẲNG THẮN/);
+});
+
+test('conversation continues naturally without repetitive greetings and can revise advice', () => {
+  const prompt = persona.conversationPayload(state, [{ role: 'user', text: 'Mình vừa có thêm thông tin' }]).systemInstruction.parts[0].text;
+  assert.match(prompt, /không chào lại từ đầu/); assert.match(prompt, /điều chỉnh nhận định/);
+  assert.match(prompt, /Trả lời đúng câu hỏi mới trước/);
 });

@@ -6,7 +6,7 @@ Nhật ký cũ chỉ có thông báo giao diện và “Chưa có lời giải�
 
 ## Prompt
 
-Phiên bản 4: Rót chào theo tên/biệt danh thật nếu có, mặc định Rót–bạn, không đoán tuổi/giới tính để gọi anh/chị/em. Giới tính đã nhập được đưa qua snapshot, kiểm tra ở máy chủ và giữ trong ngữ cảnh. Hồ sơ không bị đọc lại máy móc; không gán tính cách từ cung/ngày sinh.
+Phiên bản 6: Rót chào theo tên/biệt danh thật nếu có, mặc định Rót–bạn, không đoán tuổi/giới tính để gọi anh/chị/em. Giới tính đã nhập được đưa qua snapshot, kiểm tra ở máy chủ và giữ trong ngữ cảnh. Hồ sơ không bị đọc lại máy móc; không gán tính cách từ cung/ngày sinh.
 
 Lời nói tự nhiên, có chút duyên nhưng không nịnh, không lạm dụng tiếng đệm. Mỗi lá khoảng 65–95 từ, một lá có thể 90–125 từ; kết luận trả lời ngay câu đầu, nối các vị trí và nêu điều kiện/rủi ro. Gợi ý có cách bắt đầu và dấu hiệu đánh giá. Định dạng JSON đã sửa cùng prompt, tránh schema cũ ép câu trả lời về 2–3 câu và cho phép bỏ lời chào. Nếu dịch vụ vẫn để trống lời chào, phần xử lý thêm một lời chào trung tính theo tên, không bịa nội dung.
 
@@ -25,10 +25,16 @@ So với hỏi một chatbot trống: hệ thống đưa đúng bộ lá đượ
 
 Chạy node --test tarot-v2/tests/*.test.cjs tests/ai.test.cjs tests/apps-script.test.cjs tests/persona.test.cjs tests/reading.test.cjs tests/transport.test.cjs.
 
-84/84 kiểm thử trong phạm vi trên đạt, gồm Intern bị treo → Groq, cả ba timeout, cooldown hỏng, dữ liệu cá nhân, yêu cầu trùng, mất mạng → BUSY → lấy được kết quả, bảo toàn snapshot và không lộ khóa. Không gọi sinh lời giải trả phí trong các kiểm thử.
+85/85 kiểm thử trong phạm vi trên đạt, gồm Intern bị treo → Groq, cả ba timeout, cooldown hỏng, dữ liệu cá nhân, yêu cầu trùng, mất mạng → BUSY → lấy được kết quả, bảo toàn snapshot và không lộ khóa. Không gọi sinh lời giải trả phí trong các kiểm thử.
 
 Bộ kiểm tra toàn thư mục gốc còn 5 lỗi trong scene.test.cjs của giao diện 3D cũ. Đã chạy đối chiếu với các module AI/prompt trước lần sửa này và tái hiện cùng 5 lỗi; chúng không phát sinh từ bản sửa prompt/dự phòng. V2 và các kiểm tra AI/prompt liên quan đạt.
 
 Bản máy chủ trước thay đổi là phiên bản 20, cùng địa chỉ /exec đang cấu hình. Đã lưu bản nguồn máy chủ trước chỉnh sửa trong backups/prompt-fallback-20261015 (không đóng gói lên web). Mã mới được dựng bằng node tarot-v2/apps-script/build.cjs. Không thay khóa, quyền truy cập, cấu trúc 18 cột hoặc địa chỉ Sheet.
 
 Đã cập nhật thành công bản triển khai đang dùng từ phiên bản 20 lên **21**, lúc 09:50 ngày 15/10/2026 theo màn hình quản lý Apps Script. Không tạo địa chỉ API mới.
+
+Xác minh sau triển khai: health trả promptVersion=6, fallbackVersion=2; cả ba dịch vụ đã có cấu hình. GitHub Pages chạy thành công cho commit c89ce33; HTML công khai và các tệp app.js/tarot-ai.js đã trả đúng bản này. Sau các kiểm thử mô phỏng, đã chạy một lượt đọc thật bằng tên/câu hỏi giả lập, không ghi Sheet: Intern báo PROVIDER_ERROR, Groq tiếp nhận và trả lời thành công trong khoảng 2 giây. Đã dùng lời đáp này để chỉnh thêm mẫu giọng và ngăn việc tự gán sợ hãi/trốn tránh cho người xem.
+
+Lần hiệu chỉnh cuối dùng Prompt 6 và bản triển khai Apps Script 23, cùng địa chỉ /exec. Kiểm tra kết nối thật ở 09:58 ngày 15/10/2026 trả HTTP 200 cho Intern, Groq và Gemini.
+
+Mẫu đọc thật thứ hai cũng chuyển Intern lỗi sang Groq thành công, sau khoảng 44,7 giây chờ Intern và 2 giây ở Groq. Đã tăng chỉ dẫn giọng trò chuyện trong chính schema từng trường để tránh phần JSON ép giọng định nghĩa. Sửa thêm việc chuyển khoảng số như 3–5 thành “3 đến 5”, thay vì “3, 5”.

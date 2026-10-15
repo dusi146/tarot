@@ -23,6 +23,7 @@
       .replace(/^[ \t]{0,3}#{1,6}[ \t]+/gm, '').replace(/^[ \t]*(?:[-*•▪][ \t]+|>[ \t]?)/gm, '')
       .replace(/\*([^*\n]+)\*/g, '$1').replace(/`([^`]+)`/g, '$1')
       .replace(/[\p{Extended_Pictographic}\uFE0F\u200D\u20E3✦★☆]/gu, '')
+      .replace(/(\d)[ \t]*[—–][ \t]*(?=\d)/g, '$1 đến ')
       .replace(/[ \t]*[—–][ \t]*/g, ', ').replace(/[↗↘]/g, '').replace(/→/g, ' đến ')
       .replace(/^[ \t]*[-_=]{3,}[ \t]*$/gm, '').replace(/^[ \t]+/gm, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
   }
@@ -69,15 +70,15 @@
     const properties = {}, required = [];
     state.selectedCards.forEach((card, i) => {
       const key = 'card_' + i; required.push(key);
-      properties[key] = { type: 'string', description: `${state.activeSpread.slots[i].title}: ${card.data.viName}, ${card.isReversed ? 'ngược' : 'xuôi'}. Viết 3–5 câu, khoảng 65–95 từ (trải một lá: 90–125 từ); giải nghĩa chính, liên hệ câu hỏi và một biểu hiện cần đối chiếu. Giọng trò chuyện, không tiêu đề, không bỏ trống.` };
+      properties[key] = { type: 'string', description: `${state.activeSpread.slots[i].title}: ${card.data.viName}, ${card.isReversed ? 'ngược' : 'xuôi'}. Viết 3–5 câu, khoảng 65–95 từ (trải một lá: 90–125 từ); MỞ BẰNG nhận định cụ thể về câu hỏi, rồi giải thích lá và một điều cần đối chiếu. Xưng Rót ít nhất một lần trong đoạn, nói trực tiếp với bạn; có một nhịp thân mật vừa phải. KHÔNG mở bằng định nghĩa, “hiện ra như lời nhắc” hoặc “lá bài cảnh báo”. Không tiêu đề, không bỏ trống.` };
     });
     return { type: 'json_schema', json_schema: { name: 'tarot_reading', strict: true, schema: {
       type: 'object', additionalProperties: false, required: ['greeting', 'cards', 'summary', 'advice'],
       properties: {
-        greeting: { type: 'string', description: 'Lời chào 2–3 câu tự nhiên, gọi tên nếu người xem cung cấp, nhắc đúng câu hỏi hoặc cảm xúc đã chia sẻ; không được bỏ trống.' },
+        greeting: { type: 'string', description: 'Lời chào 2–3 câu có duyên, mở theo nhịp “Tên ơi, Rót chào bạn” nếu có tên, hoặc “Chào bạn, Rót đây” khi không có tên, nhắc đúng câu hỏi hoặc cảm xúc đã chia sẻ; không được bỏ trống.' },
         cards: { type: 'object', additionalProperties: false, required, properties },
-        summary: { type: 'string', description: 'Góc nhìn chung: trả lời thẳng câu hỏi ngay câu đầu, Khoảng 4 câu, 65–95 từ; nối các vị trí thành một lý do và nêu điều kiện/rủi ro cần chú ý. Không kể hình ảnh lá, không chép lại từng lá, không lòng vòng.' },
-        advice: { type: 'string', description: 'Một bước nhỏ cho bạn: một hành động cụ thể, vừa sức, kèm cách bắt đầu. 3–4 câu, khoảng 45–75 từ; nêu cách bắt đầu và dấu hiệu tự đánh giá, khép lại ấm áp.' }
+        summary: { type: 'string', description: 'Góc nhìn chung: câu đầu là nhận định thẳng, nói như Rót trực tiếp tư vấn cho bạn, dùng Rót ít nhất một lần, không giọng báo cáo. Khoảng 4 câu, 65–95 từ; nối các vị trí thành một lý do và nêu điều kiện/rủi ro cần chú ý. Không kể hình ảnh lá, không chép lại từng lá, không lòng vòng.' },
+        advice: { type: 'string', description: 'Một bước nhỏ cho bạn: một hành động cụ thể, vừa sức, kèm cách bắt đầu. 3–4 câu, khoảng 45–75 từ; nêu cách bắt đầu và dấu hiệu tự đánh giá, có một nhịp trò chuyện mềm. Không chúc xã giao hoặc nói “Chúc bạn tìm được…” để kết.' }
       }
     } } };
   }

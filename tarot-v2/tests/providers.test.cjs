@@ -129,7 +129,7 @@ test('a stalled Intern times out within its own budget and Groq completes with s
   assert.deepEqual(result.attempts, [{ provider: 'intern', code: 'PROVIDER_TIMEOUT', status: 0, elapsedMs: 45000 },
     { provider: 'groq', code: 'OK', status: 200, elapsedMs: 1000 }]);
   assert.ok(!JSON.stringify(result).includes('secret'));
-  const health = app.health(); assert.equal(health.promptVersion, 4); assert.equal(health.fallbackVersion, 2);
+  const health = app.health(); assert.equal(health.promptVersion, require('../js/tarot-persona.js').PROMPT_VERSION); assert.equal(health.fallbackVersion, 2);
 });
 
 test('all stalled providers finish before the browser budget and do not leave a pending lock', () => {

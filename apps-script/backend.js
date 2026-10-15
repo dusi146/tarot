@@ -35,7 +35,7 @@ function state_(input) {
   });
   var dob = input.dob || {}, day = Number(dob.day), month = Number(dob.month), year = Number(dob.year);
   var valid = TarotServerPersona.validDate(day, month, year);
-  return { userName: text_(input.name, 120), userQuestion: text_(input.question, 2000),
+  return { userName: text_(input.name, 120), userGender: ['Nam', 'Nữ', 'Khác'].indexOf(input.gender) >= 0 ? input.gender : '', userQuestion: text_(input.question, 2000),
     userVibe: Object.prototype.hasOwnProperty.call(TarotServerPersona.TONES, input.vibe) ? input.vibe : 'chualanh',
     dob: valid ? { day: day, month: month, year: year } : null,
     zodiac: valid ? TarotServerPersona.zodiac(day, month, year) : '',

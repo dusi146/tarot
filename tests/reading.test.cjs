@@ -1,5 +1,9 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+test('numeric ranges keep their meaning when decorative dashes are cleaned', () => {
+  const reading = require('../tarot-reading.js');
+  assert.equal(reading.cleanText('Chọn 3–5 tiêu chí — bắt đầu trong 10–15 phút.'), 'Chọn 3 đến 5 tiêu chí, bắt đầu trong 10 đến 15 phút.');
+});
 const reading = require('../tarot-reading.js');
 const state = {
   activeSpread: { slots: [{ title: 'Quá Khứ' }, { title: 'Hiện Tại' }, { title: 'Tương Lai' }] },
