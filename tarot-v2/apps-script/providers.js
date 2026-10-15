@@ -6,14 +6,14 @@ function providerConfig_() {
     return { id: id, key: properties.getProperty(keyName) || '',
       model: override && /^[a-zA-Z0-9._/-]{1,100}$/.test(override) ? override : model, rpm: rpm, timeoutSeconds: timeoutSeconds };
   }
-  return [config('intern', 'INTERN_AI_API_KEY', 'INTERN_AI_MODEL', 'deepseek-v4-flash-0731', 45, 45),
-    config('groq', 'GROQ_API_KEY', 'GROQ_MODEL', 'openai/gpt-oss-120b', 6, 35),
-    config('gemini', 'GEMINI_API_KEY', 'GEMINI_MODEL', 'gemini-2.5-flash', 6, 45)];
+  return [config('groq', 'GROQ_API_KEY', 'GROQ_MODEL', 'openai/gpt-oss-120b', 6, 25),
+    config('gemini', 'GEMINI_API_KEY', 'GEMINI_MODEL', 'gemini-2.5-flash', 6, 35),
+    config('intern', 'INTERN_AI_API_KEY', 'INTERN_AI_MODEL', 'deepseek-v4-flash-0731', 45, 25)];
 }
 function aiHealth_() {
   var providers = providerConfig_();
   return { status: 'success', service: 'tarot-ai', version: 2, readingFormat: 2, streaming: false,
-    promptVersion: TarotServerPersona.PROMPT_VERSION, fallbackVersion: 2,
+    promptVersion: TarotServerPersona.PROMPT_VERSION, fallbackVersion: 3,
     configured: providers.some(function (p) { return !!p.key; }),
     providers: providers.map(function (p) { return { id: p.id, model: p.model, configured: !!p.key }; }) };
 }
@@ -27,12 +27,12 @@ function retrySeconds_(response) {
   return Math.max(1, Math.min(21600, Math.ceil(retry)));
 }
 function providerCall_(provider, payload, state, followup) {
-  var request, url, headers;
+  var request, url, headers, readingTokens = 2048 + 1024 * state.selectedCards.length;
   if (provider.id === 'gemini') {
     url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(provider.model) + ':generateContent';
     headers = { 'x-goog-api-key': provider.key };
     request = { systemInstruction: payload.systemInstruction, contents: payload.contents,
-      generationConfig: { temperature: payload.generationConfig.temperature, maxOutputTokens: followup ? 2400 : 4096 } };
+      generationConfig: { temperature: payload.generationConfig.temperature, maxOutputTokens: followup ? 2400 : readingTokens } };
     if (provider.model.indexOf('gemini-2.5-') === 0) request.generationConfig.thinkingConfig = { thinkingBudget: 0 };
     if (!followup) {
       request.generationConfig.responseMimeType = 'application/json';
@@ -47,11 +47,14 @@ function providerCall_(provider, payload, state, followup) {
         return { role: item.role === 'model' ? 'assistant' : 'user', content: item.parts.map(function (part) { return part.text; }).join('\n') };
       })), temperature: payload.generationConfig.temperature };
     if (provider.id === 'groq') {
-      request.max_completion_tokens = followup ? 1800 : 4096;
+      request.max_completion_tokens = followup ? 1800 : readingTokens;
       request.reasoning_effort = 'low'; request.include_reasoning = false;
       if (!followup) request.response_format = TarotServerReading.schema(state);
     } else {
-      request.max_tokens = followup ? 2400 : 4096;
+      request.max_tokens = followup ? 2400 : readingTokens;
+      // DeepSeek V4 defaults to thinking. A prose reading does not need a long hidden
+      // reasoning pass before its JSON, which previously exhausted the fetch budget.
+      if (/^deepseek-(?:v4-|flash(?:-|$))/.test(provider.model)) request.thinking = { type: 'disabled' };
       // JSON mode is more widely supported than strict schema by OpenAI-compatible gateways.
       if (!followup) {
         request.response_format = { type: 'json_object' };
@@ -59,12 +62,13 @@ function providerCall_(provider, payload, state, followup) {
       }
     }
   }
-  var response;
+  var response, fetchStarted = Date.now();
   try { response = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', muteHttpExceptions: true,
     headers: headers, payload: JSON.stringify(request), timeoutSeconds: provider.timeoutSeconds }); }
   catch (error) {
-    var timedOut = /time\s*out|timed\s*out|timeout|deadline/i.test(String(error && error.message || ''));
-    throw failure_(timedOut ? 'PROVIDER_TIMEOUT' : 'PROVIDER_ERROR', 'Kết nối dịch vụ bị gián đoạn.', 30);
+    var timedOut = /time\s*out|timed\s*out|timeout|deadline/i.test(String(error && error.message || ''))
+      || Date.now() - fetchStarted >= provider.timeoutSeconds * 900;
+    throw failure_(timedOut ? 'PROVIDER_TIMEOUT' : 'PROVIDER_ERROR', 'Kết nối dịch vụ bị gián đoạn.', timedOut ? 120 : 30);
   }
   var status = response.getResponseCode();
   var httpError;
@@ -73,7 +77,9 @@ function providerCall_(provider, payload, state, followup) {
   else if (status < 200 || status >= 300) httpError = failure_('PROVIDER_ERROR', 'Dịch vụ chưa phản hồi.', status >= 500 ? 15 : 60);
   if (httpError) { httpError.httpStatus = status; throw httpError; }
   var result;
-  try { result = JSON.parse(response.getContentText()); } catch (_) { throw failure_('PROVIDER_ERROR', 'Phản hồi không hợp lệ.', 10); }
+  try { result = JSON.parse(response.getContentText()); } catch (_) {
+    var malformed = failure_('PROVIDER_ERROR', 'Phản hồi không hợp lệ.', 10); malformed.httpStatus = status; throw malformed;
+  }
   var content, finish;
   if (provider.id === 'gemini') {
     var candidate = result.candidates && result.candidates[0];
@@ -124,7 +130,7 @@ function ai_(data) {
   var providers = providerConfig_().filter(function (p) { return !!p.key; });
   if (!providers.length) throw failure_('NOT_CONFIGURED', 'Chưa cấu hình dịch vụ AI.');
   var cache = CacheService.getScriptCache();
-  var digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, JSON.stringify({ format: 3, action: data.action, payload: payload,
+  var digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, JSON.stringify({ format: 4, action: data.action, payload: payload,
     providers: providers.map(function (p) { return [p.id, p.model]; }) }));
   var cacheKey = 'reply:' + Utilities.base64EncodeWebSafe(digest), lock = LockService.getScriptLock();
   if (!lock.tryLock(1500)) throw failure_('BUSY', 'Dịch vụ đang bận.', 5);
@@ -178,5 +184,25 @@ function checkAIConnections() {
         headers: p.id === 'gemini' ? { 'x-goog-api-key': p.key } : { Authorization: 'Bearer ' + p.key } });
       console.log(p.id + ': HTTP ' + response.getResponseCode() + '; model đang chọn: ' + p.model + '. Khóa không được xuất ra web.');
     } catch (_) { console.log(p.id + ': lỗi kết nối hoặc quá thời gian; tiếp tục kiểm tra dịch vụ sau.'); }
+  });
+}
+// Manual synthetic generation check. Unlike /models, this checks actual reading
+// output and validation. It does not save a reading or print its content/keys.
+function checkAIGeneration() {
+  var state = state_({ name: '', question: 'Mình muốn học một kỹ năng mới trong tháng này, nên bắt đầu thế nào?',
+    vibe: 'tatnuoc', spreadId: 'single', cards: [{ id: '00', reversed: false }] });
+  var payload = TarotServerPersona.readingPayload(state, { structured: true });
+  providerConfig_().forEach(function (p) {
+    if (!p.key) { console.log(JSON.stringify({ event: 'tarot_ai_generation_check', provider: p.id, code: 'NOT_CONFIGURED' })); return; }
+    var started = Date.now();
+    try {
+      var answer = providerCall_(p, payload, state, false);
+      console.log(JSON.stringify({ event: 'tarot_ai_generation_check', provider: p.id, code: 'OK', status: 200,
+        elapsedMs: Date.now() - started, characters: answer.text.length }));
+    } catch (error) {
+      console.log(JSON.stringify({ event: 'tarot_ai_generation_check', provider: p.id,
+        code: ['RATE_LIMIT', 'AUTH_ERROR', 'PROVIDER_ERROR', 'PROVIDER_TIMEOUT', 'INCOMPLETE_READING'].indexOf(error.code) >= 0 ? error.code : 'PROVIDER_ERROR',
+        status: Number(error.httpStatus) || 0, elapsedMs: Date.now() - started }));
+    }
   });
 }

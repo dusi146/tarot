@@ -1,5 +1,17 @@
 # Lời giải và dự phòng API — 15/10/2026
 
+## Cập nhật tiếp theo: Groq → Gemini → Intern
+
+Theo yêu cầu mới của chủ trang, thứ tự hiện tại là **Groq → Gemini → Intern**, áp dụng cả đọc trải bài và tâm sự. Thông tin Intern đứng đầu bên dưới là lịch sử phiên bản trước. Cache dùng phiên bản mới để không trả lại lời giải theo cấu hình cũ.
+
+Đã kiểm tra sinh lời giải thực tế bằng câu hỏi giả lập, không ghi Sheet: Groq thành công trong 1.278 ms; Gemini thành công sau 122.241 ms; Intern trả lời thiếu sau 21.034 ms. Các phép thử Intern trước đó với prompt đầy đủ bị timeout khoảng 44,4 giây, trong khi yêu cầu JSON ngắn trả HTTP 200 trong 2–4 giây. Vì vậy không kết luận cả ba dịch vụ đều ổn chỉ từ /models hoặc chỉ quy lỗi cho khóa. Tham số tắt suy luận của DeepSeek hoạt động trong phép thử ngắn, nhưng chưa bảo đảm lời giải đầy đủ luôn thành công.
+
+Cấu hình timeoutSeconds mới là 25/35/25 giây; timeout nghỉ 120 giây cho riêng dịch vụ lỗi. Thời gian thực tế có thể vượt cấu hình như phép thử Gemini nói trên, nên **85 giây chỉ là tổng tham số cấu hình, không phải giới hạn thực tế đã chứng minh**. Tăng ngân sách đầu ra theo số lá (3.072–6.144 token), giữ mã HTTP khi phản hồi JSON hỏng. Thêm checkAIGeneration để kiểm tra sinh lời giải thật, không in khóa/nội dung hoặc ghi Sheet.
+
+88/88 kiểm thử liên quan đạt, gồm thứ tự mới, mọi nhánh dự phòng, timeout mô phỏng, đủ nội dung bốn lá và bảo toàn ngữ cảnh tâm sự. Đã lưu nguồn phiên bản máy chủ 23 trong backups/prompt-fallback-20261015/Code.server-v23.gs để đối chiếu.
+
+Đã triển khai **Apps Script 24** lúc 10:29 ngày 15/10/2026 trên cùng địa chỉ /exec. Lượt xác minh sau triển khai lúc 10:30 thành công qua Groq, lời giải 1.348 ký tự; health công khai trả đúng thứ tự Groq, Gemini, Intern. Không ghi dữ liệu mẫu vào Sheet.
+
 Đã đối chiếu tab 15-10-2026 trong Sheet nhật ký theo yêu cầu của chủ trang. Trong vùng gần nhất A353:R452 có cả lỗi kết nối, timeout, BUSY và lượt thành công qua Intern/Groq. Ví dụ J407 ghi phản hồi chậm; các lượt 09:11 ghi kết nối/BUSY liên tiếp; Q451 ghi Groq thành công. Không sao chép tên, IP, ngày sinh hoặc câu hỏi riêng vào báo cáo.
 
 Nhật ký cũ chỉ có thông báo giao diện và “Chưa có lời giải”, thiếu mã API và chuỗi đã thử. Vì vậy không thể khẳng định mọi lỗi là do Intern hoặc mọi lần Groq đều bị bỏ qua. Nhiều lỗi là mất phản hồi giữa trình duyệt và Apps Script; đổi nhà cung cấp AI không tự sửa được đường truyền này.

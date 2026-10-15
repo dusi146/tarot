@@ -39,7 +39,7 @@ Nếu đã triển khai mã trước đây với model `0711`, chỉ cần thêm
 1. Mở `tarot-v2/apps-script/Code.gs` trên máy, chép toàn bộ.
 2. Trong trình soạn thảo Apps Script, thay toàn bộ nội dung **Mã.gs / Code.gs** bằng mã mới rồi **Lưu**. Không tạo thêm một file có các hàm `doPost`/`doGet` trùng với file cũ.
 3. Ở danh sách chọn hàm cạnh nút **Chạy**, chọn **checkAIConnections** rồi **Chạy**. Cấp quyền Google nếu được yêu cầu.
-4. Nhật ký hiển thị HTTP của từng dịch vụ và model đang chọn, không in khóa. HTTP 200 kiểm tra được quyền gọi API; vẫn cần một lượt đọc thật để kiểm tra model và cách dịch vụ sinh lời giải.
+4. Nhật ký hiển thị HTTP của từng dịch vụ và model đang chọn, không in khóa. HTTP 200 ở /models chưa xác nhận sinh lời giải hoạt động. Chọn **checkAIGeneration** để thử lời giải bằng dữ liệu mẫu trên cả ba dịch vụ; hàm không ghi Sheet hoặc in khóa/nội dung lời giải.
 5. Chọn **Triển khai → Quản lý các bản triển khai → bút chì → Phiên bản mới → Triển khai**. Giữ quyền thực thi bằng tài khoản của bạn và quyền truy cập web app như bản cũ.
 
 Ưu tiên cập nhật bản triển khai đang dùng để giữ nguyên link `/exec`. Nếu tạo bản triển khai mới, thay `endpoint` trong `tarot-v2/js/sheets-config.js` bằng link mới. Đừng dùng link phản hồi tạm `script.googleusercontent.com` làm endpoint.
@@ -48,11 +48,11 @@ Nếu đã triển khai mã trước đây với model `0711`, chỉ cần thêm
 
 Mở `http://127.0.0.1:4182/` **không có `?preview=1`**, nhập câu hỏi rồi chọn/mở bài và nhấn đọc lời giải. Lượt này sẽ dùng API thật và lưu vào Sheet cũ. Cột **Người giải** ghi nhà cung cấp/model thực sự trả lời. Phản hồi lỗi không được trình bày thành lời giải hoàn chỉnh.
 
-Luồng thử tự động đã kiểm tra bằng phản hồi mô phỏng, chưa sử dụng khóa thật của bạn. Muốn quay lại duyệt hình ảnh mà không gửi dữ liệu ra ngoài, dùng lại `?preview=1`.
+Kiểm thử tự động dùng phản hồi mô phỏng. Đã chạy thêm thử sinh lời giải thật ngày 15/10/2026: Groq thành công; Gemini thành công nhưng chậm; Intern vẫn có phản hồi thiếu. Muốn quay lại duyệt hình ảnh mà không gửi dữ liệu ra ngoài, dùng lại `?preview=1`.
 
 ## Cách dự phòng hoạt động
 
-Mỗi lượt ưu tiên Intern (tối đa 45 giây), rồi Groq (35 giây), rồi Gemini (45 giây). HTTP 401/403, 429, lỗi máy chủ, kết nối hỏng, timeout hoặc lời giải thiếu đều có thể chuyển sang nhà cung cấp tiếp theo. Chỉ nhà cung cấp lỗi bị tạm nghỉ; một API chạm hạn mức không khóa toàn bộ chuỗi. Khi cả chuỗi hết hạn mức, giao diện thông báo thời gian chờ. Nếu cả chuỗi sai khóa, giao diện báo cần kiểm tra cấu hình.
+Mỗi lượt ưu tiên **Groq → Gemini → Intern**, theo yêu cầu chủ trang ngày 15/10/2026. Cấu hình timeoutSeconds lần lượt 25/35/25 giây; đây là tham số gửi tới Apps Script, không cam kết thời gian thực tế tuyệt đối (một phép thử Gemini vẫn mất 122 giây). HTTP 401/403, 429, lỗi máy chủ, kết nối hỏng, timeout hoặc lời giải thiếu đều có thể chuyển sang nhà cung cấp tiếp theo. Chỉ nhà cung cấp lỗi bị tạm nghỉ; lỗi timeout tạm nghỉ 120 giây. Một API chạm hạn mức không khóa toàn bộ chuỗi. Khi cả chuỗi hết hạn mức, giao diện thông báo thời gian chờ. Nếu cả chuỗi sai khóa, giao diện báo cần kiểm tra cấu hình.
 
 Nếu `checkAIConnections` báo Intern HTTP 401 thì kết nối đang bị từ chối xác thực, dù tên model đã đúng. Đặt khóa lấy từ tài khoản Intern vào `INTERN_AI_API_KEY`; khóa lấy từ Google AI Studio vào `GEMINI_API_KEY`. HTTP 400 của Gemini chưa xác định riêng được nguyên nhân từ mã trạng thái. Lưu thuộc tính không cần triển khai lại. Kết nối bị từ chối xác thực tạm nghỉ 300 giây; đợi hết thời gian này rồi thử một lượt đọc để xác nhận nhà cung cấp thực sự được dùng. Không gửi ảnh có giá trị khóa vào chat.
 
