@@ -136,12 +136,13 @@ body:not([data-act="INTRO"]) #skip-intro{display:none}
 .reading-section-role{font-size:10px!important;color:var(--role-color,var(--gold-champagne))!important}
 .reading-section p+p{margin-top:10px}
 .reading-prediction{border-color:rgba(226,194,133,.45)}
-.prediction-spoiler{position:relative;isolation:isolate;overflow:hidden;border:1px solid rgba(226,194,133,.15);border-radius:15px;background:linear-gradient(135deg,rgba(226,194,133,.045),rgba(169,142,219,.05))}
-.prediction-content{padding:20px;overflow-wrap:anywhere;filter:blur(7px);opacity:.38;user-select:none;pointer-events:none;transition:filter .75s ease,opacity .75s ease}
-.prediction-reveal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;padding:20px;border:0;background:rgba(14,10,24,.15);color:var(--gold-bright);cursor:pointer;font:inherit;-webkit-tap-highlight-color:transparent}
-.prediction-reveal-label{padding:12px 17px;border:1px solid rgba(226,194,133,.32);border-radius:999px;background:rgba(22,16,33,.94);font-size:12px;line-height:1.5;box-shadow:0 4px 24px rgba(0,0,0,.15)}
-.prediction-reveal:hover .prediction-reveal-label{border-color:rgba(226,194,133,.6)}
-.prediction-reveal:focus-visible{outline:2px solid var(--gold-bright);outline-offset:-4px;border-radius:15px}
+.prediction-spoiler{position:relative;isolation:isolate;display:block;border-radius:4px;color:var(--gold-champagne);cursor:pointer}
+.prediction-content{padding:0 2px;overflow-wrap:anywhere;filter:blur(5px);opacity:.25;user-select:none;pointer-events:none;transition:filter .35s ease,opacity .35s ease}
+.prediction-reveal{position:absolute;inset:0;z-index:1;width:100%;min-height:44px;padding:0;border:0;border-radius:4px;background:transparent;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.prediction-reveal-label{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.prediction-reveal:focus-visible{outline:2px solid var(--gold-bright);outline-offset:4px}
+.threads-spoiler-particles{position:absolute;inset:-2px;z-index:2;pointer-events:none}
+.prediction-spoiler.is-revealed{cursor:text}
 .prediction-spoiler.is-revealed .prediction-content{filter:blur(0);opacity:1;user-select:text;pointer-events:auto}
 .prediction-content:focus{outline:none}
 .prediction-content .prediction-notice{margin-top:16px;padding-top:14px;border-top:1px solid rgba(226,194,133,.12);color:var(--text-muted);font-size:12px;line-height:1.8}

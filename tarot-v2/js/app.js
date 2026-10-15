@@ -62,6 +62,7 @@
     clearTimeout(readingRetryTimer); $('retry-reading').disabled = false; $('retry-reading').textContent = 'Thử lại lời giải';
     version++; readingPending = chatPending = feedbackPending = false; sheetSession = null; nudged = false;
     state.readingResult = ''; state.selectedCards = []; state.followupHistory = [];
+    window.TarotSpoiler?.destroy($('reading-text'));
     $('reading-text').textContent = ''; $('messages').textContent = ''; $('chat-input').value = '';
     $('reading-loading').hidden = false; $('retry-reading').hidden = true;
     $('conversation').hidden = $('feedback-panel').hidden = true;
@@ -211,7 +212,9 @@
       if (requestVersion !== version) return;
       session = preview ? null : window.TarotSheets.begin(logProfile(response));
       state.readingResult = result; sheetSession = session;
+      window.TarotSpoiler?.destroy($('reading-text'));
       reading.render($('reading-text'), result, state, document);
+      window.TarotSpoiler?.init($('reading-text'));
       $('conversation').hidden = $('feedback-panel').hidden = false;
       if (session) session.record(result, 'Thành công').then(() => {
         if (requestVersion === version) $('sheet-status').textContent = 'Đã lưu trải bài.';

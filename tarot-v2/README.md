@@ -28,7 +28,7 @@ Máy chủ chỉ nghe tại máy đang chạy. Có thể đặt biến môi trư
 - Lá được chọn bay vào đúng ô nhận, đủ số thì cùng bay lên; lật từng lá, mở tất cả, chạm để ngắm gần.
 - Bốn cách trải: thời gian, một lá, thân/tâm/trí, gỡ rối bốn lá.
 - Tùy chỉnh màu vàng, mở/đóng có chuyển động; tên, ngày sinh hợp lệ, cung hoàng đạo và bốn tông giọng. Nhớ thông tin trên cùng trình duyệt, có nút quên; không đồng bộ giữa thiết bị.
-- Lời giải theo từng lá, Góc nhìn chung chi tiết và Phán đoán của Rót chạm để mở; có thử lại khi thiếu nội dung. Tâm sự giữ bối cảnh trải bài, mời ủng hộ một lần sau lượt thứ ba.
+- Lời giải theo từng lá, Góc nhìn chung chi tiết và Phán đoán của Rót chạm để mở: chữ mờ và hạt vàng theo mẫu Threads, tản hạt tại điểm chạm; tự dừng khi không nhìn thấy, hỗ trợ bàn phím và giảm chuyển động. Có thử lại khi thiếu nội dung. Tâm sự giữ bối cảnh trải bài, mời ủng hộ một lần sau lượt thứ ba.
 - Đánh giá, ghi chú, góp ý; phần ủng hộ có chia sẻ Rót, chuyển đổi đơn hàng và QR mở khi cần. Bảng người ủng hộ dùng kết nối cũ ở chế độ thật.
 - Âm thanh tự bật sau lần chạm hoặc nhấn phím đầu tiên. Hệ số âm tổng tăng từ 1,65 lên 3,2, tăng thêm tiếng giấy và tiếng bấm, giữ nén đỉnh để tiếng không chói. Có đọc thành tiếng khi trình duyệt hỗ trợ và tôn trọng tùy chọn giảm chuyển động của hệ điều hành.
 - Bỏ hai nút âm thanh/cảm biến ở góc và nút rung trong Tùy chỉnh thêm. Phản hồi điện thoại tự bật khi tương tác lần đầu; trình duyệt có thể yêu cầu quyền cảm biến một lần. Nếu bị từ chối hoặc không hỗ trợ, chạm/vuốt vẫn hoạt động. Cảm biến chỉ điều khiển ánh sáng và độ nghiêng, không ảnh hưởng chọn lá. Rung ngắn khi bấm giao diện, lướt, rút, đáp ô và mở bài; khi xáo có nhịp nghỉ.

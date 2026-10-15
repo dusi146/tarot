@@ -2,7 +2,9 @@
 
 **Prompt 7 và phần tiết lộ:** Góc nhìn chung được yêu cầu khoảng 100–140 từ, nối các lá, điểm thuận/vướng và dấu hiệu đối chiếu. Thay Một bước nhỏ cho bạn bằng **Phán đoán của Rót**: một sự việc hoặc chuyển biến cụ thể có thể quan sát, gắn với lá/vị trí/chiều bài, khoảng 50–80 từ trước câu kết. Chỉ dẫn phân biệt dự đoán với lời khuyên “bạn nên…” và không dùng cảm giác yên tâm làm tín hiệu kiểm chứng.
 
-Nội dung phán đoán được làm mờ, chạm hoặc nhấn Enter/Space mới hiện; vùng chữ giữ nguyên chiều cao. Trước khi mở, nội dung không tham gia điều hướng/đọc hỗ trợ và nút Nghe đọc cũng bỏ qua phần này. Kết đúng một lần bằng “Đây chỉ là dự đoán dựa trên năng lượng của bạn với trải bài này.” Chữ lời giải và tên lá hiện nhẹ trong khoảng 0,95 giây, giảm chuyển động bỏ cả độ trễ so le.
+Nội dung phán đoán được làm mờ, chạm hoặc nhấn Enter/Space mới hiện; vùng chữ giữ nguyên chiều cao. Cập nhật theo mẫu Threads của chủ trang: blur 5px/opacity 0,25, hạt vàng champagne phủ trực tiếp chữ, chạm tản hạt từ điểm chạm, hiện chữ trong 0,35 giây; bỏ nút nổi che đoạn. Mật độ gốc 60%, giới hạn 3.200 hạt và DPR 2, vẽ tối đa 30 lần/giây, không đọc lại computed style mỗi khung. Hạt dừng ngoài vùng nhìn, khi đóng cửa sổ hoặc ẩn tab; khi mở xong thì giải phóng canvas/listener. Giảm chuyển động dùng mặt hạt tĩnh và mở tức thì. Chỉ chạy 8 kiểm tra liên quan phần tiết lộ cho cập nhật này; không gọi lại AI hoặc triển khai lại Apps Script.
+
+Trước khi mở, nội dung không tham gia điều hướng/đọc hỗ trợ và nút Nghe đọc cũng bỏ qua phần này. Kết đúng một lần bằng “Đây chỉ là dự đoán dựa trên năng lượng của bạn với trải bài này.” Chữ lời giải và tên lá hiện nhẹ trong khoảng 0,95 giây, giảm chuyển động bỏ cả độ trễ so le.
 
 Giao thức readingFormat=3 giữ khóa JSON advice để tương thích gateway. Tab cũ nhận tiêu đề cũ, tab mới nhận Phán đoán của Rót; cache tách hai dạng, tránh đổi tiêu đề làm lỗi lời giải thiếu. 137 kiểm thử liên quan đạt, gồm tiết lộ an toàn, câu kết không che giấu phần thiếu, tương thích cache/tab và chuỗi năm API. Bản nguồn máy chủ 27/28 đã được lưu riêng.
 
