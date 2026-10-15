@@ -1,6 +1,6 @@
-# Bật Intern InkStone → Groq → Gemini
+# Bật Xkiro → Groq → Gemini → Intern
 
-Ngày 15/10/2026, đã cập nhật bản Apps Script đang dùng lên **phiên bản 23** với Prompt 6 và giới hạn chờ riêng từng API. Nguồn tương ứng nằm trong **Code.gs ở cùng thư mục này**; địa chỉ /exec giữ nguyên. Xem [phân tích nhật ký và kiểm tra](../AI_UPDATE.md). Bản xem thử tại `http://127.0.0.1:4182/?preview=1` vẫn dùng dữ liệu mô phỏng, không tiêu token hay ghi Sheet.
+Ngày 15/10/2026, cấu hình ưu tiên Xkiro / Mistral Large 4, rồi Groq, Gemini và Intern. Nguồn máy chủ nằm trong **Code.gs ở cùng thư mục này**; địa chỉ /exec giữ nguyên. Xem [phân tích nhật ký và kiểm tra](../AI_UPDATE.md). Bản xem thử tại `http://127.0.0.1:4182/?preview=1` vẫn dùng dữ liệu mô phỏng, không tiêu token hay ghi Sheet.
 
 ## 1. Mở dự án Apps Script cũ
 
@@ -10,13 +10,14 @@ Trong **Cài đặt dự án** (biểu tượng bánh răng ở thanh trái), t�
 
 | Thuộc tính | Giá trị cần đặt |
 | --- | --- |
+| `XKIRO_API_KEY` | Khóa Xkiro, chỉ lưu trong Script Properties |
 | `INTERN_AI_API_KEY` | Khóa Intern của bạn, dạng `sk-…` |
 | `GROQ_API_KEY` | Giữ nguyên khóa Groq đang có |
 | `GEMINI_API_KEY` | Khóa Gemini API của bạn |
 
 Lưu thuộc tính. Không dán các khóa này vào HTML, JavaScript phía web, Code.gs, GitHub hay tin nhắn chat. Script Properties là nơi lưu cấu hình máy chủ trong Apps Script, thay cho biến môi trường của Node/Express.
 
-Nếu một khóa để trống, hệ thống bỏ qua nhà cung cấp đó. Muốn đủ ba lớp dự phòng thì cần đủ ba khóa hợp lệ. Không cần gửi khóa cho Codex.
+Nếu một khóa để trống, hệ thống bỏ qua nhà cung cấp đó. Muốn đủ bốn lớp thì cần đủ bốn khóa hợp lệ.
 
 ## 2. Chọn model nếu cần
 
@@ -24,6 +25,7 @@ Các thuộc tính dưới đây là tùy chọn. Chỉ thêm khi model trong t�
 
 | Thuộc tính | Mặc định |
 | --- | --- |
+| `XKIRO_MODEL` | `mistralai/mistral-large-4-0` |
 | `INTERN_AI_MODEL` | `deepseek-v4-flash-0731` đã đối chiếu với tài khoản của bạn |
 | `GROQ_MODEL` | `openai/gpt-oss-120b` như bản cũ |
 | `GEMINI_MODEL` | `gemini-2.5-flash` như kết nối trước đây |
@@ -39,7 +41,7 @@ Nếu đã triển khai mã trước đây với model `0711`, chỉ cần thêm
 1. Mở `tarot-v2/apps-script/Code.gs` trên máy, chép toàn bộ.
 2. Trong trình soạn thảo Apps Script, thay toàn bộ nội dung **Mã.gs / Code.gs** bằng mã mới rồi **Lưu**. Không tạo thêm một file có các hàm `doPost`/`doGet` trùng với file cũ.
 3. Ở danh sách chọn hàm cạnh nút **Chạy**, chọn **checkAIConnections** rồi **Chạy**. Cấp quyền Google nếu được yêu cầu.
-4. Nhật ký hiển thị HTTP của từng dịch vụ và model đang chọn, không in khóa. HTTP 200 ở /models chưa xác nhận sinh lời giải hoạt động. Chọn **checkAIGeneration** để thử lời giải bằng dữ liệu mẫu trên cả ba dịch vụ; hàm không ghi Sheet hoặc in khóa/nội dung lời giải.
+4. HTTP 200 ở /models chưa xác nhận khóa hoặc sinh lời giải hoạt động; riêng Xkiro cho phép gọi /models công khai. Chọn **checkXkiroGeneration** để thử riêng nhà cung cấp đầu tiên, hoặc **checkAIGeneration** để thử cả chuỗi bằng dữ liệu mẫu. Các hàm không ghi Sheet hoặc in khóa/nội dung lời giải.
 5. Chọn **Triển khai → Quản lý các bản triển khai → bút chì → Phiên bản mới → Triển khai**. Giữ quyền thực thi bằng tài khoản của bạn và quyền truy cập web app như bản cũ.
 
 Ưu tiên cập nhật bản triển khai đang dùng để giữ nguyên link `/exec`. Nếu tạo bản triển khai mới, thay `endpoint` trong `tarot-v2/js/sheets-config.js` bằng link mới. Đừng dùng link phản hồi tạm `script.googleusercontent.com` làm endpoint.
@@ -48,11 +50,11 @@ Nếu đã triển khai mã trước đây với model `0711`, chỉ cần thêm
 
 Mở `http://127.0.0.1:4182/` **không có `?preview=1`**, nhập câu hỏi rồi chọn/mở bài và nhấn đọc lời giải. Lượt này sẽ dùng API thật và lưu vào Sheet cũ. Cột **Người giải** ghi nhà cung cấp/model thực sự trả lời. Phản hồi lỗi không được trình bày thành lời giải hoàn chỉnh.
 
-Kiểm thử tự động dùng phản hồi mô phỏng. Đã chạy thêm thử sinh lời giải thật ngày 15/10/2026: Groq thành công; Gemini thành công nhưng chậm; Intern vẫn có phản hồi thiếu. Muốn quay lại duyệt hình ảnh mà không gửi dữ liệu ra ngoài, dùng lại `?preview=1`.
+Kiểm thử tự động dùng phản hồi mô phỏng. Đã chạy thêm thử thật ngày 15/10/2026: Xkiro thành công ở cả trải bốn lá và tâm sự; Groq/Gemini từng thành công nhưng sau đó chạm quota theo ngày. Intern có lượt thiếu/timeout; mẫu JSON rõ hơn giúp một lượt trả đủ nội dung. Muốn duyệt hình ảnh mà không gửi dữ liệu ra ngoài, dùng `?preview=1`.
 
 ## Cách dự phòng hoạt động
 
-Mỗi lượt ưu tiên **Groq → Gemini → Intern**, theo yêu cầu chủ trang ngày 15/10/2026. Cấu hình timeoutSeconds lần lượt 25/35/25 giây; đây là tham số gửi tới Apps Script, không cam kết thời gian thực tế tuyệt đối (một phép thử Gemini vẫn mất 122 giây). HTTP 401/403, 429, lỗi máy chủ, kết nối hỏng, timeout hoặc lời giải thiếu đều có thể chuyển sang nhà cung cấp tiếp theo. Chỉ nhà cung cấp lỗi bị tạm nghỉ; lỗi timeout tạm nghỉ 120 giây. Một API chạm hạn mức không khóa toàn bộ chuỗi. Khi cả chuỗi hết hạn mức, giao diện thông báo thời gian chờ. Nếu cả chuỗi sai khóa, giao diện báo cần kiểm tra cấu hình.
+Mỗi lượt ưu tiên **Xkiro → Groq → Gemini → Intern**, theo yêu cầu mới nhất của chủ trang ngày 15/10/2026. Cấu hình timeoutSeconds lần lượt 30/25/35/25 giây; đây là tham số gửi tới Apps Script, không cam kết thời gian thực tế tuyệt đối (một phép thử Gemini vẫn mất 122 giây). HTTP 401/403, 429, lỗi máy chủ, kết nối hỏng, timeout hoặc lời giải thiếu đều có thể chuyển sang nhà cung cấp tiếp theo. Chỉ nhà cung cấp lỗi bị tạm nghỉ; lỗi timeout tạm nghỉ 120 giây. Một API chạm hạn mức không khóa toàn bộ chuỗi. Khi cả chuỗi hết hạn mức, giao diện thông báo thời gian chờ. Nếu cả chuỗi sai khóa, giao diện báo cần kiểm tra cấu hình.
 
 Bản dự phòng 4 bỏ mức 6 lượt/phút tự đặt. HTTP 429 từ dịch vụ mới tạo cooldown hạn mức; cooldown theo model và không được gia hạn lại bởi lượt SKIP. Cột Người giải phân biệt HTTP thật với SKIP, loại TPM/TPD/RPM/RPD nếu nhận diện được và thời gian chờ. Khi các API chính hết hạn mức còn API cuối timeout, giao diện giữ bài và báo thời gian thử lại. Mã không thể tăng ngân sách tài khoản; xem [kết quả kiểm tra quota thật](../QUOTA_INCIDENT.md).
 

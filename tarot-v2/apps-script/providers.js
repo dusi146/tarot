@@ -6,14 +6,15 @@ function providerConfig_() {
     return { id: id, key: properties.getProperty(keyName) || '',
       model: override && /^[a-zA-Z0-9._/-]{1,100}$/.test(override) ? override : model, timeoutSeconds: timeoutSeconds };
   }
-  return [config('groq', 'GROQ_API_KEY', 'GROQ_MODEL', 'openai/gpt-oss-120b', 25),
+  return [config('xkiro', 'XKIRO_API_KEY', 'XKIRO_MODEL', 'mistralai/mistral-large-4-0', 30),
+    config('groq', 'GROQ_API_KEY', 'GROQ_MODEL', 'openai/gpt-oss-120b', 25),
     config('gemini', 'GEMINI_API_KEY', 'GEMINI_MODEL', 'gemini-2.5-flash', 35),
     config('intern', 'INTERN_AI_API_KEY', 'INTERN_AI_MODEL', 'deepseek-v4-flash-0731', 25)];
 }
 function aiHealth_() {
   var providers = providerConfig_();
   return { status: 'success', service: 'tarot-ai', version: 2, readingFormat: 2, streaming: false,
-    promptVersion: TarotServerPersona.PROMPT_VERSION, fallbackVersion: 4, quotaPolicy: 'upstream',
+    promptVersion: TarotServerPersona.PROMPT_VERSION, fallbackVersion: 5, quotaPolicy: 'upstream',
     configured: providers.some(function (p) { return !!p.key; }),
     providers: providers.map(function (p) { return { id: p.id, model: p.model, configured: !!p.key }; }) };
 }
@@ -54,6 +55,14 @@ function providerReason_(response, status) {
   if (status === 413 || error.code === 'request_too_large') return 'REQUEST_TOO_LARGE';
   return '';
 }
+function readingExample_(state) {
+  var cards = {};
+  state.selectedCards.forEach(function (_, index) { cards['card_' + index] = 'Phân tích lá ' + (index + 1); });
+  return '\nTrả lời đúng một đối tượng JSON có ĐỦ BỐN khóa cấp ngoài: greeting, cards, summary, advice. '
+    + 'summary và advice nằm NGANG HÀNG với cards, không được bỏ sót hoặc đặt trong cards. '
+    + 'Thay các chuỗi minh họa bằng nội dung đầy đủ cho trải bài, không chép mẫu:\n'
+    + JSON.stringify({ greeting: 'Lời chào', cards: cards, summary: 'Kết luận trả lời câu hỏi', advice: 'Một hành động cụ thể' });
+}
 function providerCall_(provider, payload, state, followup, jsonFallback) {
   var request, url, headers, readingTokens = 2048 + 1024 * state.selectedCards.length;
   if (provider.id === 'gemini') {
@@ -67,7 +76,8 @@ function providerCall_(provider, payload, state, followup, jsonFallback) {
       request.generationConfig.responseJsonSchema = TarotServerReading.schema(state).json_schema.schema;
     }
   } else {
-    url = provider.id === 'intern' ? 'https://discovery-api.intern-ai.org.cn/v1/chat/completions'
+    url = provider.id === 'xkiro' ? 'https://api.xkiro.com/v1/chat/completions'
+      : provider.id === 'intern' ? 'https://discovery-api.intern-ai.org.cn/v1/chat/completions'
       : 'https://api.groq.com/openai/v1/chat/completions';
     headers = { Authorization: 'Bearer ' + provider.key };
     request = { model: provider.model, stream: false,
@@ -86,12 +96,14 @@ function providerCall_(provider, payload, state, followup, jsonFallback) {
       // DeepSeek V4 defaults to thinking. A prose reading does not need a long hidden
       // reasoning pass before its JSON. Keep its budget for the visible answer.
       if (/^deepseek-(?:v4-|flash(?:-|$))/.test(provider.model)) request.thinking = { type: 'disabled' };
+      if (provider.id === 'xkiro') request.reasoning_effort = 'none';
       // JSON mode is more widely supported than strict schema by OpenAI-compatible gateways.
       if (!followup) {
         request.response_format = { type: 'json_object' };
         request.messages[0].content += '\nJSON schema cần tuân thủ:\n' + JSON.stringify(TarotServerReading.schema(state).json_schema.schema);
       }
     }
+    if (!followup && (provider.id !== 'groq' || jsonFallback)) request.messages[request.messages.length - 1].content += readingExample_(state);
   }
   var response, fetchStarted = Date.now();
   try { response = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', muteHttpExceptions: true,
@@ -222,27 +234,34 @@ function ai_(data) {
     throw exhausted('PROVIDER_ERROR', 'Các dịch vụ chưa phản hồi. Bạn thử lại sau một chút nhé.');
   } finally { cache.remove('pending:' + cacheKey); }
 }
-// Run manually in the editor. Checks credentials without generating a paid response.
+// Manual connectivity/model-list check only. /models can be public (e.g. Xkiro),
+// so HTTP 200 does not prove credentials or actual generation are working.
 function checkAIConnections() {
   var providers = providerConfig_();
   providers.forEach(function (p) {
     if (!p.key) { console.log(p.id + ': chưa cấu hình, sẽ bỏ qua.'); return; }
-    var url = p.id === 'intern' ? 'https://discovery-api.intern-ai.org.cn/v1/models' : p.id === 'groq'
+    var url = p.id === 'xkiro' ? 'https://api.xkiro.com/v1/models' : p.id === 'intern' ? 'https://discovery-api.intern-ai.org.cn/v1/models' : p.id === 'groq'
       ? 'https://api.groq.com/openai/v1/models' : 'https://generativelanguage.googleapis.com/v1beta/models';
     try {
       var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true, timeoutSeconds: 10,
         headers: p.id === 'gemini' ? { 'x-goog-api-key': p.key } : { Authorization: 'Bearer ' + p.key } });
-      console.log(p.id + ': HTTP ' + response.getResponseCode() + '; model đang chọn: ' + p.model + '. Khóa không được xuất ra web.');
+      console.log(p.id + ': HTTP ' + response.getResponseCode() + '; model đang chọn: ' + p.model + '. Chỉ kiểm tra kết nối; dùng kiểm tra sinh lời giải để xác minh đầy đủ.');
     } catch (_) { console.log(p.id + ': lỗi kết nối hoặc quá thời gian; tiếp tục kiểm tra dịch vụ sau.'); }
   });
 }
 // Manual synthetic generation check. Unlike /models, this checks actual reading
 // output and validation. It does not save a reading or print its content/keys.
 function checkAIGeneration() {
+  checkGenerationFor_('');
+}
+function checkXkiroGeneration() {
+  checkGenerationFor_('xkiro');
+}
+function checkGenerationFor_(providerId) {
   var state = state_({ name: '', question: 'Mình muốn học một kỹ năng mới trong tháng này, nên bắt đầu thế nào?',
     vibe: 'tatnuoc', spreadId: 'single', cards: [{ id: '00', reversed: false }] });
   var payload = TarotServerPersona.readingPayload(state, { structured: true });
-  providerConfig_().forEach(function (p) {
+  providerConfig_().filter(function (p) { return !providerId || p.id === providerId; }).forEach(function (p) {
     if (!p.key) { console.log(JSON.stringify({ event: 'tarot_ai_generation_check', provider: p.id, code: 'NOT_CONFIGURED' })); return; }
     var started = Date.now();
     try {

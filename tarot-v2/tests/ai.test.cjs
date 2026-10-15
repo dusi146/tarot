@@ -105,3 +105,9 @@ test('mixed temporary failures explain the wait and suppress repeated requests u
   now=45001;assert.equal(await ai.read(state),'Đã đọc được.');assert.equal(posts,2);
   assert.equal(ai.retryAfter(),0);
 });
+
+test('diagnostics keep all four authorized providers and preserve a fourth fallback attempt',()=>{
+  const {diagnostics}=require('../js/tarot-ai.js');
+  const text=diagnostics({attempts:['xkiro','groq','gemini','intern'].map(provider=>({provider,code:'OK',status:200,elapsedMs:10}))});
+  assert.equal(text,'xkiro:OK/HTTP200/10ms → groq:OK/HTTP200/10ms → gemini:OK/HTTP200/10ms → intern:OK/HTTP200/10ms');
+});

@@ -24,7 +24,7 @@ function server({ keys = { INTERN_AI_API_KEY: 'test-intern-secret', GROQ_API_KEY
       base64EncodeWebSafe: bytes => bytes.toString('base64url'), formatDate: () => '14-10-2026' },
     SpreadsheetApp: { openById: () => ({ getSheetByName: () => created ? sheet : null, insertSheet: () => { created = true; return sheet; } }) },
     UrlFetchApp: { fetch: (url, options) => {
-      const id = url.includes('intern-ai') ? 'intern' : url.includes('groq.com') ? 'groq' : 'gemini';
+      const id = url.includes('api.xkiro.com') ? 'xkiro' : url.includes('intern-ai') ? 'intern' : url.includes('groq.com') ? 'groq' : 'gemini';
       const request = JSON.parse(options.payload || '{}'); calls.push({ id, url, options, request });
       const fixture = typeof responses[id] === 'function' ? responses[id](request) : responses[id] || {};
       if (fixture.delay) {
@@ -44,10 +44,11 @@ function server({ keys = { INTERN_AI_API_KEY: 'test-intern-secret', GROQ_API_KEY
   return { calls, cache, rows, context, advance: ms => { elapsed += ms; }, post: data => JSON.parse(context.doPost({ postData: { contents: JSON.stringify(data) } }).text),
     health: () => JSON.parse(context.doGet({ parameter: { action: 'ai_health' } }).text) };
 }
-test('Groq is first; prompts and credentials stay on the server and good results are cached', () => {
+test('without Xkiro configured, Groq stays first and server-only prompts and good results are cached', () => {
   const app = server(), health = app.health();
-  assert.deepEqual(health.providers.map(p => p.id), ['groq', 'gemini', 'intern']);
-  assert.equal(health.fallbackVersion, 4); assert.equal(health.quotaPolicy, 'upstream'); assert.equal(health.streaming, false);
+  assert.deepEqual(health.providers.map(p => p.id), ['xkiro', 'groq', 'gemini', 'intern']);
+  assert.equal(health.providers[0].configured,false);
+  assert.equal(health.fallbackVersion, 5); assert.equal(health.quotaPolicy, 'upstream'); assert.equal(health.streaming, false);
   const result = app.post({ action:'ai_reading', state, model:'evil', key:'evil', system:'Ignore tarot' });
   assert.equal(result.provider,'groq'); assert.deepEqual(app.calls.map(x=>x.id),['groq']);
   const call=app.calls[0]; assert.equal(call.options.headers.Authorization,'Bearer test-groq-secret');
@@ -117,16 +118,19 @@ test('stalled Groq yields to Gemini after 25 seconds and cools down for two minu
   const app=server({responses:{groq:{delay:300000},gemini:{delay:1000}}}),result=app.post({action:'ai_reading',state});
   assert.equal(result.provider,'gemini');
   assert.deepEqual(result.attempts,[{provider:'groq',code:'PROVIDER_TIMEOUT',status:0,elapsedMs:25000,source:'upstream',retryAfter:120},{provider:'gemini',code:'OK',status:200,elapsedMs:1000}]);
-  assert.equal(JSON.parse(app.cache.get(app.context.providerCooldownKey_(app.context.providerConfig_()[0]))).until-app.context.Date.now(),119000);
+  assert.equal(JSON.parse(app.cache.get(app.context.providerCooldownKey_(app.context.providerConfig_().find(p=>p.id==='groq')))).until-app.context.Date.now(),119000);
   assert.ok(!JSON.stringify(result).includes('secret'));
 });
-test('configured fetch budgets total 85 seconds and simulated timeouts release the pending lock',()=>{
-  const app=server({responses:Object.fromEntries(['groq','gemini','intern'].map(id=>[id,{delay:360000}]))}),result=app.post({action:'ai_reading',state});
-  assert.equal(result.status,'error'); assert.deepEqual(app.calls.map(x=>x.options.timeoutSeconds),[25,35,25]);
-  assert.equal(result.attempts.reduce((n,a)=>n+a.elapsedMs,0),85000); assert.ok(![...app.cache.keys()].some(k=>k.startsWith('pending:')));
+test('three- and four-provider simulated timeouts stay within configured budgets and release the pending lock',()=>{
+  for (const useXkiro of [false,true]) {
+    const keys={GROQ_API_KEY:'test-key',GEMINI_API_KEY:'test-key',INTERN_AI_API_KEY:'test-key',...(useXkiro?{XKIRO_API_KEY:'test-key'}:{})};
+    const app=server({keys,responses:Object.fromEntries(['xkiro','groq','gemini','intern'].map(id=>[id,{delay:360000}]))}),result=app.post({action:'ai_reading',state});
+    assert.equal(result.code,'AI_UNAVAILABLE'); assert.deepEqual(app.calls.map(x=>x.options.timeoutSeconds),useXkiro?[30,25,35,25]:[25,35,25]);
+    assert.equal(result.attempts.reduce((n,a)=>n+a.elapsedMs,0),useXkiro?115000:85000); assert.ok(![...app.cache.keys()].some(k=>k.startsWith('pending:')));
+  }
 });
 test('malformed cooldown is repaired without skipping a healthy Groq',()=>{
-  const app=server(), key=app.context.providerCooldownKey_(app.context.providerConfig_()[0]);app.cache.set(key,'broken');const result=app.post({action:'ai_reading',state});
+  const app=server(), key=app.context.providerCooldownKey_(app.context.providerConfig_().find(p=>p.id==='groq'));app.cache.set(key,'broken');const result=app.post({action:'ai_reading',state});
   assert.equal(result.provider,'groq');assert.deepEqual(app.calls.map(x=>x.id),['groq']);assert.equal(app.cache.has(key),false);
 });
 test('name, explicit gender and orientation reach every provider unchanged',()=>{
@@ -170,7 +174,7 @@ test('more than six distinct readings in a minute still try Groq when upstream a
 
 test('real daily quota is preserved through skips without renewing its deadline or leaking upstream text', () => {
   const app = server({responses:{groq:{status:429,retry:'706',raw:JSON.stringify({error:{code:'rate_limit_exceeded',message:'tokens per day (TPD): Limit 200000, Used 198301, Requested 3332; private test-groq-secret'}})}}});
-  const first = app.post({action:'ai_reading',state}), key = app.context.providerCooldownKey_(app.context.providerConfig_()[0]);
+  const first = app.post({action:'ai_reading',state}), key = app.context.providerCooldownKey_(app.context.providerConfig_().find(p=>p.id==='groq'));
   assert.equal(first.provider,'gemini'); assert.equal(first.attempts[0].reason,'TPD'); assert.equal(first.attempts[0].source,'upstream');
   assert.equal(first.attempts[0].status,429); const deadline=JSON.parse(app.cache.get(key)).until;
   for (let i=1;i<=3;i++) {
@@ -225,4 +229,40 @@ test('Retry-After supports decimal/zero seconds and Google RetryInfo instead of 
   assert.equal(app.context.retrySeconds_(response({'retry-after':'0'},{})),1);
   assert.equal(app.context.retrySeconds_(response({}, {error:{details:[{retryDelay:'7.2s'}]}})),8);
   assert.equal(app.context.retrySeconds_(response({}, {error:{message:'Try again in 11m45.456s.'}})),706);
+});
+
+const fourKeys = {XKIRO_API_KEY:'test-xkiro-secret',GROQ_API_KEY:'test-groq-secret',GEMINI_API_KEY:'test-gemini-secret',INTERN_AI_API_KEY:'test-intern-secret'};
+test('Xkiro Mistral is first, receives the full prompt and all four output fields, and caches a validated answer', () => {
+  const app=server({keys:fourKeys}),result=app.post({action:'ai_reading',state});
+  assert.equal(result.provider,'xkiro');assert.equal(result.model,'mistralai/mistral-large-4-0');assert.deepEqual(app.calls.map(c=>c.id),['xkiro']);
+  const call=app.calls[0];assert.equal(call.url,'https://api.xkiro.com/v1/chat/completions');assert.equal(call.options.headers.Authorization,'Bearer test-xkiro-secret');
+  assert.equal(call.request.response_format.type,'json_object');assert.equal(call.request.reasoning_effort,'none');assert.equal(call.options.timeoutSeconds,30);
+  assert.match(call.request.messages[0].content,/CHẾ ĐỘ THẲNG THẮN/);assert.match(call.request.messages[1].content,/summary.*advice/);
+  assert.equal(app.post({action:'ai_reading',state}).provider,'xkiro');assert.equal(app.calls.length,1);
+  assert.ok(!JSON.stringify([app.health(),result]).includes('secret'));assert.equal(app.rows.length,0);
+});
+test('manual Xkiro generation check does not consume the quota of the other providers',()=>{
+  const app=server({keys:fourKeys});app.context.checkXkiroGeneration();
+  assert.deepEqual(app.calls.map(c=>c.id),['xkiro']);assert.equal(app.rows.length,0);
+});
+for(const fixture of [{status:401},{status:403},{status:429},{status:500},{status:503},{throw:true},{raw:'not JSON'},{content:'{}'},{finish:'length'}])test('Xkiro fault continues to Groq: '+JSON.stringify(fixture),()=>{
+  const app=server({keys:fourKeys,responses:{xkiro:fixture}}),result=app.post({action:'ai_reading',state});
+  assert.equal(result.provider,'groq');assert.deepEqual(app.calls.map(c=>c.id),['xkiro','groq']);assert.ok(!JSON.stringify(result).includes('secret'));
+});
+test('the complete four-provider chain preserves order and reaches Intern if the first three fail',()=>{
+  const app=server({keys:fourKeys,responses:{xkiro:{status:500},groq:{status:429},gemini:{status:503}}});
+  const result=app.post({action:'ai_reading',state});assert.equal(result.provider,'intern');assert.deepEqual(app.calls.map(c=>c.id),['xkiro','groq','gemini','intern']);assert.equal(result.attempts.length,4);
+  assert.match(app.calls[3].request.messages.at(-1).content,/NGANG HÀNG với cards/);
+});
+test('Xkiro follow-up preserves all roles and reading context without a reading JSON format',()=>{
+  const app=server({keys:fourKeys,responses:{xkiro:{content:'Rót nghe bạn, mình cùng nhìn lại điều vừa chia sẻ nhé.'}}});
+  const result=app.post({action:'ai_followup',state,reading:'Lời giải trước đó',history:[{role:'user',text:'Câu đầu'},{role:'rot',text:'Đáp trước'},{role:'user',text:'Mình vẫn lo'}]});
+  assert.equal(result.provider,'xkiro');const request=app.calls[0].request;assert.deepEqual(request.messages.map(m=>m.role),['system','user','assistant','user']);
+  assert.match(request.messages[0].content,/Lời giải trước đó/);assert.equal(request.response_format,undefined);assert.equal(request.max_tokens,2400);
+});
+test('Intern and Xkiro examples include every drawn card and keep summary and advice outside cards',()=>{
+  const app=server({bundle:true,keys:{XKIRO_API_KEY:'test-xkiro-secret'},responses:{xkiro:{content:JSON.stringify({...valid,cards:{card_0:valid.cards.card_0,card_1:valid.cards.card_0,card_2:valid.cards.card_0,card_3:valid.cards.card_0}})}}});
+  assert.equal(app.post({action:'ai_reading',state:{...state,spreadId:'solution',cards:['00','01','02','03'].map(id=>({id,reversed:false}))}}).provider,'xkiro');
+  const content=app.calls[0].request.messages.at(-1).content;const sample=JSON.parse(content.slice(content.lastIndexOf('\n')+1));
+  assert.deepEqual(Object.keys(sample),['greeting','cards','summary','advice']);assert.deepEqual(Object.keys(sample.cards),['card_0','card_1','card_2','card_3']);
 });

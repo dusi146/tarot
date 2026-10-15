@@ -10,7 +10,7 @@
   const CODES = ['OK', 'RATE_LIMIT', 'BUSY', 'AUTH_ERROR', 'NOT_CONFIGURED', 'PROVIDER_ERROR', 'PROVIDER_TIMEOUT', 'INCOMPLETE_READING', 'CONNECTION_ERROR', 'CONNECTION_TIMEOUT', 'INVALID_RESPONSE', 'AI_ERROR', 'AI_UNAVAILABLE'];
   const REASONS = ['TPM', 'TPD', 'RPM', 'RPD', 'QUOTA', 'SCHEMA', 'REQUEST_TOO_LARGE'];
   function safeAttempts(value) {
-    return (Array.isArray(value) ? value : []).slice(0, 3).filter(item => item && ['intern', 'groq', 'gemini'].includes(item.provider) && CODES.includes(item.code))
+    return (Array.isArray(value) ? value : []).slice(0, 4).filter(item => item && ['xkiro', 'intern', 'groq', 'gemini'].includes(item.provider) && CODES.includes(item.code))
       .map(item => ({ provider: item.provider, code: item.code, status: Number.isInteger(item.status) && item.status >= 100 && item.status <= 599 ? item.status : 0,
         elapsedMs: Number.isFinite(item.elapsedMs) ? Math.max(0, Math.min(600000, Math.round(item.elapsedMs))) : 0,
         ...(['upstream', 'cooldown'].includes(item.source) ? { source: item.source } : {}),

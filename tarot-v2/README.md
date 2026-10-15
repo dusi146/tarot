@@ -2,7 +2,7 @@
 
 Bản mới độc lập, phát triển trực tiếp từ `3D.html` người dùng cung cấp. Giữ sân khấu, thiết kế mặt lưng, chất liệu, ánh sáng, bộ điều khiển chuyển động và âm thanh của bản 3D. Web cũ và bản sao lưu vẫn nằm ngoài thư mục này.
 
-Ngày 15/10/2026: đã chỉnh lời giải tự nhiên và có cá nhân hóa, đồng bộ schema với prompt, giới hạn chờ từng API và phục hồi phản hồi khi mất kết nối. Máy chủ dùng phiên bản 23; chi tiết và 85 kiểm thử liên quan ở [báo cáo AI](AI_UPDATE.md).
+Ngày 15/10/2026: ưu tiên **Xkiro / Mistral Large 4 → Groq → Gemini → Intern**. Đã sửa cách xử lý quota và lượt thử lại, bổ sung mẫu JSON đầy đủ cho các gateway, giữ lời giải tự nhiên và có cá nhân hóa. 113 kiểm thử liên quan đạt; xem [báo cáo AI](AI_UPDATE.md) và [sự cố hạn mức](QUOTA_INCIDENT.md).
 
 ## Chạy trên máy
 
@@ -14,7 +14,7 @@ node tarot-v2/serve.cjs
 
 Mở [bản xem thử](http://127.0.0.1:4182/?preview=1). Lời giải, tâm sự và đánh giá trong chế độ này được mô phỏng; không gọi AI, lấy IP hay ghi Google Sheets. Có thông báo rõ trong phần lời giải.
 
-[Chế độ kết nối thật](http://127.0.0.1:4182/) dùng Apps Script mới trong `js/sheets-config.js`. Backend ưu tiên **Intern InkStone → Groq → Gemini**. Đã xác nhận máy chủ nhận `deepseek-v4-flash-0731`; lượt đọc thật thành công qua Groq, không ghi Sheet. Nhật ký kết nối do chủ trang cung cấp: Intern HTTP 401, Groq HTTP 200, Gemini HTTP 400. Cần sửa khóa Intern/Gemini trong Script Properties để bật đủ chuỗi dự phòng; việc đã nhập khóa không có nghĩa khóa hợp lệ. Xem [hướng dẫn API](apps-script/SETUP.md).
+[Chế độ kết nối thật](http://127.0.0.1:4182/) dùng Apps Script trong `js/sheets-config.js`, ưu tiên **Xkiro → Groq → Gemini → Intern** cho cả đọc bài và tâm sự. Khóa lưu riêng trong Script Properties. Đã thử sinh lời giải Xkiro thành công; Groq và Gemini từng chạy được nhưng có lúc chạm quota theo ngày. Không coi /models HTTP 200 là bằng chứng sinh lời giải thành công. Xem [hướng dẫn API](apps-script/SETUP.md).
 
 GitHub Pages xuất bản thư mục này tại [tavanrot.online](https://tavanrot.online/) bằng workflow ở thư mục gốc. `tools/build-pages.cjs` chỉ đóng gói HTML, CSS, JavaScript giao diện và tài nguyên; không đưa backend, thử nghiệm, bản sao lưu hay cấu hình khóa lên website. Các tài nguyên mã có mã phiên bản theo commit.
 
